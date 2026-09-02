@@ -16,7 +16,7 @@
     {
       "label": "Go: Format",
       "type": "shell",
-      "command": "gofumpt -w .",
+      "command": "gofmt -w .",
       "problemMatcher": []
     },
     {
@@ -50,6 +50,15 @@
       "group": "build"
     },
     {
+      "label": "Timekeep: Service Dev",
+      "type": "shell",
+      "command": "go run ./cmd/service --debug",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
       "label": "Patina: Install dependencies",
       "type": "shell",
       "command": "npm ci",
@@ -74,6 +83,15 @@
       "options": {
         "cwd": "${workspaceFolder}/sample/patina"
       },
+      "problemMatcher": []
+    },
+    {
+      "label": "Patina: Tauri Dev + Timekeep Service",
+      "dependsOrder": "parallel",
+      "dependsOn": [
+        "Timekeep: Service Dev",
+        "Patina: Tauri Dev"
+      ],
       "problemMatcher": []
     },
     {
@@ -120,6 +138,19 @@
         "$tsc"
       ],
       "group": "build"
+    },
+    {
+      "label": "Patina: Browser Smoke",
+      "type": "shell",
+      "command": "npm run test:ui-browser-smoke",
+      "options": {
+        "cwd": "${workspaceFolder}/sample/patina"
+      },
+      "problemMatcher": [],
+      "group": {
+        "kind": "test",
+        "isDefault": false
+      }
     },
     {
       "label": "CI: Check style",

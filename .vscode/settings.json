@@ -1,9 +1,13 @@
 {
+  "go.goroot": "C:\\Program Files\\Go",
   "go.useLanguageServer": true,
   "go.toolsManagement.autoUpdate": true,
-  "go.formatTool": "gofumpt",
+  "go.formatTool": "gofmt",
   "go.lintTool": "staticcheck",
   "go.lintOnSave": "package",
+  "terminal.integrated.env.windows": {
+    "PATH": "${env:PATH};${config:go.goroot}\\bin"
+  },
   "go.testTimeout": "10m",
   "go.testFlags": [
     "-v"

@@ -15,17 +15,14 @@ import (
 	"github.com/jms-guy/timekeep/cmd/service/internal/sessions"
 	"github.com/jms-guy/timekeep/internal/config"
 	"github.com/jms-guy/timekeep/internal/database"
+	"github.com/jms-guy/timekeep/internal/protocol"
 	"github.com/jms-guy/timekeep/internal/repository"
 )
 
 var Version = "dev"
 
 // Command details communicated by pipe
-type Command struct {
-	Action      string `json:"action"`
-	ProcessName string `json:"name,omitempty"`
-	ProcessID   int    `json:"pid,omitempty"`
-}
+type Command = protocol.Request
 
 type EventController struct {
 	PsProcess  *exec.Cmd          // Powershell process for Windows event monitoring
@@ -48,6 +45,7 @@ func (e *EventController) HandleConnection(serviceCtx context.Context, logger *l
 	logger.Println("INFO: Starting to read from connection.")
 
 	scanner := bufio.NewScanner(conn)
+	encoder := json.NewEncoder(conn)
 	for scanner.Scan() {
 		line := scanner.Text()
 
@@ -58,6 +56,15 @@ func (e *EventController) HandleConnection(serviceCtx context.Context, logger *l
 		}
 
 		cmd.ProcessName = strings.ToLower(cmd.ProcessName)
+
+		if protocol.IsAPIAction(cmd.Action) || (cmd.Action == "refresh" && cmd.RequestID != "") {
+			response := e.handleAPICommand(serviceCtx, logger, s, pr, a, h, cmd)
+			if err := encoder.Encode(response); err != nil {
+				logger.Printf("ERROR: Failed to write response: %s", err)
+				return
+			}
+			continue
+		}
 
 		cmdCtx, cancel := context.WithTimeout(serviceCtx, 5*time.Second)
 
