@@ -50,6 +50,78 @@
       "group": "build"
     },
     {
+      "label": "Patina: Install dependencies",
+      "type": "shell",
+      "command": "npm ci",
+      "options": {
+        "cwd": "${workspaceFolder}/sample/patina"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Patina: Dev (Vite)",
+      "type": "shell",
+      "command": "npm run dev",
+      "options": {
+        "cwd": "${workspaceFolder}/sample/patina"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Patina: Tauri Dev",
+      "type": "shell",
+      "command": "npm run tauri -- dev",
+      "options": {
+        "cwd": "${workspaceFolder}/sample/patina"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Patina: Typecheck",
+      "type": "shell",
+      "command": "npm run check:types",
+      "options": {
+        "cwd": "${workspaceFolder}/sample/patina"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Patina: Lint",
+      "type": "shell",
+      "command": "npm run check:lint",
+      "options": {
+        "cwd": "${workspaceFolder}/sample/patina"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Patina: Test",
+      "type": "shell",
+      "command": "npm test",
+      "options": {
+        "cwd": "${workspaceFolder}/sample/patina"
+      },
+      "problemMatcher": [
+        "$tsc"
+      ],
+      "group": {
+        "kind": "test",
+        "isDefault": false
+      }
+    },
+    {
+      "label": "Patina: Build",
+      "type": "shell",
+      "command": "npm run build",
+      "options": {
+        "cwd": "${workspaceFolder}/sample/patina"
+      },
+      "problemMatcher": [
+        "$tsc"
+      ],
+      "group": "build"
+    },
+    {
       "label": "CI: Check style",
       "dependsOrder": "sequence",
       "dependsOn": [

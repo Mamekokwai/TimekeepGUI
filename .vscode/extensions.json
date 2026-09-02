@@ -5,7 +5,14 @@
     "mtxr.sqltools",
     "mtxr.sqltools-driver-sqlite",
     "ms-vscode.powershell",
-    "timonwong.shellcheck"
+    "timonwong.shellcheck",
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "bradlc.vscode-tailwindcss",
+    "rust-lang.rust-analyzer",
+    "tauri-apps.tauri-vscode",
+    "tamasfe.even-better-toml",
+    "vadimcn.vscode-lldb"
   ],
   "unwantedRecommendations": []
 }

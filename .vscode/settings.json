@@ -11,6 +11,24 @@
   "go.testEnvVars": {
     "CGO_ENABLED": "0"
   },
+  "eslint.workingDirectories": [
+    {
+      "directory": "${workspaceFolder}/sample/patina",
+      "mode": "location"
+    }
+  ],
+  "eslint.validate": [
+    "javascript",
+    "typescript",
+    "typescriptreact"
+  ],
+  "typescript.tsdk": "${workspaceFolder}/sample/patina/node_modules/typescript/lib",
+  "rust-analyzer.linkedProjects": [
+    "${workspaceFolder}/sample/patina/src-tauri/Cargo.toml"
+  ],
+  "rust-analyzer.check.command": "clippy",
+  "rust-analyzer.cargo.buildScripts.enable": true,
+  "rust-analyzer.procMacro.enable": true,
   "[go]": {
     "editor.defaultFormatter": "golang.go",
     "editor.formatOnSave": true,
@@ -26,11 +44,39 @@
     "editor.defaultFormatter": "redhat.vscode-yaml",
     "editor.formatOnSave": true
   },
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": "explicit"
+    }
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": "explicit"
+    }
+  },
+  "[rust]": {
+    "editor.defaultFormatter": "rust-lang.rust-analyzer",
+    "editor.formatOnSave": true
+  },
   "files.exclude": {
     "**/*.exe": true,
     "**/*.test": true
   },
   "search.exclude": {
-    "**/internal/database/*.sql.go": true
+    "**/internal/database/*.sql.go": true,
+    "**/sample/patina/node_modules": true,
+    "**/sample/patina/src-tauri/target": true
+  },
+  "files.watcherExclude": {
+    "**/sample/patina/node_modules/**": true,
+    "**/sample/patina/src-tauri/target/**": true
   }
 }
