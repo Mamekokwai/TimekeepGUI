@@ -1,0 +1,62 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Go: Test all packages",
+      "type": "shell",
+      "command": "go test ./... -cover",
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "problemMatcher": [
+        "$go-test"
+      ]
+    },
+    {
+      "label": "Go: Format",
+      "type": "shell",
+      "command": "gofumpt -w .",
+      "problemMatcher": []
+    },
+    {
+      "label": "Go: Staticcheck",
+      "type": "shell",
+      "command": "staticcheck ./...",
+      "problemMatcher": []
+    },
+    {
+      "label": "SQLC: Generate",
+      "type": "shell",
+      "command": "sqlc generate",
+      "problemMatcher": []
+    },
+    {
+      "label": "Build: CLI",
+      "type": "shell",
+      "command": "go build -o timekeep.exe ./cmd/cli",
+      "problemMatcher": [
+        "$go"
+      ],
+      "group": "build"
+    },
+    {
+      "label": "Build: Service",
+      "type": "shell",
+      "command": "go build -o timekeep-service.exe ./cmd/service",
+      "problemMatcher": [
+        "$go"
+      ],
+      "group": "build"
+    },
+    {
+      "label": "CI: Check style",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "Go: Staticcheck",
+        "Go: Test all packages"
+      ],
+      "problemMatcher": []
+    }
+  ]
+}

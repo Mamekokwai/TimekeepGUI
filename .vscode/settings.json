@@ -1,0 +1,36 @@
+{
+  "go.useLanguageServer": true,
+  "go.toolsManagement.autoUpdate": true,
+  "go.formatTool": "gofumpt",
+  "go.lintTool": "staticcheck",
+  "go.lintOnSave": "package",
+  "go.testTimeout": "10m",
+  "go.testFlags": [
+    "-v"
+  ],
+  "go.testEnvVars": {
+    "CGO_ENABLED": "0"
+  },
+  "[go]": {
+    "editor.defaultFormatter": "golang.go",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit"
+    }
+  },
+  "[go.mod]": {
+    "editor.defaultFormatter": "golang.go",
+    "editor.formatOnSave": true
+  },
+  "[yaml]": {
+    "editor.defaultFormatter": "redhat.vscode-yaml",
+    "editor.formatOnSave": true
+  },
+  "files.exclude": {
+    "**/*.exe": true,
+    "**/*.test": true
+  },
+  "search.exclude": {
+    "**/internal/database/*.sql.go": true
+  }
+}

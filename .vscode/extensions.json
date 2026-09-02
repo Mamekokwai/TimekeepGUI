@@ -1,0 +1,11 @@
+{
+  "recommendations": [
+    "golang.go",
+    "redhat.vscode-yaml",
+    "mtxr.sqltools",
+    "mtxr.sqltools-driver-sqlite",
+    "ms-vscode.powershell",
+    "timonwong.shellcheck"
+  ],
+  "unwantedRecommendations": []
+}
