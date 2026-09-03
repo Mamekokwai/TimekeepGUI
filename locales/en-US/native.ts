@@ -174,7 +174,7 @@ export const MESSAGES = {
   "native.tray.disableTitle": "Block titles",
   "native.tray.enableTitle": "Record titles",
   "native.tray.pause": "Pause tracking",
-  "native.tray.quit": "Exit Patina",
+  "native.tray.quit": "Exit TimekeepGUI",
   "native.tray.resume": "Resume tracking",
   "native.tray.showMain": "Open main window"
 } as const;

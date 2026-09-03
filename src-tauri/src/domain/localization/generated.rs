@@ -194,7 +194,7 @@ pub(super) fn lookup(locale: Locale, key: &str) -> Option<NativeExpr> {
         (Locale::EnUs, "native.tray.disableTitle") => Some(NativeExpr::Literal("Block titles")),
         (Locale::EnUs, "native.tray.enableTitle") => Some(NativeExpr::Literal("Record titles")),
         (Locale::EnUs, "native.tray.pause") => Some(NativeExpr::Literal("Pause tracking")),
-        (Locale::EnUs, "native.tray.quit") => Some(NativeExpr::Literal("Exit Patina")),
+        (Locale::EnUs, "native.tray.quit") => Some(NativeExpr::Literal("Exit TimekeepGUI")),
         (Locale::EnUs, "native.tray.resume") => Some(NativeExpr::Literal("Resume tracking")),
         (Locale::EnUs, "native.tray.showMain") => Some(NativeExpr::Literal("Open main window")),
         _ => None,
