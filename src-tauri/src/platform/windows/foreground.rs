@@ -251,12 +251,19 @@ pub fn get_process_exe_name(process_id: u32) -> String {
 /// system snapshot. This is intentionally independent from the foreground
 /// window and is used by the Timekeep-compatible process-presence fallback.
 pub fn get_running_process_names() -> HashSet<String> {
-    let mut names = HashSet::new();
+    get_running_process_counts().into_keys().collect()
+}
+
+/// Returns executable basenames and the number of live instances for every
+/// process currently present in the system snapshot. The caller can use this
+/// as a process picker without inspecting the foreground window.
+pub fn get_running_process_counts() -> HashMap<String, u32> {
+    let mut counts = HashMap::new();
     let snapshot = unsafe { CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0) }
         .ok()
         .and_then(OwnedHandle::new);
     let Some(snapshot) = snapshot else {
-        return names;
+        return counts;
     };
 
     let mut entry = PROCESSENTRY32W {
@@ -277,7 +284,7 @@ pub fn get_running_process_names() -> HashSet<String> {
                     .trim()
                     .to_ascii_lowercase();
                 if !name.is_empty() {
-                    names.insert(name);
+                    *counts.entry(name).or_insert(0) += 1;
                 }
 
                 if Process32NextW(snapshot.raw(), &mut entry).is_err() {
@@ -287,7 +294,7 @@ pub fn get_running_process_names() -> HashSet<String> {
         }
     }
 
-    names
+    counts
 }
 
 fn get_process_details(process_id: u32) -> (String, String) {

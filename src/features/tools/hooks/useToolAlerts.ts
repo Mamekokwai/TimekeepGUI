@@ -11,6 +11,10 @@ function mergeAlerts(current: ToolAlert[], incoming: ToolAlert[]) {
   return Array.from(byId.values()).sort((a, b) => a.occurredAt - b.occurredAt);
 }
 
+function isSupportedAlert(alert: ToolAlert): boolean {
+  return alert.kind === "reminder" || alert.kind === "activity_reminder";
+}
+
 export function useToolAlerts() {
   const [alerts, setAlerts] = useState<ToolAlert[]>([]);
 
@@ -21,7 +25,7 @@ export function useToolAlerts() {
     void ToolsRuntimeService.getToolAlerts()
       .then((nextAlerts) => {
         if (!disposed) {
-          setAlerts((current) => mergeAlerts(current, nextAlerts));
+          setAlerts((current) => mergeAlerts(current, nextAlerts.filter(isSupportedAlert)));
         }
       })
       .catch((error) => {
@@ -30,7 +34,9 @@ export function useToolAlerts() {
 
     void ToolsRuntimeService.onToolAlert((alert) => {
       if (!disposed) {
-        setAlerts((current) => mergeAlerts(current, [alert]));
+        if (isSupportedAlert(alert)) {
+          setAlerts((current) => mergeAlerts(current, [alert]));
+        }
       }
     })
       .then((dispose) => {

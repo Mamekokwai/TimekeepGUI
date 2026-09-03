@@ -92,7 +92,7 @@ export async function runLocaleScenarios(context: BrowserSmokeContext) {
     };
     assert.deepEqual(
       englishState.labels,
-      ["Today", "History", "Data", "Classification", "Tools", "Timekeep", "Settings", "About"],
+      ["Today", "Timekeep", "History", "Data", "Classification", "Reminders", "Settings", "About"],
     );
     assert.equal(englishState.fit, true);
     assert.equal(englishState.singleLine, true);
@@ -124,12 +124,12 @@ export async function runLocaleScenarios(context: BrowserSmokeContext) {
       "labeled",
     );
 
-    await evaluate(client!, sessionId, `document.querySelector('[aria-label="Tools"]')?.click()`);
+    await evaluate(client!, sessionId, `document.querySelector('[aria-label="Reminders"]')?.click()`);
     await waitForExpression(
       client!,
       sessionId,
       `document.querySelector('[data-tools-navigation-mode="labeled"]')
-        && document.querySelectorAll('[data-tools-section-label]').length === 3`,
+        && document.querySelectorAll('[data-tools-section-label]').length === 1`,
       15_000,
       "English Tools labels should follow the global navigation mode",
     );
@@ -146,7 +146,7 @@ export async function runLocaleScenarios(context: BrowserSmokeContext) {
         })()
       `),
       {
-        values: ["Reminder", "Timer", "Pomodoro"],
+        values: ["Reminder"],
         fit: true,
         railWidth: 72,
         settingsHasLabel: false,

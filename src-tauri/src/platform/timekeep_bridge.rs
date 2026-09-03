@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use sqlx::{Row, SqlitePool};
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::path::Path;
 use std::time::Duration;
 use tokio::io::AsyncWriteExt;
@@ -46,6 +46,8 @@ pub struct TimekeepRequest {
     pub all: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub config: Option<Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub programs: Option<Vec<String>>,
 }
 
 pub async fn request(request: TimekeepRequest) -> Result<Value, String> {
@@ -82,6 +84,7 @@ async fn handle_request(request: TimekeepRequest) -> Result<Value, String> {
         }
         "get_config" => read_timekeep_config().await?,
         "list_programs" => list_programs().await?,
+        "scan_programs" => scan_programs().await?,
         "get_program" => get_program(request.name.as_deref().unwrap_or_default()).await?,
         "active_sessions" => list_active_sessions().await?,
         "history" => list_history(&request).await?,
@@ -99,6 +102,39 @@ async fn handle_request(request: TimekeepRequest) -> Result<Value, String> {
             .map_err(|error| format!("failed to add tracked program: {error}"))?;
             refresh_service().await?;
             json!({ "name": name })
+        }
+        "add_programs" => {
+            let names = request
+                .programs
+                .unwrap_or_default()
+                .into_iter()
+                .map(|name| normalize_program_name(&name))
+                .collect::<Result<Vec<_>, _>>()?;
+            if names.is_empty() {
+                return Err("at least one program is required".to_string());
+            }
+
+            let pool = open_timekeep_database(false).await?;
+            let mut tx = pool
+                .begin()
+                .await
+                .map_err(|error| format!("failed to begin adding tracked programs: {error}"))?;
+            for name in &names {
+                sqlx::query(
+                    "INSERT OR IGNORE INTO tracked_programs (name, category, project) VALUES (?, ?, ?)",
+                )
+                .bind(name)
+                .bind(non_empty(request.category.as_deref()))
+                .bind(non_empty(request.project.as_deref()))
+                .execute(&mut *tx)
+                .await
+                .map_err(|error| format!("failed to add tracked program {name}: {error}"))?;
+            }
+            tx.commit()
+                .await
+                .map_err(|error| format!("failed to commit tracked programs: {error}"))?;
+            refresh_service().await?;
+            json!({ "names": names })
         }
         "update_program" => {
             let name = normalize_program_name(request.name.as_deref().unwrap_or_default())?;
@@ -240,6 +276,54 @@ async fn list_programs() -> Result<Value, String> {
         })
         .collect::<Vec<_>>();
     Ok(Value::Array(programs))
+}
+
+#[cfg(target_os = "windows")]
+async fn scan_programs() -> Result<Value, String> {
+    let pool = open_timekeep_database(true).await?;
+    let rows =
+        sqlx::query("SELECT name, lifetime_seconds, category, project FROM tracked_programs")
+            .fetch_all(&pool)
+            .await
+            .map_err(|error| format!("failed to read tracked program statistics: {error}"))?;
+    let tracked = rows
+        .into_iter()
+        .map(|row| {
+            (
+                row.get::<String, _>("name").to_ascii_lowercase(),
+                json!({
+                    "lifetime_seconds": row.get::<i64, _>("lifetime_seconds"),
+                    "category": row.get::<Option<String>, _>("category"),
+                    "project": row.get::<Option<String>, _>("project"),
+                }),
+            )
+        })
+        .collect::<HashMap<_, _>>();
+    let running = crate::platform::windows::foreground::get_running_process_counts();
+    let mut names = running.keys().cloned().collect::<Vec<_>>();
+    names.sort_unstable();
+
+    Ok(Value::Array(
+        names
+            .into_iter()
+            .map(|name| {
+                let stored = tracked.get(&name);
+                json!({
+                    "name": name,
+                    "running_instances": running.get(&name).copied().unwrap_or_default(),
+                    "tracked": stored.is_some(),
+                    "lifetime_seconds": stored.and_then(|value| value.get("lifetime_seconds")).and_then(Value::as_i64).unwrap_or(0),
+                    "category": stored.and_then(|value| value.get("category")).cloned().unwrap_or(Value::Null),
+                    "project": stored.and_then(|value| value.get("project")).cloned().unwrap_or(Value::Null),
+                })
+            })
+            .collect(),
+    ))
+}
+
+#[cfg(not(target_os = "windows"))]
+async fn scan_programs() -> Result<Value, String> {
+    Err("program scanning is currently supported on Windows only".to_string())
 }
 
 async fn get_program(name: &str) -> Result<Value, String> {
@@ -626,6 +710,7 @@ mod tests {
                 limit: None,
                 all: None,
                 config: None,
+                programs: None,
             },
         )
         .await

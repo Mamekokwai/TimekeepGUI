@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import {
   addTrackedTimekeepProgram,
+  addTrackedTimekeepPrograms,
   loadTimekeepPrograms,
   loadTimekeepActiveSessions,
   loadTimekeepHistory,
@@ -134,6 +135,21 @@ export function useTimekeepPanelState({
     }
   }, [addFailedMessage, load, onError, partialSuccessMessage, reportError]);
 
+  const addMany = useCallback(async (names: string[], category: string, project: string) => {
+    setBusy(true);
+    try {
+      await addTrackedTimekeepPrograms(names, category, project);
+      if (!await load()) onError?.(partialSuccessMessage);
+      return true;
+    } catch (error) {
+      console.warn("Failed to add Timekeep programs", error);
+      reportError(error, addFailedMessage);
+      return false;
+    } finally {
+      setBusy(false);
+    }
+  }, [addFailedMessage, load, onError, partialSuccessMessage, reportError]);
+
   const remove = useCallback(async (name: string) => {
     setBusy(true);
     try {
@@ -222,6 +238,7 @@ export function useTimekeepPanelState({
     loadHistory,
     refreshActiveSessions,
     add,
+    addMany,
     remove,
     update,
     refresh,

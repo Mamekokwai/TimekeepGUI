@@ -5,10 +5,12 @@ export type TimekeepAction =
   | "get_config"
   | "update_config"
   | "list_programs"
+  | "scan_programs"
   | "get_program"
   | "active_sessions"
   | "history"
   | "add_program"
+  | "add_programs"
   | "update_program"
   | "remove_program"
   | "reset_stats"
@@ -27,6 +29,7 @@ export interface TimekeepRequest {
   limit?: number;
   all?: boolean;
   config?: TimekeepServiceConfig;
+  programs?: string[];
 }
 
 export interface TimekeepServiceStatus {
@@ -55,6 +58,15 @@ export interface TimekeepProgram {
   lifetime_seconds: number;
   category?: string;
   project?: string;
+}
+
+export interface TimekeepProgramCandidate {
+  name: string;
+  running_instances: number;
+  tracked: boolean;
+  lifetime_seconds: number;
+  category?: string | null;
+  project?: string | null;
 }
 
 export interface TimekeepActiveSession {
@@ -165,6 +177,10 @@ export function listTimekeepPrograms(): Promise<TimekeepProgram[]> {
   return requestTimekeep<TimekeepProgram[]>({ action: "list_programs" });
 }
 
+export function scanTimekeepPrograms(): Promise<TimekeepProgramCandidate[]> {
+  return requestTimekeep<TimekeepProgramCandidate[]>({ action: "scan_programs" });
+}
+
 export function getTimekeepStatus(): Promise<TimekeepServiceStatus> {
   return requestTimekeep<TimekeepServiceStatus>({ action: "service_status" });
 }
@@ -198,6 +214,15 @@ export function addTimekeepProgram(name: string, category?: string, project?: st
   return requestTimekeep<{ name: string }>({
     action: "add_program",
     name,
+    category: category || undefined,
+    project: project || undefined,
+  });
+}
+
+export function addTimekeepPrograms(names: string[], category?: string, project?: string) {
+  return requestTimekeep<{ names: string[] }>({
+    action: "add_programs",
+    programs: names,
     category: category || undefined,
     project: project || undefined,
   });

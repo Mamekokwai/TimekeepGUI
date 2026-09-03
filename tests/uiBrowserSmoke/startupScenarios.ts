@@ -1,21 +1,21 @@
 import assert from "node:assert/strict";
 import type { BrowserSmokeContext } from "./scenarioTypes.ts";
 import { evaluate, jsonString, waitForExpression } from "./browserHarness.ts";
-import { DASHBOARD_MARKERS, EXPECTED_NAV_LABELS, FIRST_RENDER_TIMEOUT_MS } from "./constants.ts";
+import { EXPECTED_NAV_LABELS, FIRST_RENDER_TIMEOUT_MS, TIMEKEEP_MARKERS } from "./constants.ts";
 
 export async function runStartupScenarios(context: BrowserSmokeContext) {
   const { client, sessionId, runTest } = context;
 
-  await runTest("Vite page renders dashboard in a real browser", async () => {
+  await runTest("Vite page renders Timekeep in a real browser", async () => {
     await waitForExpression(
       client!,
       sessionId,
-      `document.body.innerText.includes(${jsonString(DASHBOARD_MARKERS[0])})`,
+      `document.body.innerText.includes(${jsonString(TIMEKEEP_MARKERS[0])})`,
       FIRST_RENDER_TIMEOUT_MS,
-      "dashboard first render",
+      "Timekeep first render",
     );
 
-    for (const marker of DASHBOARD_MARKERS) {
+    for (const marker of TIMEKEEP_MARKERS) {
       assert.equal(
         await evaluate(client!, sessionId, `document.body.innerText.includes(${jsonString(marker)})`),
         true,
@@ -60,7 +60,7 @@ export async function runStartupScenarios(context: BrowserSmokeContext) {
         colorScheme: "default",
         cssColorScheme: "light",
         frameConnected: true,
-        presentedView: "dashboard",
+        presentedView: "timekeep",
       },
       readyCalls: 1,
     });
@@ -121,7 +121,7 @@ export async function runStartupScenarios(context: BrowserSmokeContext) {
         colorScheme: "default",
         cssColorScheme: "light",
         frameConnected: true,
-        presentedView: "dashboard",
+        presentedView: "timekeep",
       },
       readyCalls: 2,
       sameFrame: true,

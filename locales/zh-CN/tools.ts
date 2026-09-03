@@ -186,7 +186,7 @@ export const MESSAGES = {
   "tools.statusChip.focus": "专注",
   "tools.statusChip.reminder": "提醒",
   "tools.statusChip.stopwatch": "计时",
-  "tools.subtitle": "启动本地桌面工具",
+  "tools.subtitle": "仅保留辅助提醒，自动计时由 Timekeep 负责",
   "tools.timerHint": "计时结果不会写入活动记录。",
   "tools.timerLabel": "名称",
   "tools.timerLabelPlaceholder": "可选",
@@ -197,5 +197,5 @@ export const MESSAGES = {
   "tools.timerStatus.paused": "已暂停",
   "tools.timerStatus.running": "运行中",
   "tools.timerTitle": "计时器",
-  "tools.title": "工具"
+  "tools.title": "辅助提醒"
 } as const;

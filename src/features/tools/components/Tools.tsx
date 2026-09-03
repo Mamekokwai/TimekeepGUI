@@ -1,24 +1,16 @@
 import { useLocaleText } from "../../../shared/i18n/index.ts";
-import { AlarmClock, BellRing, Settings, Timer, ToolCase } from "lucide-react";
+import { BellRing, Settings, ToolCase } from "lucide-react";
 import { type CSSProperties, useCallback, useEffect, useMemo, useState } from "react";
 import QuietBadge from "../../../shared/components/QuietBadge.tsx";
 import QuietButton from "../../../shared/components/QuietButton.tsx";
 import QuietPageHeader from "../../../shared/components/QuietPageHeader.tsx";
 import type { QuietToastTone } from "../../../shared/types/toast.ts";
 import { useRequestedAppIcons } from "../../../shared/hooks/useRequestedAppIcons.ts";
-import type { TimerMode } from "../../../shared/types/tools.ts";
 import { useToolsPageState } from "../hooks/useToolsPageState.ts";
-import {
-  readToolsSection,
-  readToolsTimerMode,
-  rememberToolsSection,
-  rememberToolsTimerMode,
-} from "../services/toolsLayoutPreferenceStorage.ts";
+import { rememberToolsSection } from "../services/toolsLayoutPreferenceStorage.ts";
 import { loadToolsIconsForExecutables } from "../services/toolsIconService.ts";
 import type { ToolsOpenTarget, ToolsSection } from "../types.ts";
-import PomodoroToolPanel from "./PomodoroToolPanel.tsx";
 import ReminderToolPanel from "./ReminderToolPanel.tsx";
-import TimerToolPanel from "./TimerToolPanel.tsx";
 import ToolsSettingsDialog from "./ToolsSettingsDialog.tsx";
 
 interface ToolsProps {
@@ -31,15 +23,10 @@ interface ToolsProps {
 
 type ToolsSectionRailStyle = CSSProperties & { "--tools-active-section-index"?: number };
 
-function normalizeToolsSection(target: ToolsOpenTarget): ToolsSection {
-  if (target.section === "timing") {
-    return target.timingMode === "timer" || isTimerMode(target.timingMode) ? "timer" : "reminders";
-  }
-  return target.section;
-}
-
-function isTimerMode(mode: ToolsOpenTarget["timingMode"]): mode is TimerMode {
-  return mode === "stopwatch" || mode === "countdown";
+function normalizeToolsSection(_target: ToolsOpenTarget): ToolsSection {
+  // Timekeep owns automatic duration tracking. Legacy timer targets are
+  // redirected to the remaining secondary feature: reminders.
+  return "reminders";
 }
 
 function addVisitedSection(current: ReadonlySet<ToolsSection>, section: ToolsSection): ReadonlySet<ToolsSection> {
@@ -61,12 +48,11 @@ export default function Tools({
 }: ToolsProps) {
   const UI_TEXT = useLocaleText();
   const [activeSection, setActiveSection] = useState<ToolsSection>(() => (
-    initialTarget ? normalizeToolsSection(initialTarget) : readToolsSection()
+    initialTarget ? normalizeToolsSection(initialTarget) : "reminders"
   ));
   const [visitedSections, setVisitedSections] = useState<ReadonlySet<ToolsSection>>(
-    () => new Set([initialTarget ? normalizeToolsSection(initialTarget) : readToolsSection()]),
+    () => new Set([initialTarget ? normalizeToolsSection(initialTarget) : "reminders"]),
   );
-  const [selectedTimerMode, setSelectedTimerMode] = useState<TimerMode>(readToolsTimerMode);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const handleError = useCallback((message: string) => {
     onToast?.(message, "error");
@@ -90,16 +76,6 @@ export default function Tools({
     },
   });
 
-  const resolveTimerMode = useCallback((target: ToolsOpenTarget): TimerMode | null => {
-    if (target.timerMode) {
-      return target.timerMode;
-    }
-    if (isTimerMode(target.timingMode)) {
-      return target.timingMode;
-    }
-    return null;
-  }, []);
-
   useEffect(() => {
     if (!initialTarget) return;
 
@@ -107,20 +83,8 @@ export default function Tools({
     setActiveSection(nextSection);
     setVisitedSections((current) => addVisitedSection(current, nextSection));
     rememberToolsSection(nextSection);
-    if (nextSection === "timer") {
-      const nextTimerMode = resolveTimerMode(initialTarget);
-      if (nextTimerMode) {
-        setSelectedTimerMode(nextTimerMode);
-        rememberToolsTimerMode(nextTimerMode);
-      }
-    }
     onInitialTargetConsumed?.();
-  }, [initialTarget, onInitialTargetConsumed, resolveTimerMode]);
-
-  const handleTimerModeChange = useCallback((mode: TimerMode) => {
-    setSelectedTimerMode(mode);
-    rememberToolsTimerMode(mode);
-  }, []);
+  }, [initialTarget, onInitialTargetConsumed]);
 
   const handleSectionChange = useCallback((section: ToolsSection) => {
     setActiveSection(section);
@@ -128,23 +92,11 @@ export default function Tools({
     rememberToolsSection(section);
   }, []);
 
-  const sections = [
-    {
-      id: "reminders" as const,
-      icon: BellRing,
-      title: UI_TEXT.tools.remindersTitle,
-    },
-    {
-      id: "timer" as const,
-      icon: Timer,
-      title: UI_TEXT.tools.timerTitle,
-    },
-    {
-      id: "pomodoro" as const,
-      icon: AlarmClock,
-      title: UI_TEXT.tools.pomodoroTitle,
-    },
-  ];
+  const sections = [{
+    id: "reminders" as const,
+    icon: BellRing,
+    title: UI_TEXT.tools.remindersTitle,
+  }];
   const activeSectionIndex = sections.findIndex((section) => section.id === activeSection);
   const sectionRailStyle: ToolsSectionRailStyle = {
     "--tools-active-section-index": Math.max(0, activeSectionIndex),
@@ -244,36 +196,6 @@ export default function Tools({
                   activityReminderCandidateRevision={state.activityReminderCandidateRevision}
                   activityReminderCandidateLoadState={state.activityReminderCandidateLoadState}
                   onRetryActivityReminderCandidates={state.retryActivityReminderCandidates}
-                />
-              </div>
-            ) : null}
-            {visitedSections.has("timer") ? (
-              <div className={activeSection === "timer" ? "tools-section-pane" : "tools-section-pane tools-section-pane-hidden"} data-tools-section="timer">
-                <TimerToolPanel
-                  snapshot={state.snapshot}
-                  viewModel={state.timerViewModel}
-                  mode={selectedTimerMode}
-                  busyAction={state.busyAction}
-                  onModeChange={handleTimerModeChange}
-                  onStartTimer={state.startTimer}
-                  onPauseTimer={state.pauseTimer}
-                  onResumeTimer={state.resumeTimer}
-                  onResetTimer={state.resetTimer}
-                  onAddTimerLap={state.addTimerLap}
-                />
-              </div>
-            ) : null}
-            {visitedSections.has("pomodoro") ? (
-              <div className={activeSection === "pomodoro" ? "tools-section-pane" : "tools-section-pane tools-section-pane-hidden"} data-tools-section="pomodoro">
-                <PomodoroToolPanel
-                  snapshot={state.snapshot}
-                  viewModel={state.pomodoroViewModel}
-                  busyAction={state.busyAction}
-                  onStartPomodoro={state.startPomodoro}
-                  onPausePomodoro={state.pausePomodoro}
-                  onResumePomodoro={state.resumePomodoro}
-                  onSkipPomodoroPhase={state.skipPomodoroPhase}
-                  onResetPomodoro={state.resetPomodoro}
                 />
               </div>
             ) : null}

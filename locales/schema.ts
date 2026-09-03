@@ -5794,6 +5794,56 @@ export const MESSAGE_SCHEMA = {
     "params": [],
     "surface": "frontend"
   },
+  "timekeep.scanPrograms": {
+    "kind": "string",
+    "params": [],
+    "surface": "frontend"
+  },
+  "timekeep.scanHint": {
+    "kind": "string",
+    "params": [],
+    "surface": "frontend"
+  },
+  "timekeep.scanEmpty": {
+    "kind": "string",
+    "params": [],
+    "surface": "frontend"
+  },
+  "timekeep.scanAgain": {
+    "kind": "string",
+    "params": [],
+    "surface": "frontend"
+  },
+  "timekeep.manualAdd": {
+    "kind": "string",
+    "params": [],
+    "surface": "frontend"
+  },
+  "timekeep.addSelected": {
+    "kind": "string",
+    "params": [],
+    "surface": "frontend"
+  },
+  "timekeep.selectedPrograms": {
+    "kind": "string",
+    "params": [],
+    "surface": "frontend"
+  },
+  "timekeep.runningInstances": {
+    "kind": "string",
+    "params": [],
+    "surface": "frontend"
+  },
+  "timekeep.scanFailed": {
+    "kind": "string",
+    "params": [],
+    "surface": "frontend"
+  },
+  "timekeep.trackingNow": {
+    "kind": "string",
+    "params": [],
+    "surface": "frontend"
+  },
   "timekeep.edit": {
     "kind": "string",
     "params": [],

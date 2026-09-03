@@ -1,31 +1,25 @@
 import { useEffect, useMemo, useState } from "react";
-import { AlarmClock, BellRing, Timer } from "lucide-react";
+import { BellRing } from "lucide-react";
 import { useLocaleText } from "../../../shared/i18n/index.ts";
 import type { ToolsRuntimeSnapshot } from "../../../shared/types/tools.ts";
 import { buildToolsViewModelLabels } from "../services/toolsLabels.ts";
 import { toolsRuntimeSnapshotStore } from "../services/toolsRuntimeSnapshotStore.ts";
 import { buildToolsStatusChipViewModels } from "../services/toolsViewModel.ts";
-import type { ToolStatusChipViewModel, ToolsOpenTarget } from "../types.ts";
+import type { ToolsOpenTarget } from "../types.ts";
 import ToolsStatusChip from "./ToolsStatusChip.tsx";
 
 interface ToolsStatusEntryProps {
   onOpenSection: (target: ToolsOpenTarget) => void;
 }
 
-function resolveStatusIcon(statusChip: ToolStatusChipViewModel) {
-  if (statusChip.targetSection === "pomodoro") return AlarmClock;
-  if (statusChip.targetSection === "timer") return Timer;
+function resolveStatusIcon() {
   return BellRing;
 }
 
 function hasToolsStatusChip(snapshot: ToolsRuntimeSnapshot | null) {
   return Boolean(
     snapshot
-    && (
-      snapshot.currentPomodoro?.status === "running"
-      || snapshot.currentTimer?.status === "running"
-      || snapshot.nextReminderAt !== null
-    ),
+    && snapshot.nextReminderAt !== null,
   );
 }
 
@@ -69,6 +63,7 @@ export default function ToolsStatusEntry({
   const statusChips = useMemo(() => (
     snapshot
       ? buildToolsStatusChipViewModels(snapshot, nowMs, labels)
+        .filter((statusChip) => statusChip.targetSection === "reminders")
       : []
   ), [labels, nowMs, snapshot]);
 
@@ -87,7 +82,7 @@ export default function ToolsStatusEntry({
         <ToolsStatusChip
           key={`${statusChip.targetSection}:${statusChip.targetTimerMode ?? "default"}`}
           label={statusChip.label}
-          icon={resolveStatusIcon(statusChip)}
+          icon={resolveStatusIcon()}
           onClick={() => onOpenSection({
             section: statusChip.targetSection,
             timerMode: statusChip.targetTimerMode,

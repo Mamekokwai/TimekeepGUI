@@ -174,7 +174,7 @@ export async function runNavigationScenarios(context: BrowserSmokeContext) {
       await dispatchTabKey(context);
       tabOrder.push(String(await evaluate(client!, sessionId, `document.activeElement?.getAttribute("aria-label") ?? ""`)));
     }
-    assert.deepEqual(tabOrder, ["历史", "数据", "分类", "工具", "Timekeep", "设置", "关于", "导航名称"]);
+    assert.deepEqual(tabOrder, ["Timekeep", "历史", "数据", "分类", "辅助提醒", "设置", "关于", "导航名称"]);
 
     assert.equal(
       await evaluate(client!, sessionId, `
@@ -484,7 +484,7 @@ export async function runNavigationScenarios(context: BrowserSmokeContext) {
       client!,
       sessionId,
       `document.querySelector("[data-sidebar-footer]")?.children.length === 1
-        && document.querySelectorAll("[data-titlebar-tools-status] .tools-status-entry-titlebar-item").length === 3
+        && document.querySelectorAll("[data-titlebar-tools-status] .tools-status-entry-titlebar-item").length === 1
         && Boolean(document.querySelector("[data-titlebar-update-entry]"))`,
       undefined,
       "Title bar entries should render while the sidebar footer stays Menu-only",
@@ -566,7 +566,7 @@ export async function runNavigationScenarios(context: BrowserSmokeContext) {
     assert.equal(shellEntryState.titlebarOrder, true);
     assert.equal(shellEntryState.entriesInsideTitlebar, true);
     assert.ok(shellEntryState.dragWidth >= 24);
-    assert.equal(shellEntryState.toolButtonCount, 3);
+    assert.equal(shellEntryState.toolButtonCount, 1);
     assert.equal(shellEntryState.toolButtonsUndecorated, true);
     shellEntryState.toolButtonSizes.forEach((buttonRect) => {
       assert.ok(buttonRect);

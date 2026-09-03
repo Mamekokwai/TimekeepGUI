@@ -186,7 +186,7 @@ export const MESSAGES = {
   "tools.statusChip.focus": "Focus",
   "tools.statusChip.reminder": "Reminder",
   "tools.statusChip.stopwatch": "Timer",
-  "tools.subtitle": "Start local desktop tools",
+  "tools.subtitle": "Auxiliary reminders only; automatic tracking is owned by Timekeep",
   "tools.timerHint": "Timer results are not written to activity records.",
   "tools.timerLabel": "Name",
   "tools.timerLabelPlaceholder": "Optional",
@@ -197,5 +197,5 @@ export const MESSAGES = {
   "tools.timerStatus.paused": "Paused",
   "tools.timerStatus.running": "Running",
   "tools.timerTitle": "Timer",
-  "tools.title": "Tools"
+  "tools.title": "Reminders"
 } as const;

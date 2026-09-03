@@ -1,8 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocale, type UiText } from "../../../shared/i18n/index.ts";
 import type {
-  StartPomodoroInput,
-  TimerMode,
   ActivityReminderTarget,
   ActivityReminderAppCandidate,
   ActivityReminderCategoryCandidate,
@@ -10,10 +8,8 @@ import type {
   ToolsRuntimeSnapshot,
 } from "../../../shared/types/tools.ts";
 import type {
-  PomodoroViewModel,
   ReminderRowViewModel,
   ActivityReminderRuleRowViewModel,
-  TimerViewModel,
   ToolsSection,
 } from "../types.ts";
 import { ToolsRuntimeService } from "../services/toolsRuntimeService.ts";
@@ -26,10 +22,8 @@ import {
 } from "../services/activityReminderTargetCandidates.ts";
 import { buildToolsViewModelLabels } from "../services/toolsLabels.ts";
 import {
-  buildPomodoroViewModel,
   buildReminderRows,
   buildActivityReminderRuleRows,
-  buildTimerViewModel,
 } from "../services/toolsViewModel.ts";
 
 const DEFAULT_SNAPSHOT: ToolsRuntimeSnapshot = {
@@ -181,14 +175,6 @@ export function useToolsPageState({
   }, [activateActivityReminderMode]);
 
   const labels = useMemo(() => buildToolsViewModelLabels(uiText), [uiText]);
-  const inactiveTimerViewModel = useMemo<TimerViewModel>(
-    () => buildTimerViewModel(DEFAULT_SNAPSHOT, DEFAULT_SNAPSHOT.sampledAtMs, labels),
-    [labels],
-  );
-  const inactivePomodoroViewModel = useMemo<PomodoroViewModel>(
-    () => buildPomodoroViewModel(DEFAULT_SNAPSHOT, DEFAULT_SNAPSHOT.sampledAtMs, labels),
-    [labels],
-  );
   const reminderRows = useMemo(
     () => activeSection === "reminders" ? buildReminderRows(snapshot, nowMs, labels) : EMPTY_REMINDER_ROWS,
     [activeSection, labels, nowMs, snapshot],
@@ -198,18 +184,6 @@ export function useToolsPageState({
       ? buildActivityReminderRuleRows(snapshot, labels)
       : EMPTY_ACTIVITY_REMINDER_RULE_ROWS,
     [activeSection, labels, snapshot],
-  );
-  const timerViewModel = useMemo(
-    () => activeSection === "timer"
-      ? buildTimerViewModel(snapshot, nowMs, labels)
-      : inactiveTimerViewModel,
-    [activeSection, inactiveTimerViewModel, labels, nowMs, snapshot],
-  );
-  const pomodoroViewModel = useMemo(
-    () => activeSection === "pomodoro"
-      ? buildPomodoroViewModel(snapshot, nowMs, labels)
-      : inactivePomodoroViewModel,
-    [activeSection, inactivePomodoroViewModel, labels, nowMs, snapshot],
   );
 
   const executeAction = useCallback(async (
@@ -268,37 +242,6 @@ export function useToolsPageState({
     () => ToolsRuntimeService.disableActivityReminderRule(id),
   ), [runAction]);
 
-  const startTimer = useCallback((mode: TimerMode, durationMinutes: number, label?: string) => runAction(
-    "start-timer",
-    () => ToolsRuntimeService.startTimer({
-      mode,
-      durationMs: mode === "countdown" ? Math.max(1, durationMinutes) * 60_000 : null,
-      label: label ?? null,
-    }),
-  ), [runAction]);
-
-  const pauseTimer = useCallback(() => runAction("pause-timer", ToolsRuntimeService.pauseTimer), [runAction]);
-  const resumeTimer = useCallback(() => runAction("resume-timer", ToolsRuntimeService.resumeTimer), [runAction]);
-  const resetTimer = useCallback(() => runAction("reset-timer", ToolsRuntimeService.resetTimer), [runAction]);
-  const addTimerLap = useCallback(() => runAction("add-timer-lap", ToolsRuntimeService.addTimerLap), [runAction]);
-
-  const startPomodoro = useCallback((input?: Partial<StartPomodoroInput>) => runAction(
-    "start-pomodoro",
-    () => ToolsRuntimeService.startPomodoro({
-      focusMs: (input?.focusMs ?? snapshot.settings.pomodoroFocusMinutes * 60_000),
-      shortBreakMs: (input?.shortBreakMs ?? snapshot.settings.pomodoroShortBreakMinutes * 60_000),
-      longBreakMs: (input?.longBreakMs ?? snapshot.settings.pomodoroLongBreakMinutes * 60_000),
-      longBreakEvery: input?.longBreakEvery ?? snapshot.settings.pomodoroLongBreakEvery,
-    }),
-  ), [runAction, snapshot.settings]);
-  const pausePomodoro = useCallback(() => runAction("pause-pomodoro", ToolsRuntimeService.pausePomodoro), [runAction]);
-  const resumePomodoro = useCallback(() => runAction("resume-pomodoro", ToolsRuntimeService.resumePomodoro), [runAction]);
-  const skipPomodoroPhase = useCallback(
-    () => runAction("skip-pomodoro-phase", ToolsRuntimeService.skipPomodoroPhase),
-    [runAction],
-  );
-  const resetPomodoro = useCallback(() => runAction("reset-pomodoro", ToolsRuntimeService.resetPomodoro), [runAction]);
-
   return {
     hasSnapshot,
     loadError,
@@ -314,22 +257,10 @@ export function useToolsPageState({
     retryActivityReminderCandidates,
     reminderRows,
     activityReminderRuleRows,
-    timerViewModel,
-    pomodoroViewModel,
     createReminder,
     cancelReminder,
     createActivityReminderRule,
     disableActivityReminderRule,
-    startTimer,
-    pauseTimer,
-    resumeTimer,
-    resetTimer,
-    addTimerLap,
-    startPomodoro,
-    pausePomodoro,
-    resumePomodoro,
-    skipPomodoroPhase,
-    resetPomodoro,
     retryLoad: refreshSnapshot,
   };
 }

@@ -1,5 +1,5 @@
-import { Activity, Eraser, Pencil, Plus, RefreshCw, Save, Server, Trash2 } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { Activity, Eraser, Pencil, Plus, RefreshCw, Save, Search, Server, Trash2 } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocale, useLocaleText } from "../../../shared/i18n/index.ts";
 import QuietBadge from "../../../shared/components/QuietBadge.tsx";
 import QuietButton from "../../../shared/components/QuietButton.tsx";
@@ -8,7 +8,12 @@ import QuietPageHeader from "../../../shared/components/QuietPageHeader.tsx";
 import { useQuietDialogs } from "../../../shared/hooks/useQuietDialogs.tsx";
 import type { QuietToastTone } from "../../../shared/types/toast.ts";
 import { useTimekeepPanelState } from "../hooks/useTimekeepPanelState.ts";
-import type { TimekeepIntegrationConfig, TimekeepServiceConfig } from "../services/timekeepRuntimeService.ts";
+import {
+  loadTimekeepProgramCandidates,
+  type TimekeepIntegrationConfig,
+  type TimekeepProgramCandidate,
+  type TimekeepServiceConfig,
+} from "../services/timekeepRuntimeService.ts";
 
 interface Props {
   onToast?: (message: string, tone?: QuietToastTone) => void;
@@ -38,6 +43,38 @@ function formatTimestamp(value: string, locale: string): string {
   });
 }
 
+// These are Windows infrastructure processes, not useful entries in a human
+// program picker. The user can still add any executable manually.
+const SYSTEM_PROCESS_NAMES = new Set([
+  "applicationframehost.exe",
+  "audiodg.exe",
+  "conhost.exe",
+  "csrss.exe",
+  "ctfmon.exe",
+  "dwm.exe",
+  "dllhost.exe",
+  "explorer.exe",
+  "fontdrvhost.exe",
+  "lsass.exe",
+  "msmpeng.exe",
+  "registry",
+  "runtimebroker.exe",
+  "searchhost.exe",
+  "services.exe",
+  "sihost.exe",
+  "smss.exe",
+  "spoolsv.exe",
+  "startmenuexperiencehost.exe",
+  "svchost.exe",
+  "shellexperiencehost.exe",
+  "system",
+  "taskhostw.exe",
+  "textinputhost.exe",
+  "wininit.exe",
+  "winlogon.exe",
+  "wudfhost.exe",
+]);
+
 export default function Timekeep({ onToast }: Props) {
   const UI_TEXT = useLocaleText();
   const locale = useLocale();
@@ -52,6 +89,14 @@ export default function Timekeep({ onToast }: Props) {
   const [editingProgramName, setEditingProgramName] = useState<string | null>(null);
   const [configDraft, setConfigDraft] = useState<TimekeepServiceConfig | null>(null);
   const [nowMs, setNowMs] = useState(() => Date.now());
+  const [scanDialogOpen, setScanDialogOpen] = useState(false);
+  const [scanCandidates, setScanCandidates] = useState<TimekeepProgramCandidate[]>([]);
+  const [scanSelection, setScanSelection] = useState<Set<string>>(new Set());
+  const [scanFilter, setScanFilter] = useState("");
+  const [scanCategory, setScanCategory] = useState("");
+  const [scanProject, setScanProject] = useState("");
+  const [scanLoading, setScanLoading] = useState(false);
+  const [scanError, setScanError] = useState(false);
   const notifyError = useCallback((message: string) => {
     onToast?.(message, "error");
   }, [onToast]);
@@ -64,6 +109,18 @@ export default function Timekeep({ onToast }: Props) {
     requestTimeoutMessage: UI_TEXT.timekeep.requestTimeout,
     partialSuccessMessage: UI_TEXT.timekeep.partialSuccess,
   });
+
+  const visibleScanCandidates = useMemo(() => {
+    const filter = scanFilter.trim().toLowerCase();
+    return scanCandidates.filter((candidate) => (
+      !SYSTEM_PROCESS_NAMES.has(candidate.name.toLowerCase())
+      && (!filter || candidate.name.toLowerCase().includes(filter))
+    ));
+  }, [scanCandidates, scanFilter]);
+  const activeProgramNames = useMemo(
+    () => new Set(state.activeSessions.map((session) => session.program_name.toLowerCase())),
+    [state.activeSessions],
+  );
 
   useEffect(() => {
     if (state.config) setConfigDraft(state.config);
@@ -108,6 +165,47 @@ export default function Timekeep({ onToast }: Props) {
     setCategory("");
     setProject("");
     setAddDialogOpen(true);
+  };
+
+  const openScanDialog = async () => {
+    setScanDialogOpen(true);
+    setScanLoading(true);
+    setScanError(false);
+    setScanFilter("");
+    setScanCategory("");
+    setScanProject("");
+    try {
+      const candidates = await loadTimekeepProgramCandidates();
+      setScanCandidates(candidates);
+      // Keep the first scan opt-in: process discovery can include development
+      // tools and background apps that the user did not intend to track.
+      setScanSelection(new Set());
+    } catch (error) {
+      console.warn("Failed to scan programs", error);
+      setScanError(true);
+      onToast?.(UI_TEXT.timekeep.scanFailed, "error");
+    } finally {
+      setScanLoading(false);
+    }
+  };
+
+  const toggleScanSelection = (name: string) => {
+    setScanSelection((current) => {
+      const next = new Set(current);
+      if (next.has(name)) next.delete(name);
+      else next.add(name);
+      return next;
+    });
+  };
+
+  const handleAddSelected = async () => {
+    const names = [...scanSelection];
+    if (names.length === 0) return;
+    const added = await state.addMany(names, scanCategory.trim(), scanProject.trim());
+    if (added) {
+      setScanDialogOpen(false);
+      setScanSelection(new Set());
+    }
   };
 
   const openEditDialog = (program: { name: string; category?: string; project?: string }) => {
@@ -160,7 +258,7 @@ export default function Timekeep({ onToast }: Props) {
   };
 
   return (
-    <>
+    <div className="flex h-full min-h-0 w-full min-w-0 flex-col gap-4 md:gap-5">
       {dialogs}
       <QuietPageHeader
         icon={<Activity size={18} />}
@@ -175,7 +273,7 @@ export default function Timekeep({ onToast }: Props) {
             <QuietButton size="compact" tone="danger" onClick={() => { void handleResetAllStats(); }} disabled={state.busy}>
               {UI_TEXT.timekeep.resetStats}
             </QuietButton>
-            <QuietButton size="compact" tone="primary" onClick={openAddDialog}>
+            <QuietButton size="compact" tone="primary" onClick={() => { void openScanDialog(); }}>
               <Plus size={14} />
               {UI_TEXT.timekeep.add}
             </QuietButton>
@@ -183,7 +281,7 @@ export default function Timekeep({ onToast }: Props) {
         )}
       />
 
-      <div className="qp-scroll-region flex-1 min-h-0 space-y-4">
+      <div className="qp-scroll-region min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain pr-1">
         {state.loading ? (
           <div className="qp-panel flex items-center justify-center p-8 text-sm text-[var(--qp-text-tertiary)]">
             {UI_TEXT.common.loading}
@@ -267,7 +365,12 @@ export default function Timekeep({ onToast }: Props) {
                   {state.programs.map((program) => (
                     <div key={program.id || program.name} className="flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0">
                       <div className="min-w-0">
-                        <div className="truncate font-medium text-[var(--qp-text-primary)]">{program.name}</div>
+                        <div className="flex min-w-0 items-center gap-2">
+                          <div className="truncate font-medium text-[var(--qp-text-primary)]">{program.name}</div>
+                          {activeProgramNames.has(program.name.toLowerCase()) ? (
+                            <QuietBadge tone="subtle">{UI_TEXT.timekeep.trackingNow}</QuietBadge>
+                          ) : null}
+                        </div>
                         <div className="mt-1 flex flex-wrap gap-2 text-xs text-[var(--qp-text-tertiary)]">
                           {program.category ? <span>{program.category}</span> : null}
                           {program.project ? <span>{program.project}</span> : null}
@@ -357,6 +460,98 @@ export default function Timekeep({ onToast }: Props) {
       </div>
 
       <QuietDialog
+        open={scanDialogOpen}
+        title={UI_TEXT.timekeep.scanPrograms}
+        description={UI_TEXT.timekeep.scanHint}
+        onClose={() => setScanDialogOpen(false)}
+        surfaceClassName="max-w-2xl"
+        actions={(
+          <>
+            <QuietButton onClick={() => { setScanDialogOpen(false); openAddDialog(); }}>{UI_TEXT.timekeep.manualAdd}</QuietButton>
+            <QuietButton onClick={() => setScanDialogOpen(false)}>{UI_TEXT.common.cancel}</QuietButton>
+            <QuietButton
+              tone="primary"
+              onClick={() => { void handleAddSelected(); }}
+              busy={state.busy}
+              disabled={scanSelection.size === 0 || scanLoading}
+            >
+              {UI_TEXT.timekeep.addSelected} ({scanSelection.size})
+            </QuietButton>
+          </>
+        )}
+      >
+        <div className="space-y-4">
+          <div className="relative">
+            <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[var(--qp-text-tertiary)]" />
+            <input
+              value={scanFilter}
+              onChange={(event) => setScanFilter(event.target.value)}
+              className="qp-input h-9 w-full pl-9"
+              placeholder={UI_TEXT.timekeep.programName}
+              aria-label={UI_TEXT.timekeep.programName}
+            />
+          </div>
+
+          {scanLoading ? (
+            <p className="py-8 text-center text-sm text-[var(--qp-text-tertiary)]">{UI_TEXT.common.loading}</p>
+          ) : scanError ? (
+            <div className="flex flex-col items-center gap-3 py-8 text-center">
+              <p className="text-sm text-[var(--qp-text-secondary)]">{UI_TEXT.timekeep.scanFailed}</p>
+              <QuietButton size="compact" onClick={() => { void openScanDialog(); }}>{UI_TEXT.timekeep.scanAgain}</QuietButton>
+            </div>
+          ) : visibleScanCandidates.length === 0 ? (
+            <p className="py-8 text-center text-sm text-[var(--qp-text-tertiary)]">{UI_TEXT.timekeep.scanEmpty}</p>
+          ) : (
+            <>
+              <div className="flex items-center justify-between text-xs text-[var(--qp-text-tertiary)]">
+                <span>{UI_TEXT.timekeep.selectedPrograms}: {scanSelection.size}</span>
+                <span>{visibleScanCandidates.length}</span>
+              </div>
+              <div className="max-h-[360px] space-y-1 overflow-y-auto overscroll-contain pr-1">
+                {visibleScanCandidates.map((candidate) => {
+                  const checked = candidate.tracked || scanSelection.has(candidate.name);
+                  return (
+                    <label
+                      key={candidate.name}
+                      className={`flex cursor-pointer items-center gap-3 rounded-[8px] border border-transparent px-3 py-2.5 transition-colors hover:border-[var(--qp-border-subtle)] hover:bg-[var(--qp-surface-muted)] ${candidate.tracked ? "opacity-65" : ""}`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        disabled={candidate.tracked}
+                        onChange={() => toggleScanSelection(candidate.name)}
+                      />
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-sm font-medium text-[var(--qp-text-primary)]">{candidate.name}</span>
+                        <span className="mt-0.5 block text-xs text-[var(--qp-text-tertiary)]">
+                          {candidate.running_instances} {UI_TEXT.timekeep.runningInstances}
+                          {candidate.tracked ? ` · ${UI_TEXT.timekeep.trackingNow}` : ""}
+                        </span>
+                      </span>
+                      <span className="shrink-0 text-xs tabular-nums text-[var(--qp-text-tertiary)]">
+                        {formatLifetime(candidate.lifetime_seconds)}
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
+            </>
+          )}
+
+          <div className="grid gap-3 border-t border-[var(--qp-border-subtle)] pt-4 md:grid-cols-2">
+            <label className="block text-sm text-[var(--qp-text-secondary)]">
+              <span className="mb-1 block">{UI_TEXT.timekeep.category}</span>
+              <input value={scanCategory} onChange={(event) => setScanCategory(event.target.value)} className="qp-input h-9 w-full" />
+            </label>
+            <label className="block text-sm text-[var(--qp-text-secondary)]">
+              <span className="mb-1 block">{UI_TEXT.timekeep.project}</span>
+              <input value={scanProject} onChange={(event) => setScanProject(event.target.value)} className="qp-input h-9 w-full" />
+            </label>
+          </div>
+        </div>
+      </QuietDialog>
+
+      <QuietDialog
         open={addDialogOpen}
         title={editingProgramName ? UI_TEXT.timekeep.edit : UI_TEXT.timekeep.add}
         onClose={() => { setAddDialogOpen(false); setEditingProgramName(null); }}
@@ -382,6 +577,6 @@ export default function Timekeep({ onToast }: Props) {
           </label>
         </div>
       </QuietDialog>
-    </>
+    </div>
   );
 }

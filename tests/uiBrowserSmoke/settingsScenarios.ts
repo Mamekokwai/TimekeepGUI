@@ -607,7 +607,7 @@ export async function runSettingsScenarios(context: BrowserSmokeContext) {
       { label: "History", view: "history" },
       { label: "Data", view: "data" },
       { label: "Classification", view: "mapping" },
-      { label: "Tools", view: "tools" },
+      { label: "Reminders", view: "tools" },
       { label: "Settings", view: "settings" },
       { label: "About", view: "about" },
     ]) {

@@ -20,7 +20,7 @@ https://github.com/Ceceliaee/patina
 
 
 <p align="center">
-TimekeepGUI 将 Timekeep 的程序存在时间追踪与安静、可信的桌面时间管理界面结合起来。
+TimekeepGUI 将 Timekeep 的程序存在时间追踪与安静、可信的桌面时间管理界面结合起来。Timekeep 是本项目唯一的核心计时系统，其他页面只提供查看、分类、分析和辅助提醒。
 </p>
 
 ## 项目定位
@@ -44,6 +44,8 @@ Windows named pipe: \\.\pipe\Timekeep → Timekeep service
 ```
 
 Timekeep 服务未运行时，GUI 仍可直接根据配置的程序名称枚举当前进程并维护会话；服务运行时则由服务负责进程事件监控，GUI 只读取其活动会话。
+
+首次使用 Timekeep 页面时，点击“添加程序”会扫描当前正在运行的 Windows 程序。勾选需要统计的程序后，可以一次性设置分类和项目并加入追踪列表；程序保持运行期间会写入活动会话，退出后会把时长写入 `session_history` 和 `tracked_programs.lifetime_seconds`。如果目标程序尚未运行，先启动它再点击“重新扫描”。
 
 ## 目录结构
 
@@ -105,7 +107,7 @@ cd E:\Github\TimekeepGUI
 npm run tauri dev
 ```
 
-Timekeep service 成功运行后应监听 Windows named pipe `\\.\pipe\Timekeep`。如果服务未启动，GUI 仍可打开，但 Timekeep 页面会显示服务不可用。
+Timekeep service 成功运行后应监听 Windows named pipe `\\.\pipe\Timekeep`。如果服务未启动但数据库已经存在，GUI 会启用内置进程存在同步；如果数据库也不存在，请先启动 Timekeep 服务完成数据库初始化。
 
 ## 从源码构建
 
@@ -158,7 +160,7 @@ src-tauri/target/release/bundle/nsis/
 - 处理无操作、锁屏、睡眠和异常退出等边界，让记录更加可信。
 - 数据默认保存在本地，不依赖账号、云同步或远程服务器。
 - 支持管理应用名称、分类、颜色和统计排除规则。
-- 提供提醒、计时器和番茄钟等轻量本地工具。
+- 提供轻量本地提醒；独立秒表、倒计时和番茄钟不是本项目的计时入口。
 - 界面保持克制、清晰、低打扰，适合长期日常使用。
 
 ## 下载
@@ -194,12 +196,13 @@ Patina 的公开版本和素材仅作为本项目的参考来源，不代表 Tim
 
 - 重命名应用，调整分类、颜色和统计规则。
 - 管理需要追踪的程序，不想统计的程序不加入追踪列表。
+- 在 Timekeep 页面扫描本机运行程序，勾选后批量加入计时，并为一组程序设置分类和项目。
 - 导出本地备份、恢复备份并清理历史记录。
 
 ### 轻量工具
 
 - 创建一次性提醒和应用使用时长限制提醒。
-- 使用秒表、倒计时和番茄钟处理主动专注任务。
+- Timekeep 是唯一的自动计时入口；提醒功能仅用于辅助通知，不会替代 Timekeep 统计。
 - 工具状态保存在本地，不会替代自动追踪记录。
 
 ## 界面预览

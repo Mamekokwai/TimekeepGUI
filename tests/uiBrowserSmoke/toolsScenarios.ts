@@ -26,12 +26,12 @@ export async function runToolsScenarios(context: BrowserSmokeContext) {
       client!,
       sessionId,
       `document.documentElement.dataset.patinaSmokeReload !== "tools-cold"
-        && Boolean(document.querySelector('[aria-label=' + ${jsonString(JSON.stringify("工具"))} + ']'))`,
+        && Boolean(document.querySelector('[aria-label=' + ${jsonString(JSON.stringify(TOOLS_TEXT.title))} + ']'))`,
     );
     assert.equal(
       await evaluate(client!, sessionId, `
         (() => {
-          const node = document.querySelector('[aria-label=' + ${jsonString(JSON.stringify("工具"))} + ']');
+          const node = document.querySelector('[aria-label=' + ${jsonString(JSON.stringify(TOOLS_TEXT.title))} + ']');
           node?.click();
           return Boolean(node);
         })()
@@ -45,7 +45,7 @@ export async function runToolsScenarios(context: BrowserSmokeContext) {
       showsLoadingCopy: document.body.innerText.includes("加载中..."),
       dashboardActive: document.querySelector('[aria-label=' + ${jsonString(JSON.stringify("今天"))} + ']')
         ?.className.includes("qp-nav-item-active") ?? false,
-      toolsActive: document.querySelector('[aria-label=' + ${jsonString(JSON.stringify("工具"))} + ']')
+      toolsActive: document.querySelector('[aria-label=' + ${jsonString(JSON.stringify(TOOLS_TEXT.title))} + ']')
         ?.className.includes("qp-nav-item-active") ?? false,
     })`))) as {
       presentedView: string | null;
@@ -84,12 +84,12 @@ export async function runToolsScenarios(context: BrowserSmokeContext) {
       client!,
       sessionId,
       `document.documentElement.dataset.patinaSmokeReload !== "tools-stale-ensure"
-        && Boolean(document.querySelector('[aria-label=' + ${jsonString(JSON.stringify("工具"))} + ']'))`,
+        && Boolean(document.querySelector('[aria-label=' + ${jsonString(JSON.stringify(TOOLS_TEXT.title))} + ']'))`,
     );
     assert.equal(
       await evaluate(client!, sessionId, `
         (async () => {
-          const tools = document.querySelector('[aria-label=' + ${jsonString(JSON.stringify("工具"))} + ']');
+          const tools = document.querySelector('[aria-label=' + ${jsonString(JSON.stringify(TOOLS_TEXT.title))} + ']');
           const dashboard = document.querySelector('[aria-label=' + ${jsonString(JSON.stringify("今天"))} + ']');
           if (!tools || !dashboard) return false;
           tools.click();
@@ -123,10 +123,10 @@ export async function runToolsScenarios(context: BrowserSmokeContext) {
       client!,
       sessionId,
       `document.documentElement.dataset.patinaSmokeReload !== "tools-cold-failure"
-        && Boolean(document.querySelector('[aria-label=' + ${jsonString(JSON.stringify("工具"))} + ']'))`,
+        && Boolean(document.querySelector('[aria-label=' + ${jsonString(JSON.stringify(TOOLS_TEXT.title))} + ']'))`,
     );
     await evaluate(client!, sessionId, `
-      document.querySelector('[aria-label=' + ${jsonString(JSON.stringify("工具"))} + ']')?.click()
+      document.querySelector('[aria-label=' + ${jsonString(JSON.stringify(TOOLS_TEXT.title))} + ']')?.click()
     `);
     await waitForExpression(
       client!,
@@ -163,7 +163,7 @@ export async function runToolsScenarios(context: BrowserSmokeContext) {
     assert.equal(
       await evaluate(client!, sessionId, `
         (() => {
-          const node = document.querySelector('[aria-label=' + ${jsonString(JSON.stringify("工具"))} + ']');
+          const node = document.querySelector('[aria-label=' + ${jsonString(JSON.stringify(TOOLS_TEXT.title))} + ']');
           if (!node) return false;
           node.click();
           return true;
@@ -184,8 +184,6 @@ export async function runToolsScenarios(context: BrowserSmokeContext) {
 
     for (const marker of [
       TOOLS_TEXT.remindersTitle,
-      TOOLS_TEXT.timerTitle,
-      TOOLS_TEXT.pomodoroTitle,
     ] as const) {
       assert.equal(
         await evaluate(client!, sessionId, `
@@ -334,9 +332,9 @@ export async function runToolsScenarios(context: BrowserSmokeContext) {
       client!,
       sessionId,
       `document.querySelector('[data-tools-navigation-mode="labeled"]')
-        && document.querySelectorAll('[data-tools-section-label]').length === 3`,
+        && document.querySelectorAll('[data-tools-section-label]').length === 1`,
       undefined,
-      "Menu should reveal all three Tools section labels",
+      "Menu should reveal the reminder section label",
     );
     const labeledModeState = await evaluate(client!, sessionId, `
       (() => {
@@ -346,7 +344,7 @@ export async function runToolsScenarios(context: BrowserSmokeContext) {
         };
         const rail = document.querySelector('[data-tools-navigation-mode="labeled"]');
         const tabs = Array.from(document.querySelectorAll('.tools-section-tab'));
-        const sectionTabs = tabs.slice(0, 3);
+        const sectionTabs = tabs.slice(0, 1);
         const labels = Array.from(document.querySelectorAll('[data-tools-section-label]'));
         const settingsTab = tabs.at(-1);
         return {
@@ -375,11 +373,9 @@ export async function runToolsScenarios(context: BrowserSmokeContext) {
     assert.deepEqual(labeledModeState.geometry, iconModeGeometry);
     assert.deepEqual(labeledModeState.labels, [
       TOOLS_TEXT.remindersTitle,
-      TOOLS_TEXT.timerTitle,
-      TOOLS_TEXT.pomodoroTitle,
     ]);
     assert.equal(labeledModeState.labelsFit, true);
-    assert.deepEqual(labeledModeState.iconSizes, ["15", "15", "15"]);
+    assert.deepEqual(labeledModeState.iconSizes, ["15"]);
     assert.equal(labeledModeState.settingsIconSize, "17");
     assert.equal(labeledModeState.settingsHasLabel, false);
     assert.equal(labeledModeState.activeSection, TOOLS_TEXT.remindersTitle);
@@ -689,6 +685,11 @@ export async function runToolsScenarios(context: BrowserSmokeContext) {
       }
     }
 
+    // Independent stopwatch/countdown/pomodoro UI was retired in favor of
+    // Timekeep process-presence tracking. Their runtime compatibility is
+    // covered by the unit tests, so the old browser interactions stop here.
+    return;
+
     assert.equal(
       await evaluate(client!, sessionId, `
         (() => {
@@ -845,7 +846,7 @@ export async function runToolsScenarios(context: BrowserSmokeContext) {
     assert.equal(
       await evaluate(client!, sessionId, `
         (() => {
-          const tools = document.querySelector('[aria-label=' + ${jsonString(JSON.stringify("工具"))} + ']');
+          const tools = document.querySelector('[aria-label=' + ${jsonString(JSON.stringify(TOOLS_TEXT.title))} + ']');
           if (!tools) return false;
           tools.click();
           return true;

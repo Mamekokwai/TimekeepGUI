@@ -1,28 +1,35 @@
 import {
   addTimekeepProgram,
+  addTimekeepPrograms,
   getTimekeepStatus,
   getTimekeepConfig,
   listTimekeepActiveSessions,
   listTimekeepHistory,
   listTimekeepPrograms,
+  scanTimekeepPrograms,
   refreshTimekeep,
   resetTimekeepStats,
   removeTimekeepProgram,
   updateTimekeepProgram,
   updateTimekeepConfig,
   type TimekeepProgram,
+  type TimekeepProgramCandidate,
   type TimekeepServiceStatus,
   type TimekeepServiceConfig,
 } from "../../../platform/timekeep/timekeepGateway.ts";
 
 export { getTimekeepErrorCode } from "../../../platform/timekeep/timekeepGateway.ts";
 
-export type { TimekeepProgram, TimekeepServiceStatus };
+export type { TimekeepProgram, TimekeepProgramCandidate, TimekeepServiceStatus };
 export type { TimekeepActiveSession, TimekeepHistoryEntry } from "../../../platform/timekeep/timekeepGateway.ts";
 export type { TimekeepIntegrationConfig, TimekeepServiceConfig } from "../../../platform/timekeep/timekeepGateway.ts";
 
 export function loadTimekeepPrograms(): Promise<TimekeepProgram[]> {
   return listTimekeepPrograms();
+}
+
+export function loadTimekeepProgramCandidates() {
+  return scanTimekeepPrograms();
 }
 
 export function loadTimekeepStatus(): Promise<TimekeepServiceStatus> {
@@ -47,6 +54,10 @@ export function loadTimekeepHistory(options?: { name?: string; date?: string; li
 
 export function addTrackedTimekeepProgram(name: string, category: string, project: string) {
   return addTimekeepProgram(name, category, project);
+}
+
+export function addTrackedTimekeepPrograms(names: string[], category: string, project: string) {
+  return addTimekeepPrograms(names, category, project);
 }
 
 export function removeTrackedTimekeepProgram(name: string) {

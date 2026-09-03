@@ -1,8 +1,9 @@
 import { getLocaleText } from "../../src/shared/i18n/runtime.ts";
 const COPY = { "zh-CN": getLocaleText("zh-CN") } as const;
 
-export const EXPECTED_NAV_LABELS = ["今天", "历史", "数据", "分类", "工具", "Timekeep", "设置", "关于"] as const;
+export const EXPECTED_NAV_LABELS = ["今天", "Timekeep", "历史", "数据", "分类", "辅助提醒", "设置", "关于"] as const;
 export const DASHBOARD_MARKERS = ["专注分布", "应用排行"] as const;
+export const TIMEKEEP_MARKERS = ["Timekeep", "追踪程序"] as const;
 export const TOOLS_TEXT = COPY["zh-CN"].tools;
 export const DATE_TEXT = COPY["zh-CN"].date;
 export const SETTINGS_MARKER = "主题模式";

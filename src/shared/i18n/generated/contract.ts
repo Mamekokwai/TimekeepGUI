@@ -894,6 +894,7 @@ export interface UiText {
     "activeSessions": string;
     "add": string;
     "addFailed": string;
+    "addSelected": string;
     "apiKey": string;
     "category": string;
     "cliPath": string;
@@ -906,6 +907,7 @@ export interface UiText {
     "historySearch": string;
     "lifetime": string;
     "loadFailed": string;
+    "manualAdd": string;
     "noActiveSessions": string;
     "noHistory": string;
     "operationFailed": string;
@@ -926,13 +928,21 @@ export interface UiText {
     "resetProgramConfirm": string;
     "resetStats": string;
     "retry": string;
+    "runningInstances": string;
     "saveSettings": string;
+    "scanAgain": string;
+    "scanEmpty": string;
+    "scanFailed": string;
+    "scanHint": string;
+    "scanPrograms": string;
+    "selectedPrograms": string;
     "server": string;
     "serviceOffline": string;
     "serviceSettings": string;
     "settingsSaved": string;
     "subtitle": string;
     "title": string;
+    "trackingNow": string;
     "version": string;
     "wakapi": string;
     "wakatime": string;

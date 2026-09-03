@@ -32,11 +32,11 @@ export default function AppSidebar({
   const isLabeled = navigationMode === "labeled";
   const navItems = [
     { id: "dashboard" as View, icon: Monitor, label: UI_TEXT.dashboard.title },
+    { id: "timekeep" as View, icon: Activity, label: UI_TEXT.timekeep.title },
     { id: "history" as View, icon: Clock, label: UI_TEXT.history.title },
     { id: "data" as View, icon: BarChart3, label: UI_TEXT.data.title },
     { id: "mapping" as View, icon: Sparkles, label: UI_TEXT.mapping.title },
     { id: "tools" as View, icon: ToolCase, label: UI_TEXT.tools.title },
-    { id: "timekeep" as View, icon: Activity, label: UI_TEXT.timekeep.title },
     { id: "settings" as View, icon: Settings2, label: UI_TEXT.settings.title },
     { id: "about" as View, icon: Info, label: UI_TEXT.about.title },
   ];
