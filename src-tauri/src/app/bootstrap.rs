@@ -1,0 +1,362 @@
+use std::sync::Arc;
+
+use crate::app::{
+    runtime,
+    state::{
+        AppExitState, AppSettingsCommitState, DesktopBehaviorState, MainWindowLifecycleState,
+        TraySafetyState, WidgetWindowLifecycleState,
+    },
+    tray,
+};
+use crate::domain::lifecycle::AppRestartState;
+use crate::domain::settings::{DesktopBehaviorSettings, StartupSource};
+use crate::engine::{
+    tools::{ToolsRuntimeState, ToolsRuntimeWakeState},
+    tracking::{
+        pause_state::TrackingPauseRuntimeState, runtime_snapshot::TrackingRuntimeSnapshotState,
+        title_state::TitleRecordingRuntimeState, watchdog::RuntimeHealthState,
+    },
+    updater::UpdaterRuntimeState,
+    web_activity::WebActivityRuntimeState,
+};
+use crate::{commands, data};
+use tauri::Manager;
+
+pub struct BootstrapInput {
+    pub runtime_health: Arc<RuntimeHealthState>,
+    pub launched_by_autostart: bool,
+    pub app_version: String,
+}
+
+pub fn build(input: BootstrapInput) -> tauri::Builder<tauri::Wry> {
+    let builder = register_single_instance_plugin(tauri::Builder::<tauri::Wry>::default());
+    let builder = register_managed_state_and_plugins(
+        builder,
+        &input.app_version,
+        input.runtime_health.clone(),
+    );
+    let builder = register_invoke_handlers(builder);
+    register_runtime_hooks(builder, input.runtime_health, input.launched_by_autostart)
+}
+
+fn register_single_instance_plugin(
+    builder: tauri::Builder<tauri::Wry>,
+) -> tauri::Builder<tauri::Wry> {
+    #[cfg(desktop)]
+    {
+        let enabled = !cfg!(debug_assertions)
+            || std::env::var("PATINA_E2E_SINGLE_INSTANCE").as_deref() == Ok("1");
+        if enabled {
+            return builder.plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
+                let app = app.clone();
+                // The Windows plugin invokes this callback from its WM_COPYDATA window procedure.
+                // Return to the message loop before recreating a background-destroyed WebView so
+                // native window creation cannot be trapped inside the re-entrant message dispatch.
+                tauri::async_runtime::spawn(async move {
+                    tokio::task::yield_now().await;
+                    if !tray::show_main_window(
+                        &app,
+                        crate::app::main_window::MainWindowShowReason::SingleInstance,
+                    ) {
+                        eprintln!("[main-window] single-instance recovery request was rejected");
+                    }
+                });
+            }));
+        }
+    }
+
+    builder
+}
+
+fn register_managed_state_and_plugins(
+    builder: tauri::Builder<tauri::Wry>,
+    app_version: &str,
+    runtime_health: Arc<RuntimeHealthState>,
+) -> tauri::Builder<tauri::Wry> {
+    builder
+        .manage(DesktopBehaviorState::default())
+        .manage(AppSettingsCommitState::default())
+        .manage(AppExitState::default())
+        .manage(TraySafetyState::default())
+        .manage(AppRestartState::default())
+        .manage(MainWindowLifecycleState::default())
+        .manage(WidgetWindowLifecycleState::default())
+        .manage(TrackingRuntimeSnapshotState::default())
+        .manage(TrackingPauseRuntimeState::default())
+        .manage(TitleRecordingRuntimeState::default())
+        .manage(crate::domain::localization::LocalizationState::default())
+        .manage(tray::TrayMenuRebuildState::default())
+        .manage(tray::TrayIconRuntimeState::default())
+        .manage(runtime_health)
+        .manage(ToolsRuntimeState::default())
+        .manage(ToolsRuntimeWakeState::default())
+        .manage(crate::platform::web_activity_bridge::WebActivityBridgeRuntimeState::default())
+        .manage(crate::engine::remote_status_bridge::RemoteStatusBridgeRuntimeState::default())
+        .manage(WebActivityRuntimeState::default())
+        .manage(UpdaterRuntimeState::new(app_version.to_string()))
+        .manage(crate::app::scheduled_backup::ScheduledBackupRuntimeState::default())
+        .manage(crate::app::scheduled_export::ScheduledExportRuntimeState::default())
+        .plugin(
+            tauri_plugin_autostart::Builder::new()
+                .args(vec![runtime::AUTOSTART_ARG.to_string()])
+                .build(),
+        )
+        .plugin(tauri_plugin_sql::Builder::default().build())
+        .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_notification::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
+}
+
+fn register_invoke_handlers(builder: tauri::Builder<tauri::Wry>) -> tauri::Builder<tauri::Wry> {
+    builder.invoke_handler(tauri::generate_handler![
+        commands::activity_read_model::cmd_get_recorded_app_catalog_page,
+        commands::activity_read_model::cmd_get_activity_aggregate_range,
+        commands::activity_read_model::cmd_get_activity_read_model_status,
+        commands::tracking::get_current_active_window,
+        commands::tracking::get_current_tracking_snapshot,
+        commands::tracking::cmd_get_tracker_health_snapshot,
+        commands::tracking::cmd_set_afk_threshold,
+        commands::timekeep::cmd_timekeep_request,
+        commands::settings::cmd_set_desktop_behavior,
+        commands::settings::cmd_set_launch_behavior,
+        commands::settings::cmd_set_background_optimization,
+        commands::settings::cmd_commit_app_settings,
+        commands::settings::cmd_commit_classification_settings,
+        commands::export::cmd_pick_export_save_file,
+        commands::export::cmd_export_data,
+        commands::export::cmd_get_scheduled_export_snapshot,
+        commands::export::cmd_pick_scheduled_export_directory,
+        commands::export::cmd_save_scheduled_export_config,
+        commands::import::cmd_pick_canonical_import_file,
+        commands::import::cmd_pick_external_import_file,
+        commands::import::cmd_preview_canonical_import,
+        commands::import::cmd_commit_canonical_import,
+        commands::import::cmd_destructure_external_data,
+        commands::import::cmd_list_import_batches,
+        commands::import::cmd_delete_import_batch,
+        commands::tools::cmd_get_tools_snapshot,
+        commands::tools::cmd_get_tool_alerts,
+        commands::tools::cmd_dismiss_tool_alert,
+        commands::tools::cmd_create_reminder,
+        commands::tools::cmd_cancel_reminder,
+        commands::tools::cmd_create_activity_reminder_rule,
+        commands::tools::cmd_disable_activity_reminder_rule,
+        commands::tools::cmd_start_timer,
+        commands::tools::cmd_pause_timer,
+        commands::tools::cmd_resume_timer,
+        commands::tools::cmd_reset_timer,
+        commands::tools::cmd_add_timer_lap,
+        commands::tools::cmd_start_pomodoro,
+        commands::tools::cmd_pause_pomodoro,
+        commands::tools::cmd_resume_pomodoro,
+        commands::tools::cmd_skip_pomodoro_phase,
+        commands::tools::cmd_reset_pomodoro,
+        commands::widget::cmd_get_widget_icon,
+        commands::widget::cmd_get_widget_bootstrap_snapshot,
+        commands::widget::cmd_get_widget_placement,
+        commands::widget::cmd_finalize_widget_drag,
+        commands::widget::cmd_set_widget_expanded,
+        commands::widget::cmd_get_widget_status_snapshot,
+        commands::widget::cmd_set_widget_pinned,
+        commands::widget::cmd_show_main_window,
+        commands::widget::cmd_hide_widget_window,
+        commands::widget::cmd_is_primary_mouse_button_down,
+        commands::window::cmd_minimize_main_window,
+        commands::window::cmd_e2e_destroy_hidden_main_window,
+        commands::window::cmd_get_main_window_render_token,
+        commands::window::cmd_mark_main_window_ready,
+        commands::update::cmd_get_update_snapshot,
+        commands::update::cmd_check_for_updates,
+        commands::update::cmd_download_update,
+        commands::update::cmd_install_update,
+        commands::web_activity::cmd_get_web_activity_bridge_snapshot,
+        commands::web_activity_analysis::cmd_get_web_activity_aggregate_range,
+        commands::backup::cmd_pick_backup_save_file,
+        commands::backup::cmd_pick_backup_file,
+        commands::backup::cmd_get_scheduled_backup_snapshot,
+        commands::backup::cmd_pick_scheduled_backup_directory,
+        commands::backup::cmd_save_scheduled_backup_config,
+        commands::backup::cmd_preview_backup,
+        commands::backup::cmd_export_backup,
+        commands::backup::cmd_restore_backup,
+        commands::backup::cmd_save_webdav_backup_secret,
+        commands::backup::cmd_delete_webdav_backup_secret,
+        commands::backup::cmd_has_webdav_backup_secret,
+        commands::backup::cmd_reveal_webdav_backup_secret,
+        commands::backup::cmd_test_webdav_backup_target,
+        commands::backup::cmd_upload_webdav_backup,
+        commands::backup::cmd_list_webdav_backups,
+        commands::backup::cmd_download_webdav_backup,
+        commands::backup::cmd_delete_remote_backup_temp,
+        commands::storage::cmd_get_storage_snapshot,
+        commands::storage::cmd_pick_storage_directory,
+        commands::storage::cmd_preview_storage_migration,
+        commands::storage::cmd_preview_webview_cache_migration,
+        commands::storage::cmd_preview_restore_default_storage_migration,
+        commands::storage::cmd_preview_restore_default_webview_cache_migration,
+        commands::storage::cmd_restart_and_apply_storage_migration,
+        commands::storage::cmd_restart_and_apply_webview_cache_migration,
+        commands::storage::cmd_restart_and_apply_restore_default_storage_migration,
+        commands::storage::cmd_restart_and_apply_restore_default_webview_cache_migration,
+        commands::storage::cmd_restart_and_clear_webview_cache,
+        commands::storage::cmd_open_storage_directory,
+        commands::persistence::cmd_delete_sessions_before,
+        commands::persistence::cmd_delete_sessions_by_exe_names,
+        commands::persistence::cmd_delete_sessions_by_exe_names_between,
+        commands::persistence::cmd_delete_web_activity_segments_by_domain,
+        commands::persistence::cmd_save_remote_backup_settings,
+        commands::persistence::cmd_save_remote_backup_remote_dir,
+        commands::persistence::cmd_save_remote_backup_last_backup_at,
+        commands::persistence::cmd_clear_remote_backup_settings,
+        commands::persistence::cmd_save_data_bootstrap_snapshot_payload,
+        commands::persistence::cmd_clear_data_bootstrap_snapshot_payload,
+        commands::persistence::cmd_save_history_bootstrap_snapshot_payload,
+        commands::persistence::cmd_clear_history_bootstrap_snapshot_payload,
+        commands::diagnostics::cmd_get_resource_diagnostics,
+    ])
+}
+
+fn register_runtime_hooks(
+    builder: tauri::Builder<tauri::Wry>,
+    runtime_health: Arc<RuntimeHealthState>,
+    launched_by_autostart: bool,
+) -> tauri::Builder<tauri::Wry> {
+    builder
+        .on_menu_event(tray::handle_menu_event)
+        .on_tray_icon_event(tray::handle_tray_icon_event)
+        .on_window_event(tray::handle_window_event)
+        .setup(move |app| {
+            let handled_storage_restart = tauri::async_runtime::block_on(
+                data::storage_migration::run_pending_storage_migration(app.handle()),
+            )
+            .map_err(std::io::Error::other)?;
+            tauri::async_runtime::block_on(data::sqlite_pool::initialize_app_sqlite(app.handle()))
+                .map_err(std::io::Error::other)?;
+            let mut should_clear_update_reopen_intent = false;
+            let startup = match tauri::async_runtime::block_on(
+                data::app_settings_service::load_desktop_behavior_startup_state(app.handle()),
+            ) {
+                Ok(startup_state) => {
+                    should_clear_update_reopen_intent =
+                        startup_state.should_reopen_main_window;
+                    runtime::StartupContext::new(
+                        startup_state.settings,
+                        resolve_startup_source(
+                            launched_by_autostart,
+                            handled_storage_restart,
+                            startup_state.should_reopen_main_window,
+                        ),
+                    )
+                }
+                Err(error) => {
+                    eprintln!(
+                        "[startup] failed to load desktop behavior settings; showing main window: {error}"
+                    );
+                    runtime::StartupContext::new(
+                        DesktopBehaviorSettings::default(),
+                        StartupSource::SettingsRecovery,
+                    )
+                }
+            };
+            runtime::setup(app, runtime_health.clone(), startup)?;
+            if should_clear_update_reopen_intent {
+                if let Err(error) = tauri::async_runtime::block_on(
+                    data::app_settings_service::clear_post_install_reopen_main_window(app.handle()),
+                ) {
+                    eprintln!(
+                        "[startup] main window reopened but update intent could not be cleared: {error}"
+                    );
+                }
+            }
+            Ok(())
+        })
+}
+
+fn resolve_startup_source(
+    launched_by_autostart: bool,
+    handled_storage_restart: bool,
+    should_reopen_after_update: bool,
+) -> StartupSource {
+    if handled_storage_restart {
+        StartupSource::StorageRestart
+    } else if should_reopen_after_update {
+        StartupSource::UpdateRestart
+    } else if launched_by_autostart {
+        StartupSource::Autostart
+    } else {
+        StartupSource::Manual
+    }
+}
+
+pub(crate) fn handle_run_event(app: &tauri::AppHandle, event: tauri::RunEvent) {
+    match event {
+        tauri::RunEvent::ExitRequested { api, .. } => {
+            let exit_requested = app.state::<AppExitState>().is_exit_requested();
+            let keep_tray_visible = should_keep_app_running_without_windows(
+                app.state::<DesktopBehaviorState>()
+                    .snapshot()
+                    .should_keep_tray_visible(),
+                app.state::<TraySafetyState>().is_forced_visible(),
+                exit_requested,
+            );
+
+            if keep_tray_visible {
+                api.prevent_exit();
+            }
+        }
+        tauri::RunEvent::Exit => tray::stop_taskbar_theme_watcher(app),
+        _ => {}
+    }
+}
+
+fn should_keep_app_running_without_windows(
+    configured_tray_residency: bool,
+    safety_tray_forced: bool,
+    exit_requested: bool,
+) -> bool {
+    !exit_requested && (configured_tray_residency || safety_tray_forced)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{resolve_startup_source, should_keep_app_running_without_windows};
+    use crate::domain::settings::StartupSource;
+
+    #[test]
+    fn ordinary_launch_sources_are_distinguished() {
+        assert_eq!(
+            resolve_startup_source(false, false, false),
+            StartupSource::Manual
+        );
+        assert_eq!(
+            resolve_startup_source(true, false, false),
+            StartupSource::Autostart
+        );
+    }
+
+    #[test]
+    fn explicit_restarts_override_autostart_arguments() {
+        assert_eq!(
+            resolve_startup_source(true, false, true),
+            StartupSource::UpdateRestart
+        );
+        assert_eq!(
+            resolve_startup_source(true, true, true),
+            StartupSource::StorageRestart
+        );
+        assert_eq!(
+            resolve_startup_source(false, true, false),
+            StartupSource::StorageRestart
+        );
+    }
+
+    #[test]
+    fn forced_startup_tray_keeps_close_to_exit_apps_running() {
+        assert!(should_keep_app_running_without_windows(false, true, false));
+        assert!(should_keep_app_running_without_windows(true, false, false));
+        assert!(!should_keep_app_running_without_windows(
+            false, false, false
+        ));
+        assert!(!should_keep_app_running_without_windows(true, true, true));
+    }
+}

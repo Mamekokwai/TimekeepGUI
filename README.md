@@ -1,358 +1,271 @@
-![Test Status](https://github.com/jms-guy/timekeep/actions/workflows/CI.yml/badge.svg)
-[![Go Report Card](https://goreportcard.com/badge/github.com/jms-guy/timekeep)](https://goreportcard.com/report/github.com/jms-guy/timekeep)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+<div align="center">
+
+# TimekeepGUI
+
+参考项目
+https://github.com/jms-guy/timekeep
+https://github.com/Ceceliaee/patina
+将patina的GUI和timekeep的功能结合
+
+Local-first time tracking for Windows desktop work.
+
+English · [简体中文](README.zh-CN.md)
+
+![Platform](https://img.shields.io/badge/platform-Windows-4f6f8f)
+![Built with Tauri](https://img.shields.io/badge/built%20with-Tauri%20v2-4f7f8f)
+![Local first](https://img.shields.io/badge/data-local--first-5f7f68)
+[![License](https://img.shields.io/badge/license-MIT-6f647a)](LICENSE)
+
+</div>
 
 
-# Timekeep
+<p align="center">
+TimekeepGUI combines local foreground activity tracking with a quiet, trustworthy desktop time-management interface.
+</p>
 
-A process activity tracker, it runs as a background service recording start/stop events for select programs and aggregates active sessions, session history, and lifetime program usage. Now has [WakaTime](https://github.com/jms-guy/timekeep?tab=readme-ov-file#wakatime)/[Wakapi](https://github.com/muety/wakapi) integration.
+## 项目定位
 
-## Table of Contents
-- [Features](#features)
-- [How It Works](#how-it-works)
-- [Usage](#usage)
-- [Installation](#installation)
-- [WakaTime/Wakapi](#wakatimewakapi)
-- [File Locations](#file-locations)
-- [Contributing & Issues](#contributing--issues)
-- [License](#license)
+TimekeepGUI 是一个 Windows 桌面端时间管理项目，使用 Patina 的 Tauri/React 图形界面承载 Timekeep 的程序追踪、活动会话、历史记录和统计能力。
 
-## Features
-- Track programs by executable basename (e.g., `notepad.exe`, `code`, `bash`)
-- Start/stop detection:
-  - Windows: WMI PowerShell subscription
-  - Linux: /proc polling with exe/cmdline-based identity
-- Active session aggregation across multiple PIDs
-- Session history and total lifetime durations
-- CLI for managing tracked programs
-- WakaTime integration allows for tracking external program usage alongside your IDE/web-browsing stats
+当前仓库的父级目录 `E:\Github\TimekeepGUI` 是实际 GUI 项目根目录。`sample/` 仅用于保存参考项目，不参与前端、Rust 或 Release 构建。
 
-## How It Works
-- Windows: Embeds a PowerShell script to subscribe to WMI process start/stop events. Runs a pre-monitoring script to find any tracked programs already running on service start
+## 工作方式
 
-- Linux: Polls `/proc`, resolves process identity via `/proc/<pid>/exe` (readlink) -> fallback to `/proc/<pid>/cmdline` -> last-resort `/proc/<pid>/comm`, then matches by basename. It polls at a configurable time.Duration value, defaulting to 1s. To catch accidental transient misses, a grace period is granted which is also a configurable value. If a PID is no longer found, or missed when polling, the process will keep being tracked until (poll_interval * poll_grace). For example, default values are poll_interval = 1s and poll_grace = 3; If a PID is missed, it’s removed after poll_interval × poll_grace. 0 grace time is allowed if desired.
+GUI 通过 Rust/Tauri command 调用 Timekeep bridge，再通过 Windows named pipe 与 Timekeep service 通信：
 
-- Session model: A session begins when the first process for a tracked program starts. Additional processes (ex. multiple windows) are added to the active session. The session ends only when the last process terminates, giving an accurate picture of total time with that program.
+```text
+React/TypeScript GUI
+        ↓
+Tauri command: cmd_timekeep_request
+        ↓
+Windows named pipe: \\.\pipe\Timekeep
+        ↓
+Timekeep service
+```
 
-## Usage
+Timekeep service 未运行时，GUI 仍可以启动，但 Timekeep 页面会显示服务不可用。Windows 服务端需要监听 `\\.\pipe\Timekeep`，请求和响应使用逐行 JSON 格式。
 
-**Full command reference:** [Commands](https://github.com/jms-guy/timekeep/blob/main/docs/commands.md)
+## 目录结构
 
-### Quick Start
+```text
+TimekeepGUI/
+├─ src/                 React、TypeScript 和页面功能
+├─ src-tauri/           Rust/Tauri 桌面端、Windows 集成和 IPC bridge
+├─ tests/               前端、集成和 UI 测试
+├─ scripts/             检查、生成和 Release 脚本
+├─ .vscode/             推荐插件、任务和调试配置
+└─ sample/              Patina/Timekeep 参考代码，不参与本项目构建
+```
+
+<p align="center">
+  <img src=".github/assets/readme/hero.png" alt="TimekeepGUI dashboard">
+</p>
+
+## Why TimekeepGUI
+
+- Records foreground apps automatically, without manually starting or stopping timers.
+- Handles idle, lock, sleep, and abnormal-exit boundaries to keep records more trustworthy.
+- Keeps data local by default, with no account, cloud sync, or server dependency.
+- Lets you manage app names, categories, colors, stats exclusions, and window title capture.
+- Provides lightweight local tools such as reminders, timers, and Pomodoro.
+- Keeps the interface restrained, clear, and low-interruption for long-term daily use.
+
+## Download
+
+TimekeepGUI 当前版本需要从源码构建，独立 Release 页面将在项目正式发布后补充。构建方法见下方 [Build From Source](#build-from-source)。
+
+Patina 的公开版本和素材仅作为本项目的参考来源，不代表 TimekeepGUI 的发行包。
+
+[Patina Web Sync](https://github.com/Ceceliaee/patina-web-sync) adds specific webpage details to browser activity. Install it as needed:
+
+<p align="center">
+  <a href="https://chromewebstore.google.com/detail/patina-web-sync/gimdckblhckibmeklhemgccabmbnoemd"><img src=".github/assets/store-badges/chrome-web-store.png" height="36" alt="Install Patina Web Sync from the Chrome Web Store"></a>
+  <a href="https://addons.mozilla.org/firefox/addon/patina-web-sync/"><img src=".github/assets/store-badges/firefox-add-ons.svg" height="36" alt="Install Patina Web Sync from Firefox Add-ons"></a>
+  <a href="https://microsoftedge.microsoft.com/addons/detail/gogmlpjhbfjghilmpcciedplifdiibai"><img src=".github/assets/store-badges/edge-add-ons.png" height="36" alt="Install Patina Web Sync from Microsoft Edge Add-ons"></a>
+</p>
+
+## Core Features
+
+### Automatic Tracking
+
+- Automatically records the current foreground app and turns activity into time records.
+- Detects idle, lock, and sleep states to reduce invalid time in statistics.
+- Handles record boundaries after long-away periods and abnormal exits, reducing accidentally merged time.
+- Reduces missed effective activity in low-interaction scenarios such as videos, meetings, courses, and livestreams.
+
+### Review And Analysis
+
+- Review effective activity, app rankings, and category distribution in today's overview.
+- Use the timeline to review activity by date and inspect app switches and window title details.
+- Understand long-term time distribution through trends, heatmaps, and app curves.
+
+### Management And Control
+
+- Rename apps and adjust categories, colors, and statistics rules.
+- Exclude apps you do not want in statistics, or disable window title capture for specific apps.
+- Export local backups, restore backups, and clean up historical records.
+
+### Lightweight Tools
+
+- Create one-off reminders and app usage limit reminders.
+- Use stopwatch, countdown, and Pomodoro for active focus tasks.
+- Tool state stays local and does not replace automatic tracking records.
+
+## Interface Preview
+
+<table>
+  <tr>
+    <td width="50%" align="center"><strong>History</strong></td>
+    <td width="50%" align="center"><strong>Data</strong></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src=".github/assets/readme/history.png" alt="History page"></td>
+    <td width="50%"><img src=".github/assets/readme/data.png" alt="Data page"></td>
+  </tr>
+  <tr>
+    <td width="50%" align="center"><strong>Classification</strong></td>
+    <td width="50%" align="center"><strong>Tools</strong></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src=".github/assets/readme/classification.png" alt="Classification page"></td>
+    <td width="50%"><img src=".github/assets/readme/tools.png" alt="Tools page"></td>
+  </tr>
+  <tr>
+    <td width="50%" align="center"><strong>Settings</strong></td>
+    <td width="50%" align="center"><strong>About</strong></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src=".github/assets/readme/settings.png" alt="Settings page"></td>
+    <td width="50%"><img src=".github/assets/readme/about.png" alt="About page"></td>
+  </tr>
+</table>
+
+## Reliability And Privacy
+
+Time tracking has long-term value only when the records are trustworthy. TimekeepGUI focuses on these boundaries:
+
+- **Foreground app recognition**: records the window and app that are actually in the foreground, reducing temporary-window and system noise.
+- **Idle handling**: idle time does not continue counting as effective activity.
+- **State boundaries**: handles record boundaries after lock, sleep, resume, long-away periods, and abnormal exits.
+- **Effective-duration stats**: rankings, distributions, and totals use effective activity time, not just open spans.
+- **Title capture control**: window title capture can be disabled per app to reduce unnecessary sensitive information retention.
+- **Local data control**: core data stays local, and backups, restores, and history cleanup are initiated by the user.
+
+## Current Scope
+
+TimekeepGUI currently focuses on personal local time records:
+
+- Windows 10/11 desktop use
+- Personal local data storage and control
+- Automatic tracking, review, classification, and backup or restore
+- Lightweight local tools
+
+It is not currently aimed at team collaboration, account systems, cloud sync, multi-platform sync, or heavy AI insights.
+
+## Build From Source
+
+### Requirements
+
+- Windows 10/11 x64
+- [Node.js](https://nodejs.org/) `25.8.0` and npm `11.11.0`
+- [Rust](https://www.rust-lang.org/tools/install) `1.94.1` with the `x86_64-pc-windows-msvc` toolchain
+- Visual Studio C++ Build Tools and Windows 10/11 SDK
+
+The Node and Rust versions are pinned in [`.node-version`](.node-version) and [`rust-toolchain.toml`](rust-toolchain.toml).
+
+### Install Dependencies
+
 ```powershell
-timekeep add notepad.exe --category notes # Add notepad
-timekeep ls               # List currently tracked programs
- • notepad.exe
-timekeep info notepad.exe # Basic info for program sessions
- • Category: notes
- • Current Lifetime: 19h 41m
- • Total sessions to date: 4
- • Last Session: 2025-09-26 11:25 - 2025-09-26 11:26 (21 seconds)
- • Average session length: 4h 55m
-timekeep history notepad.exe  # Session history for program
-  notepad.exe | 2025-09-26 11:25 - 2025-09-26 11:26 | Duration: 21 seconds
-  notepad.exe | 2025-09-24 13:49 - 2025-09-24 13:50 | Duration: 39 seconds
-  notepad.exe | 2025-09-23 11:18 - 2025-09-23 11:19 | Duration: 56 seconds
-  notepad.exe | 2025-09-22 13:08 - 2025-09-23 08:48 | Duration: 19h 39m
+cd E:\Github\TimekeepGUI
+npm ci
 ```
 
-**Note**: Program category not required for local tracking. Required for WakaTime integration.
-
-## Installation
-
-### Prerequisites
-- **Go 1.24+** (if building from source)
-- **Windows**: Administrator privileges for service installation
-- **Linux**: sudo privileges for systemd service setup
-
-### Method 1: Install script
-1. Download latest release ZIP from [Releases](https://github.com/jms-guy/timekeep/releases)
-2. Extract ZIP
-3. Run the appropriate install script:
-  - **Windows**: Double-click 'install.bat'
-  - **Linux**: ```chmod +x install.sh && sudo ./install.sh```
-
-### Method 2: Build from Source
-
-#### Windows
-```powershell
-# Clone and build
-git clone https://github.com/jms-guy/timekeep
-cd timekeep
-GOOS=windows go build -o timekeep-service.exe ./cmd/service
-GOOS=windows go build -o timekeep.exe ./cmd/cli
-
-# Install and start service (Run as Administrator)
-sc.exe create timekeep binPath= "\"C:\Path\to\timekeep-service.exe\"" start= auto 
-sc.exe start timekeep
-
-# Verify service is running
-Get-Service -Name "timekeep"
-```
-
-Test using CLI:
+### Run In Development
 
 ```powershell
-.\timekeep.exe status # Check if the service is responsive
+npm run tauri dev
 ```
 
-**To include shell completion**: 
+Start the Timekeep service separately before using the Timekeep page. The GUI connects to the Windows named pipe `\\.\pipe\Timekeep` and does not start the service automatically.
+
+### Build Installer
 
 ```powershell
-New-Item -Force -ItemType Directory (Split-Path $PROFILE) | Out-Null
-$comp = Join-Path (Split-Path $PROFILE) 'timekeep.ps1'
-timekeep completion powershell > $comp
-if (-not (Select-String -Path $PROFILE -SimpleMatch $comp -Quiet)) { Add-Content $PROFILE "`n. $comp" }
-. $PROFILE
+# Unsigned local installer
+npm run tauri -- build --bundles nsis --no-sign
+
+# Signed installer (requires TAURI_SIGNING_PRIVATE_KEY and
+# TAURI_SIGNING_PRIVATE_KEY_PASSWORD in the environment)
+npm run tauri -- build --bundles nsis
 ```
 
-If you encounter issues running scripts in PowerShell, bypass the ExecutionPolicy with:
+Installers are generated under:
 
-```powershell
-powershell -ExecutionPolicy Bypass
+```text
+src-tauri/target/release/bundle/nsis/
 ```
 
-for a single terminal session, or loosen restrictions with:
-
-```powershell
-Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
-```
-
-
-#### Linux
-```bash
-# Clone and build
-git clone https://github.com/jms-guy/timekeep
-cd timekeep
-GOOS=linux go build -o timekeepd ./cmd/service  
-GOOS=linux go build -o timekeep ./cmd/cli
-
-# Install binaries
-sudo install -m 755 timekeepd /usr/local/bin/
-sudo install -m 755 timekeep /usr/local/bin/
-
-# Database directory
-mkdir -p ~/.local/share/timekeep
-
-# Set service capabilities, for /proc read permissions
-sudo setcap cap_dac_read_search,cap_sys_ptrace+ep /usr/local/bin/timekeepd
-
-# Set user/group variables
-USER_NAME=$(whoami)
-GROUP_NAME=$(id -gn)
-
-# Create socket directory and set permissions
-sudo mkdir -p /var/run/timekeep
-sudo chown "$USER_NAME":"$GROUP_NAME" /var/run/timekeep
-sudo chmod 755 /var/run/timekeep
-
-# Create systemd service
-sudo tee /etc/systemd/system/timekeep.service > /dev/null <<EOF
-[Unit]
-Description=TimeKeep Process Tracker
-After=network.target
-
-[Service]
-Type=simple
-ExecStart=/usr/local/bin/timekeepd
-StandardOutput=journal
-StandardError=journal
-KillMode=process
-Restart=always
-RestartSec=2s
-User=$USER_NAME
-Group=$GROUP_NAME
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-# Enable and start service
-sudo systemctl daemon-reload
-sudo systemctl enable timekeep.service
-sudo systemctl start timekeep.service
-
-# Check status
-sudo systemctl status timekeep
-```
-
-Test using CLI:
-```bash
-timekeep status # Check if the service is responsive
-```
-
-**To include shell completion**:
-
-```bash
-timekeep completion bash | sudo tee /etc/bash_completion.d/timekeep >/dev/null
-source /etc/bash_completion
-```
-
-## Uninstalling
-
-To clean up logs/config/database, file locations are available [here](https://github.com/jms-guy/timekeep?tab=readme-ov-file#file-locations).
-
-### Windows
-```powershell
-sc.exe stop timekeep
-sc.exe delete timekeep
-```
-
-### Linux
-```bash
-sudo systemctl disable --now timekeep
-sudo rm /etc/systemd/system/timekeep.service
-sudo rm /usr/local/bin/timekeepd /usr/local/bin/timekeep
-sudo systemctl daemon-reload
-```
-
-## WakaTime/Wakapi
-
-### WakaTime 
-
-Timekeep now integrates with [WakaTime](https://wakatime.com), allowing users to track external program usage alongside their IDE and web-browsing stats. **Timekeep does not track activity within these programs, only when these programs are running.**
-
-To enable WakaTime integration, users must:
-  1. Have a WakaTime account
-  2. Have [wakatime-cli](https://github.com/wakatime/wakatime-cli) installed on their machine
-
-Enable integration through timekeep. Retrieve your API key from your [WakaTime profile settings](https://wakatime.com/settings/account). Set your WakaTime API key and wakatime-cli path either directly in the Timekeep [config](https://github.com/jms-guy/timekeep?tab=readme-ov-file#file-locations) file, or provide them through flags:
-
-`timekeep wakatime enable --api_key "YOUR_KEY" --cli_path "wakatime-cli_PATH"`
-
-```json
-{
-  "wakatime": {
-    "enabled": true,
-    "api_key": "API_KEY",
-    "cli_path": "PATH",
-    "global_project": "PROJECT"
-  }
-}
-```
-
-**The wakatime-cli path must be an absolute path.**
-
-*C:\Path\To\\.wakatime\wakatime-cli.exe*
-
-*/home/user/wakatime-cli-linux-amd64*
-
-#### Complete WakaTime setup example
-
-`timekeep wakatime enable --api_key "YOUR_KEY" --cli_path "wakatime-cli_PATH"`
-
-`timekeep add photoshop.exe --category "designing" --project "UI Design"`
-
-Check WakaTime current enabled/disabled status:
-
-`timekeep wakatime status`
-
-Disable integration with:
-
-`timekeep wakatime disable`
-
-#### Categories
-After enabling, wakatime-cli heartbeats will be sent containing tracking data for given programs. Note, that only programs added to Timekeep with a given category will have data sent to WakaTime.
-
-`timekeep add notepad.exe --category "notes"`
-
-If no category is set for a program, it will still be tracked locally, but no data for it will be sent out.
-
-List of categories accepted(defined [here](https://github.com/wakatime/wakatime-cli/blob/75ed1c3d905fc77a5039817458298c9ac44853a3/cmd/root.go#L74)):
-```bash
-"Category of this heartbeat activity. Can be \"coding\", \"ai coding\","+
-			" \"building\", \"indexing\", \"debugging\", \"learning\", \"notes\","+
-			" \"meeting\", \"planning\", \"researching\", \"communicating\", \"supporting\","+
-			" \"advising\", \"running tests\", \"writing tests\", \"manual testing\","+
-			" \"writing docs\", \"code reviewing\", \"browsing\","+
-			" \"translating\", or \"designing\".
-```
-
-#### Projects
-Timekeep has no automatic project detection for WakaTime. Users may set a global project for all programs to use in the config, or via the command:
-
-`timekeep config --global_project "YOUR-PROJECT"`
-
-Users can also set project variables on a per-program basis:
-
-`timekeep add notepad.exe --category "notes" --project "Timekeep"`
-
-Program-set project variables will take precedence over a set Global Project. If no project variable is set via the global_project config or when adding programs, WakaTime will fall back to default "Unknown Project".
-
-Users can update a program's category or project with the **update** command:
-
-`timekeep update notepad.exe --category "planning" --project "Timekeep2"`
-
-### Wakapi
-
-Similar to WakaTime, users can also allow their program activity to be tracked via [Wakapi](https://github.com/muety/wakapi). The commands and structures are very similar, to enable integration you need your Wakapi API key as well as the address to your running Wakapi server, provided through either command flags or editing the config file.
-
-`timekeep wakapi enable --api_key "YOUR_KEY" --server "https://wakapi.example.com"`
-
-**or for local instances**:
-
-`timekeep wakapi enable --api_key "YOUR_KEY" --server "http://127.0.0.1:3000"`
-
-`timekeep wakapi disable`
-
-`timekeep wakapi status`
-
-```json
-{
-  "wakapi": {
-    "enabled": true,
-    "api_key": "API_KEY",
-    "server": "ADDRESS",
-    "global_project": "PROJECT"
-  }
-}
-```
-
-The global project variable for Wakapi can be altered manually in the config file. **Note**: Using `timekeep config --global_project` sets both WakaTime and Wakapi global projects to the same value. For separate projects, edit the config file directly.
-
-
-## File Locations
-- **Logs** 
-  - **Windows**: *C:\ProgramData\Timekeep\logs*
-  - **Linux**: *journal* -- `journalctl -u timekeep`
-
-- **Config**
-  - **Windows**: *C:\ProgramData\Timekeep\config*
-  - **Linux**: *~/.config/timekeep*
-  - **Config structure**:
-
-  ```json
-  {
-    "wakatime": {
-      "enabled": true,
-      "api_key": "API_KEY",
-      "cli_path": "PATH",
-      "global_project": "PROJECT"
-    },
-    "wakapi": {
-      "enabled": true,
-      "api_key": "API_KEY",
-      "server": "ADDRESS",
-      "global_project": "PROJECT"
-    },
-    "poll_interval": "1s", 
-    "poll_grace": 3, 
-  }
-  ```
-
-  - Update config manually & refresh service, or via command line:
-
-  `timekeep config --poll_interval "2.5s" --poll_grace 2`
-
-- **Database**
-  - **Windows**: *C:\ProgramData\Timekeep*
-  - **Linux**: *~/.local/share/timekeep*
-
-
-## Contributing & Issues
-To contribute, clone the repo with ```git clone https://github.com/jms-guy/timekeep```. Please fork the repository and open a pull request to the `main` branch. Run tests from base repo using ```go test ./...```
-
-If you have an issue, please report it [here](https://github.com/jms-guy/timekeep/issues).
+The signed build also generates the updater signature file `*.exe.sig`. Keep the updater private key outside the repository and never commit it.
+
+## Tech Stack
+
+- Desktop shell: Tauri v2
+- Native backend and Windows integration: Rust
+- Time tracking service: Timekeep (Go), connected through local IPC
+- Frontend: React + Vite + TypeScript
+- Styling: Tailwind CSS
+- Animation: Framer Motion
+- Charts: Recharts
+- Database: SQLite via `@tauri-apps/plugin-sql`
+- Windows integration: `windows` crate
+
+## Contributing
+
+If you want to contribute, understand the product direction, or review architecture boundaries, start with [`CONTRIBUTING.md`](CONTRIBUTING.md#english).
+
+## Feedback
+
+Use GitHub Issues for bugs and feedback that needs follow-up, or scan the QR code to join the QQ channel for everyday conversation:
+
+<div align="center">
+  <a href="https://github.com/Ceceliaee/patina/issues/new/choose">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset=".github/assets/feedback/github-issues-button-dark.svg">
+      <img src=".github/assets/feedback/github-issues-button-light.svg" height="36" alt="GitHub Issues">
+    </picture>
+  </a>
+  <br><br>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset=".github/assets/feedback/qq-channel-dark.jpg">
+    <img src=".github/assets/feedback/qq-channel-light.jpg" width="200" alt="Patina QQ channel QR code">
+  </picture>
+</div>
+
+## Support
+
+TimekeepGUI is a personal, local-first open-source project. If it has been useful in your daily life or work, you can support ongoing maintenance in whichever way is convenient:
+
+<div align="center">
+  <a href="https://ko-fi.com/ceceliaee"><img src="https://storage.ko-fi.com/cdn/kofi2.png?v=3" height="36" alt="Buy me a coffee"></a>
+  <br><br>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset=".github/assets/support/wechat-reward-dark.png">
+    <img src=".github/assets/support/wechat-reward-light.png" width="200" alt="WeChat reward code">
+  </picture>
+</div>
+
+Sponsorship helps sustain maintenance, but it does not affect feature priority, issue handling, the roadmap, or the product direction.
+
+## Star History
+
+<a href="https://www.star-history.com/?repos=Ceceliaee%2Fpatina">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=Ceceliaee/patina&type=date&theme=dark&legend=top-left&sealed_token=TkOqzStKb8XlqP6BGjPQemnL7ZceKzqtuxfJf7xf_DrzNfgZeW2TjJDSbHigf23UNcY-30x56ZaebW5RV1tbcW2Q_5UczdmmdB2ndfELHsoLcpYL5hIHvw" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=Ceceliaee/patina&type=date&legend=top-left&sealed_token=TkOqzStKb8XlqP6BGjPQemnL7ZceKzqtuxfJf7xf_DrzNfgZeW2TjJDSbHigf23UNcY-30x56ZaebW5RV1tbcW2Q_5UczdmmdB2ndfELHsoLcpYL5hIHvw" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=Ceceliaee/patina&type=date&legend=top-left&sealed_token=TkOqzStKb8XlqP6BGjPQemnL7ZceKzqtuxfJf7xf_DrzNfgZeW2TjJDSbHigf23UNcY-30x56ZaebW5RV1tbcW2Q_5UczdmmdB2ndfELHsoLcpYL5hIHvw" />
+ </picture>
+</a>
 
 ## License
-Licensed under MIT - see [LICENSE](https://github.com/jms-guy/timekeep/blob/main/LICENSE).
+
+[MIT](LICENSE)

@@ -1,0 +1,50 @@
+name: "Other / 其他事项"
+description: "Report another actionable repository concern / 提交其他可执行的仓库事项"
+title: "[Other]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form when the bug report and feature request forms do not fit.
+
+        如果缺陷报告和功能建议表单都不适用，请使用此表单。
+
+        Do not post window titles, local database contents, backup files, access tokens, or personal paths unless they have been safely redacted.
+
+        请勿直接公开窗口标题、本地数据库内容、备份文件、访问 Token 或个人路径，除非已经安全脱敏。
+
+  - type: checkboxes
+    id: preflight
+    attributes:
+      label: "Preflight Checks / 提交前检查"
+      options:
+        - label: "I searched existing issues and did not find the same topic. / 我已经搜索过已有 issue，没有发现相同主题。"
+          required: true
+        - label: "I removed or redacted sensitive information. / 我已经移除或脱敏敏感信息。"
+          required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: "Category / 类型"
+      options:
+        - "Documentation / 文档"
+        - "Build, CI, or release process / 构建、CI 或发布流程"
+        - "Question requiring repository clarification / 需要仓库说明的问题"
+        - "Other actionable concern / 其他可执行事项"
+    validations:
+      required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: "Summary / 概述"
+      description: "Explain the topic and the desired outcome. / 请说明事项和期望结果。"
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: "Additional Context / 补充信息"
+      description: "Add redacted examples, links, or other useful context. / 可以添加已脱敏示例、链接或其他有用信息。"

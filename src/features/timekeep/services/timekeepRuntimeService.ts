@@ -1,0 +1,66 @@
+import {
+  addTimekeepProgram,
+  getTimekeepStatus,
+  getTimekeepConfig,
+  listTimekeepActiveSessions,
+  listTimekeepHistory,
+  listTimekeepPrograms,
+  refreshTimekeep,
+  resetTimekeepStats,
+  removeTimekeepProgram,
+  updateTimekeepProgram,
+  updateTimekeepConfig,
+  type TimekeepProgram,
+  type TimekeepServiceStatus,
+  type TimekeepServiceConfig,
+} from "../../../platform/timekeep/timekeepGateway.ts";
+
+export { getTimekeepErrorCode } from "../../../platform/timekeep/timekeepGateway.ts";
+
+export type { TimekeepProgram, TimekeepServiceStatus };
+export type { TimekeepActiveSession, TimekeepHistoryEntry } from "../../../platform/timekeep/timekeepGateway.ts";
+export type { TimekeepIntegrationConfig, TimekeepServiceConfig } from "../../../platform/timekeep/timekeepGateway.ts";
+
+export function loadTimekeepPrograms(): Promise<TimekeepProgram[]> {
+  return listTimekeepPrograms();
+}
+
+export function loadTimekeepStatus(): Promise<TimekeepServiceStatus> {
+  return getTimekeepStatus();
+}
+
+export function loadTimekeepServiceConfig() {
+  return getTimekeepConfig();
+}
+
+export function saveTimekeepServiceConfig(config: TimekeepServiceConfig) {
+  return updateTimekeepConfig(config);
+}
+
+export function loadTimekeepActiveSessions() {
+  return listTimekeepActiveSessions();
+}
+
+export function loadTimekeepHistory(options?: { name?: string; date?: string; limit?: number }) {
+  return listTimekeepHistory(options);
+}
+
+export function addTrackedTimekeepProgram(name: string, category: string, project: string) {
+  return addTimekeepProgram(name, category, project);
+}
+
+export function removeTrackedTimekeepProgram(name: string) {
+  return removeTimekeepProgram(name);
+}
+
+export function updateTrackedTimekeepProgram(name: string, category: string, project: string) {
+  return updateTimekeepProgram(name, category, project);
+}
+
+export function refreshTimekeepService() {
+  return refreshTimekeep();
+}
+
+export function resetTimekeepServiceStats(name?: string) {
+  return resetTimekeepStats(name);
+}

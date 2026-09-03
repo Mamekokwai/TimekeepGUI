@@ -1,0 +1,129 @@
+name: "Bug Report / 缺陷报告"
+description: "Report a reproducible problem or regression / 报告可复现的问题或回归"
+title: "[Bug]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for helping improve Patina.
+
+        感谢你帮助改进 Patina。
+
+        Before submitting, please search existing issues and remove sensitive information. Do not post window titles, local database contents, backup files, access tokens, or personal paths unless they have been safely redacted.
+
+        提交前请先搜索已有 issue，并移除敏感信息。请勿直接公开窗口标题、本地数据库内容、备份文件、访问 Token 或个人路径，除非已经安全脱敏。
+
+  - type: checkboxes
+    id: preflight
+    attributes:
+      label: "Preflight Checks / 提交前检查"
+      options:
+        - label: "I searched existing issues and did not find the same problem. / 我已经搜索过已有 issue，没有发现相同问题。"
+          required: true
+        - label: "I removed or redacted sensitive information. / 我已经移除或脱敏敏感信息。"
+          required: true
+
+  - type: dropdown
+    id: affected-area
+    attributes:
+      label: "Affected Area / 影响区域"
+      description: "Choose the area that best matches the problem. / 请选择最符合问题的区域。"
+      options:
+        - "Tracking accuracy or session lifecycle / 追踪准确性或会话生命周期"
+        - "Dashboard, History, or Data / 今日、历史或数据页面"
+        - "App mapping or classification / 应用映射或分类"
+        - "Settings or desktop behavior / 设置或桌面行为"
+        - "Backup, restore, or cleanup / 备份、恢复或清理"
+        - "Update, installation, or startup / 更新、安装或启动"
+        - "UI or accessibility / 界面或无障碍"
+        - "Performance or resource usage / 性能或资源占用"
+        - "Other / 其他"
+    validations:
+      required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: "Problem Summary / 问题概述"
+      description: "Describe what went wrong and why it matters. / 请说明出现了什么问题，以及它为什么重要。"
+      placeholder: "A clear and concise description of the problem. / 请简洁清楚地描述问题。"
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: "Steps To Reproduce / 复现步骤"
+      description: "List the smallest reliable reproduction steps. / 请列出能够稳定复现问题的最小步骤。"
+      placeholder: |
+        1. Open ...
+        2. Change ...
+        3. Wait ...
+        4. Observe ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: "Expected Behavior / 预期行为"
+      description: "What did you expect to happen? / 你预期会发生什么？"
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: "Actual Behavior / 实际行为"
+      description: "What happened instead? / 实际发生了什么？"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: impact
+    attributes:
+      label: "Impact / 影响程度"
+      description: "Choose the closest description. / 请选择最接近的描述。"
+      options:
+        - "Blocks normal use / 阻塞正常使用"
+        - "May affect tracking correctness or local data / 可能影响追踪正确性或本地数据"
+        - "Frequent workflow regression / 高频流程回归"
+        - "Minor or occasional issue / 轻微或偶发问题"
+    validations:
+      required: true
+
+  - type: input
+    id: app-version
+    attributes:
+      label: "Patina Version / Patina 版本"
+      description: "For example: 1.2.0. / 例如：1.2.0。"
+      placeholder: "1.2.0"
+    validations:
+      required: true
+
+  - type: input
+    id: windows-version
+    attributes:
+      label: "Windows Version / Windows 版本"
+      description: "For example: Windows 11 24H2. / 例如：Windows 11 24H2。"
+      placeholder: "Windows 11 24H2"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: install-source
+    attributes:
+      label: "Installation Source / 安装来源"
+      options:
+        - "GitHub Release installer / GitHub Release 安装包"
+        - "Built from source / 从源码构建"
+        - "Other / 其他"
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: "Additional Context / 补充信息"
+      description: "Add redacted screenshots, logs, timing details, or other useful context. / 可以添加已脱敏截图、日志、发生时间或其他有用信息。"
+      placeholder: "Optional. Please redact sensitive information before posting. / 可选。发布前请先脱敏。"

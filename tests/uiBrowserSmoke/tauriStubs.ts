@@ -1,0 +1,1241 @@
+import type { Plugin } from "vite";
+import { HISTORY_TITLE_DETAIL_COUNT } from "./constants.ts";
+
+function tauriStubFor(path: string) {
+  if (path === "@tauri-apps/api/window") {
+    return `
+      const noop = async () => {};
+      const foregroundListeners = new Set();
+      const resizeListeners = new Set();
+      const scaleListeners = new Set();
+      const currentWindowLabel = new URL(globalThis.location.href).searchParams.get("__patinaWindow") === "widget"
+        ? "widget"
+        : "main";
+      let foregroundState = { visible: true, focused: false };
+      globalThis.__TIME_TRACKER_SET_FOREGROUND_STATE = (nextState) => {
+        foregroundState = { ...foregroundState, ...nextState };
+        for (const listener of foregroundListeners) listener({ payload: foregroundState.focused });
+        for (const listener of resizeListeners) listener();
+      };
+      globalThis.__PATINA_EMIT_SCALE_FACTOR_CHANGED = (scaleFactor) => {
+        const payload = {
+          scaleFactor,
+          size: {
+            width: Math.round(globalThis.innerWidth * scaleFactor),
+            height: Math.round(globalThis.innerHeight * scaleFactor),
+          },
+        };
+        for (const listener of scaleListeners) listener({ payload });
+      };
+      const currentWindow = {
+        label: currentWindowLabel,
+        minimize: noop,
+        toggleMaximize: noop,
+        close: noop,
+        startDragging: noop,
+        setFocusable: noop,
+        isMaximized: async () => false,
+        isVisible: async () => foregroundState.visible,
+        isFocused: async () => foregroundState.focused,
+        outerPosition: async () => ({ x: 0, y: 0 }),
+        outerSize: async () => ({ width: 1280, height: 800 }),
+        onMoved: async () => () => {},
+        onScaleChanged: async (listener) => {
+          scaleListeners.add(listener);
+          return () => scaleListeners.delete(listener);
+        },
+        onFocusChanged: async (listener) => {
+          foregroundListeners.add(listener);
+          return () => foregroundListeners.delete(listener);
+        },
+        onResized: async (listener) => {
+          resizeListeners.add(listener);
+          return () => resizeListeners.delete(listener);
+        },
+      };
+      export function getCurrentWindow() {
+        return currentWindow;
+      }
+      export async function cursorPosition() {
+        return { x: 0, y: 0 };
+      }
+    `;
+  }
+
+  if (path === "@tauri-apps/api/webviewWindow") {
+    return `
+      const currentWindowLabel = new URL(globalThis.location.href).searchParams.get("__patinaWindow") === "widget"
+        ? "widget"
+        : "main";
+      export function getCurrentWebviewWindow() {
+        return { label: currentWindowLabel };
+      }
+    `;
+  }
+
+  if (path === "@tauri-apps/api/core") {
+    return `
+      const SETTINGS_STORAGE_KEY = "__time_tracker_smoke_settings";
+      globalThis.__TIME_TRACKER_CLASSIFICATION_MUTATIONS ??= [];
+      globalThis.__PATINA_IMPORT_BATCHES ??= [];
+      globalThis.__PATINA_INVOKED_COMMANDS ??= [];
+      globalThis.__PATINA_MAIN_WINDOW_GENERATION__ ??= 1;
+      globalThis.__PATINA_MAIN_WINDOW_LOAD_EPOCH__ ??= 1;
+      globalThis.__PATINA_WEBDAV_SECRET ??= null;
+
+      function loadStoredSettings() {
+        try {
+          return {
+            "__app_override::cursor.exe": JSON.stringify({ category: "development", enabled: true }),
+            "__app_override::deep-research-workbench.exe": JSON.stringify({ category: "office", enabled: true }),
+            "web_activity_enabled": "1",
+            "web_activity_token": "smoke-token",
+            ...JSON.parse(localStorage.getItem(SETTINGS_STORAGE_KEY) ?? "{}"),
+          };
+        } catch {
+          return {};
+        }
+      }
+
+      function storeSettings(settings) {
+        localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(settings));
+      }
+
+      export async function invoke(command, payload = {}) {
+        globalThis.__PATINA_INVOKED_COMMANDS.push({ command, payload });
+        const widgetParams = new URL(globalThis.location.href).searchParams;
+        const isWidgetSmoke = widgetParams.get("__patinaWindow") === "widget";
+        if (isWidgetSmoke && command === "cmd_get_widget_bootstrap_snapshot") {
+          const settings = loadStoredSettings();
+          return {
+            settings: {
+              tracking_paused: settings.tracking_paused ?? null,
+              theme_mode: settings.theme_mode ?? null,
+              language: settings.language ?? null,
+              color_scheme_light: settings.color_scheme_light ?? null,
+              color_scheme_dark: settings.color_scheme_dark ?? null,
+            },
+            pinned: widgetParams.get("widgetPinned") === "1",
+            app_overrides: Object.entries(settings)
+              .filter(([key]) => key.startsWith("__app_override::"))
+              .sort(([left], [right]) => left.localeCompare(right))
+              .map(([key, value]) => ({ key, value: String(value) })),
+          };
+        }
+        if (isWidgetSmoke && command === "cmd_get_widget_placement") {
+          return {
+            monitor: null,
+            side: widgetParams.get("widgetSide") === "left" ? "left" : "right",
+            anchor_y: 0.28,
+          };
+        }
+        if (isWidgetSmoke && command === "cmd_get_widget_icon") {
+          return widgetParams.get("widgetTracking") !== "0"
+            ? "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII="
+            : null;
+        }
+        if (isWidgetSmoke && command === "cmd_get_widget_status_snapshot") {
+          const toolCount = Math.max(0, Math.min(2, Number(widgetParams.get("widgetTools") ?? 0)));
+          const tools = [
+            {
+              kind: "stopwatch",
+              state: "running",
+              value_ms: 1_104_000,
+              counts_down: false,
+              visible_until_ms: null,
+            },
+            {
+              kind: "pomodoro",
+              state: "running",
+              value_ms: 271_000,
+              counts_down: true,
+              visible_until_ms: null,
+            },
+          ].slice(0, toolCount);
+          const override = globalThis.__PATINA_WIDGET_TRACKING_OVERRIDE;
+          const responseDelayMs = Number(override?.responseDelayMs ?? 0);
+          const status = override?.widgetStatus ?? {
+            tracking: widgetParams.get("widgetTracking") === "0" ? null : {
+              app_name: "Chrome",
+              exe_name: "chrome.exe",
+              elapsed_ms: 6_120_000,
+              running: true,
+            },
+            tools,
+            sampled_at_ms: Date.now(),
+          };
+          const tracking = override?.currentTrackingSnapshot ?? {
+            window: {
+              hwnd: "1",
+              root_owner_hwnd: "1",
+              process_id: 7,
+              window_class: "Chrome_WidgetWin_1",
+              title: "Docs",
+              exe_name: "chrome.exe",
+              process_path: "C:/Program Files/Google/Chrome/Application/chrome.exe",
+              is_afk: false,
+              idle_time_ms: 0,
+            },
+            status: {
+              is_tracking_active: true,
+              sustained_participation_eligible: false,
+              sustained_participation_active: false,
+              sustained_participation_kind: null,
+              sustained_participation_state: "inactive",
+              sustained_participation_signal_source: null,
+              sustained_participation_reason: "no-signal",
+              sustained_participation_diagnostics: {
+                state: "inactive",
+                reason: "no-signal",
+                window_identity: null,
+                effective_signal_source: null,
+                last_match_at_ms: null,
+                grace_deadline_ms: null,
+                system_media: {
+                  signal: {
+                    is_available: false,
+                    is_active: false,
+                    signal_source: null,
+                    source_app_id: null,
+                    source_app_identity: null,
+                    playback_type: null,
+                  },
+                  match_result: "unavailable",
+                },
+                audio_session: {
+                  signal: {
+                    is_available: false,
+                    is_active: false,
+                    signal_source: null,
+                    source_app_id: null,
+                    source_app_identity: null,
+                    playback_type: null,
+                  },
+                  match_result: "unavailable",
+                },
+              },
+            },
+            sampled_at_ms: Date.now(),
+            probe_status: "ok",
+          };
+          const presentation = {
+            window: tracking.window,
+            tracking_status: tracking.status,
+            tracking_sampled_at_ms: tracking.sampled_at_ms ?? Date.now(),
+            tracking_probe_status: tracking.probe_status ?? "ok",
+            status,
+          };
+          if (Number.isFinite(responseDelayMs) && responseDelayMs > 0) {
+            await new Promise((resolve) => setTimeout(resolve, responseDelayMs));
+          }
+          return presentation;
+        }
+        if (
+          isWidgetSmoke
+          && command === "cmd_set_widget_pinned"
+        ) {
+          const delayMs = Number(widgetParams.get("widgetPinDelayMs") ?? 0);
+          if (Number.isFinite(delayMs) && delayMs > 0) {
+            await new Promise((resolve) => setTimeout(resolve, delayMs));
+          }
+          if (widgetParams.get("widgetPinFailure") === "1") {
+            throw new Error("forced widget pin persistence failure");
+          }
+        }
+        if (isWidgetSmoke && command === "cmd_get_tracker_health_snapshot") {
+          const now = Date.now();
+          return {
+            last_heartbeat_ms: now,
+            last_successful_sample_ms: now,
+            last_watchdog_seal_sample_ms: null,
+          };
+        }
+        if (isWidgetSmoke && command === "get_current_tracking_snapshot") {
+          if (globalThis.__PATINA_WIDGET_TRACKING_OVERRIDE) {
+            return globalThis.__PATINA_WIDGET_TRACKING_OVERRIDE.currentTrackingSnapshot;
+          }
+          const unavailableSignal = {
+            signal: {
+              is_available: false,
+              is_active: false,
+              signal_source: null,
+              source_app_id: null,
+              source_app_identity: null,
+              playback_type: null,
+            },
+            match_result: "unavailable",
+          };
+          return {
+            window: {
+              hwnd: "1",
+              root_owner_hwnd: "1",
+              process_id: 7,
+              window_class: "Chrome_WidgetWin_1",
+              title: "Patina browser smoke",
+              exe_name: "chrome.exe",
+              process_path: "C:/Program Files/Google/Chrome/Application/chrome.exe",
+              is_afk: false,
+              idle_time_ms: 0,
+            },
+            status: {
+              is_tracking_active: true,
+              sustained_participation_eligible: false,
+              sustained_participation_active: false,
+              sustained_participation_kind: null,
+              sustained_participation_state: "inactive",
+              sustained_participation_signal_source: null,
+              sustained_participation_reason: "no-signal",
+              sustained_participation_diagnostics: {
+                state: "inactive",
+                reason: "no-signal",
+                window_identity: null,
+                effective_signal_source: null,
+                last_match_at_ms: null,
+                grace_deadline_ms: null,
+                system_media: unavailableSignal,
+                audio_session: unavailableSignal,
+              },
+            },
+            sampled_at_ms: Date.now(),
+            probe_status: "ok",
+          };
+        }
+        if (command === "cmd_get_main_window_render_token") {
+          return {
+            generation: Number(globalThis.__PATINA_MAIN_WINDOW_GENERATION__),
+            loadEpoch: Number(globalThis.__PATINA_MAIN_WINDOW_LOAD_EPOCH__),
+          };
+        }
+        if (command === "cmd_timekeep_request") {
+          const request = payload.request ?? {};
+          globalThis.__PATINA_TIMEKEEP_REQUESTS ??= [];
+          globalThis.__PATINA_TIMEKEEP_REQUESTS.push(request);
+          const action = String(request.action ?? "");
+          const dataByAction = {
+            service_status: { running: true, version: "smoke-service" },
+            get_config: {
+              wakatime: { enabled: false, api_key: "", cli_path: "", global_project: "" },
+              wakapi: { enabled: false, api_key: "", server: "", global_project: "" },
+              poll_interval: "30s",
+              poll_grace: 2,
+            },
+            list_programs: [{
+              id: 1,
+              name: "code.exe",
+              lifetime_seconds: 3720,
+              category: "development",
+              project: "Timekeep",
+            }],
+            get_program: {
+              id: 1,
+              name: "code.exe",
+              lifetime_seconds: 3720,
+              category: "development",
+              project: "Timekeep",
+            },
+            active_sessions: [{
+              id: 10,
+              program_name: "code.exe",
+              start_time: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
+            }],
+            history: [{
+              id: 20,
+              program_name: "code.exe",
+              start_time: new Date(Date.now() - 65 * 60 * 1000).toISOString(),
+              end_time: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
+              duration_seconds: 3600,
+            }],
+            add_program: { name: String(request.name ?? "code.exe") },
+            update_program: { name: String(request.name ?? "code.exe") },
+            remove_program: { removed: true },
+            reset_stats: { reset: true },
+            refresh: { refreshed: true },
+          };
+          return {
+            request_id: request.request_id,
+            ok: true,
+            data: dataByAction[action] ?? null,
+          };
+        }
+        if (command === "cmd_mark_main_window_ready") {
+          globalThis.__PATINA_MAIN_WINDOW_READY_EVIDENCE = {
+            generation: Number(payload.generation),
+            loadEpoch: Number(payload.loadEpoch),
+            themeMode: document.documentElement.dataset.themeMode ?? null,
+            theme: document.documentElement.dataset.theme ?? null,
+            colorScheme: document.documentElement.dataset.colorScheme ?? null,
+            cssColorScheme: document.documentElement.style.colorScheme || null,
+            frameConnected: Boolean(document.querySelector(".qp-app-frame")?.isConnected),
+            presentedView: document.querySelector("main.qp-canvas")?.dataset.presentedView ?? null,
+          };
+          return {
+            outcome: "hidden",
+            generation: Number(payload.generation),
+            loadEpoch: Number(payload.loadEpoch),
+          };
+        }
+        if (command === "cmd_save_webdav_backup_secret") {
+          globalThis.__PATINA_WEBDAV_SECRET = String(payload.password ?? "");
+          return null;
+        }
+        if (command === "cmd_delete_webdav_backup_secret") {
+          globalThis.__PATINA_WEBDAV_SECRET = null;
+          return null;
+        }
+        if (command === "cmd_has_webdav_backup_secret") {
+          return typeof globalThis.__PATINA_WEBDAV_SECRET === "string"
+            && globalThis.__PATINA_WEBDAV_SECRET.length > 0;
+        }
+        if (command === "cmd_reveal_webdav_backup_secret") {
+          return globalThis.__PATINA_WEBDAV_SECRET;
+        }
+        if (command === "cmd_test_webdav_backup_target") {
+          return { ok: true };
+        }
+        if (command === "cmd_get_update_snapshot") {
+          const override = localStorage.getItem("__time_tracker_update_snapshot_override");
+          return override ? JSON.parse(override) : {
+            current_version: "0.0.0",
+            status: "idle",
+            latest_version: null,
+            release_notes: null,
+            release_date: null,
+            error_message: null,
+            error_stage: null,
+            downloaded_bytes: null,
+            total_bytes: null,
+            release_page_url: null,
+            asset_download_url: null,
+          };
+        }
+        if (command === "cmd_get_tools_snapshot") {
+          const toolsSnapshotDelayMs = Number(
+            globalThis.__TIME_TRACKER_TOOLS_SNAPSHOT_DELAY_MS
+              ?? localStorage.getItem("__time_tracker_tools_snapshot_delay_ms")
+              ?? 0
+          );
+          if (toolsSnapshotDelayMs > 0) {
+            await new Promise((resolve) => setTimeout(resolve, toolsSnapshotDelayMs));
+          }
+          if (localStorage.getItem("__time_tracker_reject_tools_snapshot") === "1") {
+            throw new Error("tools snapshot rejected by browser smoke fixture");
+          }
+          const override = localStorage.getItem("__time_tracker_tools_snapshot_override");
+          if (override) {
+            return JSON.parse(override);
+          }
+          return {
+            settings: {
+              default_countdown_minutes: 25,
+              pomodoro_focus_minutes: 25,
+              pomodoro_short_break_minutes: 5,
+              pomodoro_long_break_minutes: 15,
+              pomodoro_long_break_every: 4,
+            },
+            reminders: [],
+            activity_reminder_rules: [],
+            current_timer: null,
+            timer_laps: [],
+            current_pomodoro: null,
+            today_completed_pomodoros: 0,
+            next_reminder_at: null,
+            sampled_at_ms: Date.now(),
+          };
+        }
+        if (command === "cmd_get_recorded_app_catalog_page") {
+          const queryDelayMs = Math.max(
+            Number(
+              globalThis.__TIME_TRACKER_CLASSIFICATION_QUERY_DELAY_MS
+                ?? localStorage.getItem("__time_tracker_classification_query_delay_ms")
+                ?? 0
+            ),
+            Number(
+              globalThis.__TIME_TRACKER_CLASSIFICATION_CATALOG_QUERY_DELAY_MS
+                ?? localStorage.getItem("__time_tracker_classification_catalog_query_delay_ms")
+                ?? 0
+            ),
+          );
+          if (queryDelayMs > 0) {
+            await new Promise((resolve) => setTimeout(resolve, queryDelayMs));
+          }
+          if (localStorage.getItem("__time_tracker_reject_classification_query") === "1") {
+            throw new Error("classification query rejected by browser smoke fixture");
+          }
+          const fixtureEnabled = globalThis.__TIME_TRACKER_ENABLE_CLASSIFICATION_CATALOG_FIXTURE
+            || localStorage.getItem("__time_tracker_enable_classification_catalog_fixture") === "1";
+          const iconFixtureEnabled = globalThis.__TIME_TRACKER_ENABLE_CLASSIFICATION_ICON_FIXTURE
+            || localStorage.getItem("__time_tracker_enable_classification_icon_fixture") === "1";
+          const baseRows = fixtureEnabled
+            ? Array.from({ length: 130 }, (_, index) => ({
+                rawExeName: "catalog-" + String(index).padStart(3, "0") + ".exe",
+                appName: index === 129 ? "一年以前的应用" : "Catalog App " + index,
+                lastSeenMs: 1767229200000 - index * 24 * 60 * 60 * 1000,
+                hasNativeRecords: index % 2 === 0,
+                hasImportExactRecords: index % 2 !== 0,
+                hasImportBucketRecords: false,
+              }))
+            : [
+            {
+              rawExeName: "cursor.exe",
+              appName: "Cursor",
+              lastSeenMs: 1767229200000,
+              hasNativeRecords: true,
+              hasImportExactRecords: false,
+              hasImportBucketRecords: false,
+            },
+            {
+              rawExeName: "deep-research-workbench.exe",
+              appName: "Deep Research Workbench",
+              lastSeenMs: 1767225600000,
+              hasNativeRecords: true,
+              hasImportExactRecords: true,
+              hasImportBucketRecords: false,
+            },
+            ...(iconFixtureEnabled ? [{
+              rawExeName: "classification-only.exe",
+              appName: "Classification Only",
+              lastSeenMs: 1767222000000,
+              hasNativeRecords: false,
+              hasImportExactRecords: true,
+              hasImportBucketRecords: false,
+            }] : []),
+          ];
+          const searchQuery = String(payload.searchQuery ?? "").trim().toLowerCase();
+          const cursor = payload.cursor ?? null;
+          const limit = Math.max(1, Math.min(120, Number(payload.limit ?? 120)));
+          const filteredRows = baseRows
+            .filter((row) => !searchQuery
+              || (row.rawExeName + " " + row.appName).toLowerCase().includes(searchQuery))
+            .filter((row) => !cursor
+              || row.lastSeenMs < Number(cursor.lastSeenMs)
+              || (
+                row.lastSeenMs === Number(cursor.lastSeenMs)
+                && row.rawExeName > String(cursor.rawExeName)
+              ));
+          const rows = filteredRows.slice(0, limit);
+          const hasMore = filteredRows.length > rows.length;
+          return {
+            rows,
+            nextCursor: hasMore && rows.length > 0
+              ? { lastSeenMs: rows.at(-1).lastSeenMs, rawExeName: rows.at(-1).rawExeName }
+              : null,
+            hasMore,
+            readPath: "projection",
+            fallbackReason: null,
+            sourceRevision: 4,
+          };
+        }
+        if (command === "cmd_get_activity_aggregate_range") {
+          const historyQueryDelayMs = Number(
+            globalThis.__TIME_TRACKER_HISTORY_QUERY_DELAY_MS
+              ?? localStorage.getItem("__time_tracker_history_query_delay_ms")
+              ?? 0
+          );
+          if (historyQueryDelayMs > 0) {
+            await new Promise((resolve) => setTimeout(resolve, historyQueryDelayMs));
+          }
+          const start = Number(payload.startMs ?? 0);
+          const end = Number(payload.endMs ?? start);
+          const bucketBoundaries = Array.isArray(payload.bucketBoundariesMs)
+            ? payload.bucketBoundariesMs
+            : [];
+          if (
+            localStorage.getItem("__time_tracker_reject_heatmap_query") === "1"
+            && bucketBoundaries.length > 100
+          ) {
+            throw new Error("Injected activity heatmap aggregate failure");
+          }
+          const duration = Math.max(0, Math.min(30 * 60 * 1000, end - start));
+          return {
+            records: duration > 0 ? [
+              { appName: "Cursor", exeName: "cursor.exe", startTime: start, endTime: start + duration },
+              { appName: "Extremely Long Research Workbench Application Name", exeName: "deep-research-workbench.exe", startTime: start + duration, endTime: start + duration * 2 },
+            ].filter((record) => record.startTime < end).map((record) => ({
+              ...record,
+              endTime: Math.min(record.endTime, end),
+            })) : [],
+            readPath: "projection",
+            fallbackReason: null,
+            sourceRevision: 4,
+            projectionRowCount: duration > 0 ? 2 : 0,
+            factRowCount: 0,
+            hasActiveSession: false,
+          };
+        }
+        if (command === "cmd_get_web_activity_aggregate_range") {
+          const delayMs = Number(globalThis.__PATINA_WEB_ACTIVITY_QUERY_DELAY_MS ?? 0);
+          if (Number.isFinite(delayMs) && delayMs > 0) {
+            await new Promise((resolve) => setTimeout(resolve, delayMs));
+          }
+          if (globalThis.__PATINA_WEB_ACTIVITY_QUERY_FAILURE === true) {
+            throw new Error("Injected web activity aggregate failure");
+          }
+          const boundaries = Array.isArray(payload.bucketBoundariesMs)
+            ? payload.bucketBoundariesMs.map(Number)
+            : [];
+          const domains = Array.isArray(payload.normalizedDomains)
+            ? payload.normalizedDomains.map(String)
+            : payload.normalizedDomain
+              ? [String(payload.normalizedDomain)]
+              : ["docs.example.com", "research.example"];
+          const records = [];
+          for (let index = 0; index < Math.min(4, boundaries.length - 1); index += 1) {
+            for (const [domainIndex, normalizedDomain] of domains.entries()) {
+              records.push({
+                normalizedDomain,
+                bucketStartMs: boundaries[index],
+                durationMs: Math.min(
+                  Math.max(0, boundaries[index + 1] - boundaries[index]),
+                  (domainIndex + 1) * (index + 1) * 5 * 60 * 1000,
+                ),
+              });
+            }
+          }
+          return {
+            records,
+            domainCoverage: domains.map((normalizedDomain) => ({
+              normalizedDomain,
+              earliestRecordedStartMs: Number(payload.startMs),
+            })),
+            sourceRevision: "1",
+            snapshotNowMs: Number(payload.snapshotNowMs),
+          };
+        }
+        if (command === "cmd_list_import_batches") {
+          return [...globalThis.__PATINA_IMPORT_BATCHES];
+        }
+        if (command === "cmd_pick_canonical_import_file") {
+          return "C:\\Smoke\\tai.patina.csv";
+        }
+        if (command === "cmd_preview_canonical_import") {
+          return {
+            filePath: payload.filePath,
+            fileName: "tai.patina.csv",
+            fileFingerprint: "smoke-fingerprint",
+            validRecords: 3,
+            duplicateRecords: 1,
+            errorRecords: 0,
+            exactSessions: 0,
+            hourBuckets: 3,
+            categoryCandidates: [
+              { exeName: "code.exe", categories: ["开发"] },
+              { exeName: "chrome.exe", categories: ["工作", "娱乐"] },
+            ],
+            errors: [],
+          };
+        }
+        if (command === "cmd_commit_canonical_import") {
+          globalThis.__PATINA_LAST_IMPORT_PAYLOAD = payload;
+          globalThis.__PATINA_IMPORT_BATCHES = [{
+            id: "smoke-batch",
+            importedAt: 1767225600000,
+            sourceName: "tai.patina.csv",
+            sourceKind: "patina-csv",
+            exactSessions: 0,
+            hourBuckets: 2,
+            totalRecords: 2,
+          }];
+          return {
+            batchId: "smoke-batch",
+            importedRecords: 2,
+            duplicateRecords: 1,
+            errorRecords: 0,
+            exactSessions: 0,
+            hourBuckets: 2,
+          };
+        }
+        if (command === "cmd_delete_import_batch") {
+          globalThis.__PATINA_IMPORT_BATCHES = globalThis.__PATINA_IMPORT_BATCHES
+            .filter((batch) => batch.id !== payload.batchId);
+          return { deletedExactSessions: 0, deletedHourBuckets: 2 };
+        }
+        if (command === "cmd_get_web_activity_bridge_snapshot") {
+          return globalThis.__TIME_TRACKER_WEB_ACTIVITY_BRIDGE_SNAPSHOT ?? {
+            enabled: true,
+            connected: false,
+            browserClientId: null,
+            browserKind: null,
+            extensionVersion: null,
+            lastActivityAtMs: null,
+          };
+        }
+        if (command === "cmd_get_scheduled_backup_snapshot") {
+          globalThis.__PATINA_SCHEDULED_BACKUP_SNAPSHOT ??= {
+            config: {
+              enabled: false,
+              cadence: "weekly",
+              weekday: 5,
+              localTimeMinutes: 1260,
+              target: { kind: "local", targetDir: "C:\\Smoke\\Patina\\backups" },
+              targetGeneration: "0123456789abcdef0123456789abcdef",
+              scheduleAnchorAtMs: Date.now(),
+              updatedAtMs: Date.now(),
+            },
+            defaultLocalTargetDir: "C:\\\\Smoke\\\\Patina\\\\backups",
+            nextExecutionAtMs: null,
+            recentSuccess: null,
+            recentFailure: null,
+            activeRun: null,
+          };
+          return structuredClone(globalThis.__PATINA_SCHEDULED_BACKUP_SNAPSHOT);
+        }
+        if (command === "cmd_save_scheduled_backup_config") {
+          const current = globalThis.__PATINA_SCHEDULED_BACKUP_SNAPSHOT;
+          const nextTarget = payload.input.target?.kind === "webdav"
+            ? { kind: "webdav", targetIdentity: "fedcba9876543210fedcba9876543210" }
+            : payload.input.target;
+          globalThis.__PATINA_SCHEDULED_BACKUP_SNAPSHOT = {
+            ...current,
+            config: {
+              ...current.config,
+              ...payload.input,
+              target: nextTarget,
+              updatedAtMs: Date.now(),
+            },
+            nextExecutionAtMs: payload.input.enabled ? Date.now() + 86400000 : null,
+          };
+          return structuredClone(globalThis.__PATINA_SCHEDULED_BACKUP_SNAPSHOT);
+        }
+        if (command === "cmd_pick_scheduled_backup_directory") {
+          return "C:\\Smoke\\Scheduled Backups";
+        }
+        if (command === "cmd_get_scheduled_export_snapshot") {
+          globalThis.__PATINA_SCHEDULED_EXPORT_SNAPSHOT ??= {
+            config: {
+              enabled: false,
+              cadence: "daily",
+              weekday: null,
+              localTimeMinutes: 1260,
+              targetDir: "C:\\Smoke\\Patina\\exports",
+              format: "csv",
+              selectedFields: ["record_type", "start_time", "end_time", "duration_ms"],
+              planGeneration: "0123456789abcdef0123456789abcdef",
+              scheduleAnchorAtMs: Date.now(),
+              updatedAtMs: Date.now(),
+            },
+            nextExecutionAtMs: null,
+            recentSuccess: null,
+            recentFailure: null,
+            activeRun: null,
+          };
+          return structuredClone(globalThis.__PATINA_SCHEDULED_EXPORT_SNAPSHOT);
+        }
+        if (command === "cmd_save_scheduled_export_config") {
+          const current = globalThis.__PATINA_SCHEDULED_EXPORT_SNAPSHOT;
+          globalThis.__PATINA_SCHEDULED_EXPORT_SNAPSHOT = {
+            ...current,
+            config: {
+              ...current.config,
+              ...payload.input,
+              planGeneration: current.config.planGeneration,
+              updatedAtMs: Date.now(),
+            },
+            nextExecutionAtMs: payload.input.enabled ? Date.now() + 86400000 : null,
+          };
+          globalThis.__PATINA_EMIT_TAURI_EVENT?.("scheduled-export-changed", null);
+          return structuredClone(globalThis.__PATINA_SCHEDULED_EXPORT_SNAPSHOT);
+        }
+        if (command === "cmd_pick_scheduled_export_directory") {
+          return "C:\\Smoke\\Scheduled Exports";
+        }
+        if (command === "cmd_get_storage_snapshot") {
+          return {
+            paths: {
+              installDir: "C:\\\\Smoke\\\\Patina Install",
+              anchorDir: "C:\\\\Smoke\\\\Patina Anchor",
+              dataRoot: "C:\\\\Smoke\\\\Patina",
+              databasePath: "C:\\\\Smoke\\\\Patina\\\\patina.db",
+              backupDir: "C:\\\\Smoke\\\\Patina\\\\backups",
+              remoteBackupTempDir: "C:\\\\Smoke\\\\Patina\\\\remote-backup-temp",
+              webviewRoot: "C:\\\\Smoke\\\\PatinaWebView",
+              isCustomDataRoot: false,
+              isCustomWebviewRoot: false,
+            },
+            sizes: {
+              installDirSizeBytes: 10485760,
+              dataSizeBytes: 4096,
+              backupDirSizeBytes: 0,
+            },
+            webviewCache: {
+              webviewRoot: "C:\\\\Smoke\\\\PatinaWebView",
+              ebwebviewPath: "C:\\\\Smoke\\\\PatinaWebView\\\\EBWebView",
+              totalSizeBytes: 0,
+              reclaimableSizeBytes: 0,
+              lastTrimAtMs: null,
+              entries: [],
+            },
+            maintenance: {
+              lastError: null,
+            },
+          };
+        }
+        if (command === "cmd_commit_app_settings") {
+          const settings = loadStoredSettings();
+          for (const mutation of payload.mutations ?? []) {
+            settings[mutation.key] = mutation.value;
+          }
+          storeSettings(settings);
+        }
+        if (command === "cmd_commit_classification_settings") {
+          const settings = loadStoredSettings();
+          for (const mutation of payload.mutations ?? []) {
+            globalThis.__TIME_TRACKER_CLASSIFICATION_MUTATIONS.push(mutation);
+            if (mutation.value === null) {
+              delete settings[mutation.key];
+            } else {
+              settings[mutation.key] = mutation.value;
+            }
+          }
+          storeSettings(settings);
+        }
+        if (command === "cmd_save_history_bootstrap_snapshot_payload") {
+          const settings = loadStoredSettings();
+          settings["history.bootstrap_snapshot.v1"] = String(payload.payload ?? "");
+          storeSettings(settings);
+        }
+        if (command === "cmd_clear_history_bootstrap_snapshot_payload") {
+          const settings = loadStoredSettings();
+          delete settings["history.bootstrap_snapshot.v1"];
+          storeSettings(settings);
+        }
+        return null;
+      }
+      export class Channel {
+        onmessage = null;
+        constructor() {}
+      }
+    `;
+  }
+
+  if (path === "@tauri-apps/api/event") {
+    return `
+      const listenersByEvent = new Map();
+      globalThis.__PATINA_EMIT_TAURI_EVENT = (eventName, payload) => {
+        for (const listener of listenersByEvent.get(eventName) ?? []) {
+          listener({ event: eventName, id: 0, payload });
+        }
+      };
+      export async function listen(eventName, listener) {
+        const listeners = listenersByEvent.get(eventName) ?? new Set();
+        listeners.add(listener);
+        listenersByEvent.set(eventName, listeners);
+        return () => {
+          listeners.delete(listener);
+          if (listeners.size === 0) listenersByEvent.delete(eventName);
+        };
+      }
+      export async function emit() {}
+    `;
+  }
+
+  if (path === "@tauri-apps/api/app") {
+    return `
+      export async function getVersion() {
+        return "0.0.0-browser-smoke";
+      }
+    `;
+  }
+
+  if (path === "@tauri-apps/plugin-opener") {
+    return `
+      globalThis.__TIME_TRACKER_OPENED_URLS ??= [];
+      export async function openUrl(url) {
+        if (globalThis.__TIME_TRACKER_REJECT_OPEN_URL) {
+          throw new Error("browser smoke opener failure");
+        }
+        globalThis.__TIME_TRACKER_OPENED_URLS.push(url);
+      }
+    `;
+  }
+
+  if (path === "@tauri-apps/plugin-sql") {
+    return `
+      const SETTINGS_STORAGE_KEY = "__time_tracker_smoke_settings";
+
+      function loadStoredSettings() {
+        try {
+          return {
+            "__app_override::cursor.exe": JSON.stringify({ category: "development", enabled: true }),
+            "__app_override::deep-research-workbench.exe": JSON.stringify({ category: "office", enabled: true }),
+            "web_activity_enabled": "1",
+            "web_activity_token": "smoke-token",
+            ...JSON.parse(localStorage.getItem(SETTINGS_STORAGE_KEY) ?? "{}"),
+          };
+        } catch {
+          return {};
+        }
+      }
+
+      function smokeSessionTiming() {
+        const now = new Date();
+        const dayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0).getTime();
+        const latestEnd = Math.max(dayStart + 70 * 1000, now.getTime() - 60 * 1000);
+        const duration = Math.min(
+          40 * 60 * 1000,
+          Math.max(60 * 1000, latestEnd - dayStart - 1000),
+        );
+
+        return {
+          start: Math.max(dayStart, latestEnd - duration),
+          end: latestEnd,
+          duration,
+        };
+      }
+
+      function historySessionRows() {
+        const timing = smokeSessionTiming();
+        const earlierEnd = timing.start;
+        const earlierStart = Math.max(
+          new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate(), 0, 0, 0, 0).getTime(),
+          earlierEnd - 10 * 60 * 1000,
+        );
+        return [
+          {
+            id: 901,
+            app_name: "Extremely Long Research Workbench Application Name",
+            exe_name: "deep-research-workbench.exe",
+            window_title: "Extremely detailed project brief",
+            start_time: timing.start,
+            end_time: timing.end,
+            duration: timing.duration,
+            continuity_group_start_time: timing.start,
+          },
+          {
+            id: 902,
+            app_name: "Cursor",
+            exe_name: "cursor.exe",
+            window_title: "Implement chart mode",
+            start_time: earlierStart,
+            end_time: earlierEnd,
+            duration: Math.max(0, earlierEnd - earlierStart),
+            continuity_group_start_time: earlierStart,
+          },
+        ];
+      }
+
+      function historyTitleSampleRows() {
+        const timing = smokeSessionTiming();
+        const sampleDuration = Math.max(1, Math.floor(timing.duration / ${HISTORY_TITLE_DETAIL_COUNT}));
+        return Array.from({ length: ${HISTORY_TITLE_DETAIL_COUNT} }, (_, index) => {
+          const sampleStart = timing.start + index * sampleDuration;
+          return {
+            session_id: 901,
+            title: "Detailed document title " + (index + 1) + " for a very long research workflow",
+            start_time: sampleStart,
+            end_time: index === ${HISTORY_TITLE_DETAIL_COUNT} - 1
+              ? timing.end
+              : Math.min(timing.end, sampleStart + sampleDuration),
+          };
+        });
+      }
+
+      function historyWebActivityRows() {
+        const dataDetailFixtureEnabled = (
+          globalThis.__TIME_TRACKER_ENABLE_DATA_WEB_DETAIL_FIXTURE === true
+        );
+        if (
+          !dataDetailFixtureEnabled
+          && !globalThis.__TIME_TRACKER_ENABLE_WEB_FIXTURE
+        ) return [];
+        const timing = smokeSessionTiming();
+        const firstDuration = Math.max(60 * 1000, Math.floor(timing.duration * 0.6));
+        if (dataDetailFixtureEnabled) {
+          return [
+            {
+              id: 1951,
+              browser_client_id: "smoke-browser",
+              browser_kind: "chrome",
+              browser_exe_name: "chrome.exe",
+              domain: "research.example",
+              normalized_domain: "research.example",
+              url: "https://research.example/patina/detail",
+              title: "Patina research workspace",
+              favicon_url: null,
+              start_time: timing.start,
+              end_time: timing.start + firstDuration,
+              duration: firstDuration,
+            },
+            {
+              id: 1952,
+              browser_client_id: "smoke-browser",
+              browser_kind: "chrome",
+              browser_exe_name: "chrome.exe",
+              domain: "docs.example.com",
+              normalized_domain: "docs.example.com",
+              url: "https://docs.example.com/patina/guide",
+              title: "Patina documentation guide",
+              favicon_url: null,
+              start_time: timing.start + firstDuration,
+              end_time: timing.end,
+              duration: Math.max(60 * 1000, timing.end - timing.start - firstDuration),
+            },
+          ];
+        }
+        return [
+          {
+            id: 1901,
+            browser_client_id: "smoke-browser",
+            browser_kind: "chrome",
+            browser_exe_name: "chrome.exe",
+            domain: "stable.example",
+            normalized_domain: "stable.example",
+            url: "https://stable.example/work",
+            title: "Stable work",
+            favicon_url: null,
+            start_time: timing.start,
+            end_time: timing.start + firstDuration,
+            duration: firstDuration,
+          },
+          {
+            id: 1902,
+            browser_client_id: "smoke-browser",
+            browser_kind: "chrome",
+            browser_exe_name: "chrome.exe",
+            domain: "docs.example",
+            normalized_domain: "docs.example",
+            url: "https://docs.example/guide",
+            title: "Stable docs",
+            favicon_url: null,
+            start_time: timing.start + firstDuration,
+            end_time: timing.end,
+            duration: Math.max(60 * 1000, timing.end - timing.start - firstDuration),
+          },
+        ];
+      }
+
+      function historyWebFaviconRows(params) {
+        if (!globalThis.__TIME_TRACKER_ENABLE_WEB_FIXTURE) return [];
+        const requestedDomains = new Set(params.map((value) => String(value).toLowerCase()));
+        return [
+          {
+            normalized_domain: "stable.example",
+            favicon_url: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2248%22%20height%3D%2248%22%3E%3Crect%20width%3D%2248%22%20height%3D%2248%22%20fill%3D%22%23236CC7%22%2F%3E%3C%2Fsvg%3E",
+          },
+          {
+            normalized_domain: "docs.example",
+            favicon_url: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2248%22%20height%3D%2248%22%3E%3Crect%20width%3D%2248%22%20height%3D%2248%22%20fill%3D%22%23C94F63%22%2F%3E%3C%2Fsvg%3E",
+          },
+        ].filter((row) => requestedDomains.size === 0 || requestedDomains.has(row.normalized_domain));
+      }
+
+      function classificationCatalogRows(params) {
+        const enabled = globalThis.__TIME_TRACKER_ENABLE_CLASSIFICATION_CATALOG_FIXTURE
+          || localStorage.getItem("__time_tracker_enable_classification_catalog_fixture") === "1";
+        const timing = smokeSessionTiming();
+        const baseRows = enabled
+          ? Array.from({ length: 130 }, (_, index) => ({
+              exe_name: "catalog-" + String(index).padStart(3, "0") + ".exe",
+              app_name: index === 129 ? "一年以前的应用" : "Catalog App " + index,
+              last_seen_ms: timing.end - index * 24 * 60 * 60 * 1000,
+              has_native_records: index % 2 === 0 ? 1 : 0,
+            }))
+          : historySessionRows().map((row) => ({
+              exe_name: row.exe_name,
+              app_name: row.app_name,
+              last_seen_ms: row.start_time,
+              has_native_records: 1,
+            }));
+        const hasSearch = Number(params[0] ?? 0) === 1;
+        const escapedPattern = String(params[1] ?? "");
+        const search = escapedPattern
+          .replace(/^%|%$/g, "")
+          .replace(/\\\\([\\\\%_])/g, "$1")
+          .toLowerCase();
+        const hasCursor = Number(params[3] ?? 0) === 1;
+        const cursorTime = Number(params[4] ?? 0);
+        const cursorExe = String(params[6] ?? "");
+        const limit = Math.max(1, Number(params[7] ?? 120));
+        return baseRows
+          .filter((row) => !hasSearch || (row.exe_name + " " + row.app_name).toLowerCase().includes(search))
+          .filter((row) => !hasCursor
+            || row.last_seen_ms < cursorTime
+            || (row.last_seen_ms === cursorTime && row.exe_name > cursorExe))
+          .sort((left, right) => right.last_seen_ms - left.last_seen_ms || left.exe_name.localeCompare(right.exe_name))
+          .slice(0, limit);
+      }
+
+      export default class Database {
+        static get() {
+          return new Database();
+        }
+
+        static async load() {
+          return new Database();
+        }
+
+        async select(query, params = []) {
+          const normalizedQuery = String(query ?? "").toLowerCase();
+          const classificationQueryDelayMs = Number(
+            globalThis.__TIME_TRACKER_CLASSIFICATION_QUERY_DELAY_MS
+              ?? localStorage.getItem("__time_tracker_classification_query_delay_ms")
+              ?? 0
+          );
+          const isObservedClassificationQuery = (
+            normalizedQuery.includes("max(coalesce(app_name")
+            && normalizedQuery.includes("group by exe_name")
+          ) || (
+            normalizedQuery.includes("select record_id, origin")
+            && normalizedQuery.includes("from import_exact_sessions")
+            && !normalizedQuery.includes("window_title")
+          );
+          const isRecordedCatalogQuery = normalizedQuery.includes("raw_observed_apps as")
+            && normalizedQuery.includes("grouped_apps");
+          const classificationCatalogQueryDelayMs = Number(
+            globalThis.__TIME_TRACKER_CLASSIFICATION_CATALOG_QUERY_DELAY_MS
+              ?? localStorage.getItem("__time_tracker_classification_catalog_query_delay_ms")
+              ?? 0
+          );
+          if (
+            classificationQueryDelayMs > 0
+            && (isObservedClassificationQuery || isRecordedCatalogQuery)
+          ) {
+            await new Promise((resolve) => setTimeout(resolve, classificationQueryDelayMs));
+          }
+          if (classificationCatalogQueryDelayMs > 0 && isRecordedCatalogQuery) {
+            await new Promise((resolve) => setTimeout(resolve, classificationCatalogQueryDelayMs));
+          }
+          if (
+            localStorage.getItem("__time_tracker_reject_classification_query") === "1"
+            && (isObservedClassificationQuery || isRecordedCatalogQuery)
+          ) {
+            throw new Error("classification query rejected by browser smoke fixture");
+          }
+          if (normalizedQuery.includes("from settings")) {
+            if (
+              normalizedQuery.trim() === "select key, value from settings"
+              && Number(globalThis.__TIME_TRACKER_REJECT_SETTINGS_QUERY_COUNT ?? 0) > 0
+            ) {
+              globalThis.__TIME_TRACKER_REJECT_SETTINGS_QUERY_COUNT -= 1;
+              throw new Error("settings query rejected by browser smoke fixture");
+            }
+            const settingsQueryDelayMs = Number(
+              globalThis.__TIME_TRACKER_SETTINGS_QUERY_DELAY_MS
+                ?? localStorage.getItem("__time_tracker_settings_query_delay_ms")
+                ?? 0
+            );
+            if (settingsQueryDelayMs > 0) {
+              await new Promise((resolve) => setTimeout(resolve, settingsQueryDelayMs));
+            }
+            const settings = loadStoredSettings();
+            const language = globalThis.__TIME_TRACKER_SMOKE_LANGUAGE;
+            if (language) settings.language = language;
+            const keyPrefix = normalizedQuery.includes("key like")
+              ? String(params[0] ?? "").replace(/%$/, "")
+              : "";
+            const exactKey = normalizedQuery.includes("where key = ?")
+              ? String(params[0] ?? "")
+              : "";
+            return Object.entries(settings)
+              .filter(([key]) => (!keyPrefix || key.startsWith(keyPrefix)) && (!exactKey || key === exactKey))
+              .map(([key, value]) => ({ key, value: String(value) }));
+          }
+          if (normalizedQuery.includes("from icon_cache")) {
+            const iconQueryDelayMs = Number(
+              globalThis.__TIME_TRACKER_APP_ICON_QUERY_DELAY_MS
+                ?? localStorage.getItem("__time_tracker_app_icon_query_delay_ms")
+                ?? 0
+            );
+            if (iconQueryDelayMs > 0) {
+              await new Promise((resolve) => setTimeout(resolve, iconQueryDelayMs));
+            }
+            const requestedExecutables = new Set(params.map((value) => String(value).toLowerCase()));
+            return [
+              {
+                exe_name: "cursor.exe",
+                icon_base64: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2248%22%20height%3D%2248%22%3E%3Crect%20width%3D%2248%22%20height%3D%2248%22%20fill%3D%22%23E34A3A%22%2F%3E%3C%2Fsvg%3E",
+              },
+              {
+                exe_name: "deep-research-workbench.exe",
+                icon_base64: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2248%22%20height%3D%2248%22%3E%3Crect%20width%3D%2248%22%20height%3D%2248%22%20fill%3D%22%23257F62%22%2F%3E%3C%2Fsvg%3E",
+              },
+              {
+                exe_name: "classification-only.exe",
+                icon_base64: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2248%22%20height%3D%2248%22%3E%3Crect%20width%3D%2248%22%20height%3D%2248%22%20fill%3D%22%23C15B2A%22%2F%3E%3C%2Fsvg%3E",
+              },
+            ].filter((row) => (
+              requestedExecutables.size === 0 || requestedExecutables.has(row.exe_name)
+            ));
+          }
+          if (isRecordedCatalogQuery) {
+            return classificationCatalogRows(params);
+          }
+          const historyQueryDelayMs = Number(
+            globalThis.__TIME_TRACKER_HISTORY_QUERY_DELAY_MS
+              ?? localStorage.getItem("__time_tracker_history_query_delay_ms")
+              ?? 0
+          );
+          if (
+            historyQueryDelayMs > 0
+            && (
+              normalizedQuery.includes("from sessions")
+              || normalizedQuery.includes("from session_title_samples")
+              || normalizedQuery.includes("from web_activity_segments")
+            )
+          ) {
+            await new Promise((resolve) => setTimeout(resolve, historyQueryDelayMs));
+          }
+          if (normalizedQuery.includes("from web_favicon_cache")) {
+            globalThis.__TIME_TRACKER_WEB_FAVICON_QUERY_COUNT =
+              (globalThis.__TIME_TRACKER_WEB_FAVICON_QUERY_COUNT ?? 0) + 1;
+            globalThis.__TIME_TRACKER_WEB_FAVICON_QUERY_DOMAINS = params.map((value) => String(value));
+            const faviconDelayMs = Number(globalThis.__TIME_TRACKER_WEB_FAVICON_QUERY_DELAY_MS ?? 0);
+            if (faviconDelayMs > 0) {
+              await new Promise((resolve) => setTimeout(resolve, faviconDelayMs));
+            }
+            return historyWebFaviconRows(params);
+          }
+          if (normalizedQuery.includes("from web_activity_segments")) {
+            return historyWebActivityRows();
+          }
+          if (normalizedQuery.includes("min(start_time)")) {
+            return [{ earliest_start_time: historySessionRows()[0].start_time }];
+          }
+          if (normalizedQuery.includes("from session_title_samples")) {
+            return historyTitleSampleRows();
+          }
+          if (normalizedQuery.includes("from sessions")) {
+            if (normalizedQuery.includes("effective_end_time")) {
+              return historySessionRows().map((row) => ({
+                record_id: row.id,
+                origin: "native",
+                app_name: row.app_name,
+                exe_name: row.exe_name,
+                window_title: row.window_title,
+                start_time: row.start_time,
+                effective_end_time: row.end_time,
+                capacity_end_time: null,
+              }));
+            }
+            return historySessionRows().map((row) => ({ ...row, origin: "native" }));
+          }
+          return [];
+        }
+
+        async execute() {}
+        async close() {}
+      }
+    `;
+  }
+
+  throw new Error(`Missing Tauri browser smoke stub for ${path}`);
+}
+
+export function tauriBrowserSmokeStubPlugin(): Plugin {
+  return {
+    name: "tauri-browser-smoke-stubs",
+    enforce: "pre",
+    resolveId(source) {
+      if (source.startsWith("@tauri-apps/")) {
+        return `\0tauri-browser-smoke:${source}`;
+      }
+      return null;
+    },
+    load(id) {
+      const prefix = "\0tauri-browser-smoke:";
+      if (id.startsWith(prefix)) {
+        return tauriStubFor(id.slice(prefix.length));
+      }
+      return null;
+    },
+  };
+}

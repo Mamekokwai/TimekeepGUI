@@ -1,0 +1,42 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Patina Dev",
+  "mainBinaryName": "PatinaDev",
+  "version": "1.9.4",
+  "identifier": "com.ceceliaee.patina.dev",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://127.0.0.1:1420",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "createUpdaterArtifacts": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ]
+  },
+  "plugins": {
+    "updater": {
+      "active": true,
+      "dialog": false,
+      "endpoints": [
+        "https://github.com/Ceceliaee/patina/releases/latest/download/latest.json",
+        "https://pub-ad4b539442124a3287529c9435f053ba.r2.dev/latest.json"
+      ],
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDI4Mzk0RjQ3MEZBMEVFQUYKUldTdjdxQVBSMDg1S01kRy9veDFDa01TUXRSZ0J5bmJRTERWQlZpTm0zS0tnQXY3eUs4TXlsNFYK"
+    }
+  }
+}
