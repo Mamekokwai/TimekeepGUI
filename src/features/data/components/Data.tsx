@@ -89,6 +89,7 @@ import {
   createQuickWebClassificationTarget,
   getQuickClassificationTargetKey,
 } from "../../classification/types.ts";
+import TimekeepDashboardCard from "../../timekeep/components/TimekeepDashboardCard.tsx";
 
 interface Props {
   icons: Record<string, string>;
@@ -1528,6 +1529,7 @@ export default function Data({
         icon={<BarChart3 size={18} />}
         title={UI_TEXT.data.title}
         subtitle={UI_TEXT.data.subtitle}
+        rightSlot={<TimekeepDashboardCard refreshKey={refreshKey ?? 0} compact />}
       />
 
       <div className="data-page-scroll min-h-0 flex-1 overflow-y-auto pr-1 qp-scroll-region qp-scroll-region-stable">

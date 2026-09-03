@@ -1,9 +1,11 @@
-import { useLocaleText } from "../../../shared/i18n/index.ts";
+import { useLocale, useLocaleText } from "../../../shared/i18n/index.ts";
 import { getCategoryToken } from "../../../shared/classification/categoryTokens.ts";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, } from "react";
 import { Layers3, Monitor, Minus, TrendingDown, TrendingUp } from "lucide-react";
 
 import { useIconThemeColors } from "../../../shared/hooks/useIconThemeColors";
+import { useRequestedAppIcons } from "../../../shared/hooks/useRequestedAppIcons.ts";
+import { getAppIcon, loadAppIconsForExecutables } from "../../../platform/persistence/appIconRuntimeCache.ts";
 import { formatDashboardDuration } from "../services/dashboardFormatting";
 import type { DashboardReadModel } from "../services/dashboardReadModel";
 import { AppClassification } from "../../../shared/classification/appClassification.ts";
@@ -25,6 +27,9 @@ import {
   getQuickClassificationTargetKey,
 } from "../../classification/types.ts";
 import TimekeepDashboardCard from "../../timekeep/components/TimekeepDashboardCard.tsx";
+import { useTimekeepDashboardState } from "../../timekeep/hooks/useTimekeepDashboardState.ts";
+import { buildTimekeepDashboardViewModel } from "../../timekeep/services/timekeepDashboardViewModel.ts";
+import { useSystemRuntimeSnapshot } from "../../system/hooks/useSystemRuntimeSnapshot.ts";
 
 interface Props {
   dashboard: DashboardReadModel;
@@ -128,7 +133,6 @@ function DashboardFocusDonut({
 }
 
 export default function Dashboard({
-  dashboard,
   icons,
   hourlyActivityChartMode,
   onHourlyActivityChartModeChange,
@@ -137,10 +141,34 @@ export default function Dashboard({
   onQuickActionError,
 }: Props) {
   const UI_TEXT = useLocaleText();
+  const locale = useLocale();
   const { refreshKey, mappingVersion, mergeThresholdSecs, trackerHealth } = runtime;
+  const timekeepState = useTimekeepDashboardState(refreshKey);
+  const systemRuntime = useSystemRuntimeSnapshot();
+  const timekeepDashboard = useMemo(() => buildTimekeepDashboardViewModel({
+    date: new Date(),
+    programs: timekeepState.programs,
+    history: timekeepState.history,
+    yesterdayHistory: timekeepState.yesterdayHistory,
+    activeSessions: timekeepState.activeSessions,
+    uiText: UI_TEXT,
+  }), [timekeepState.programs, timekeepState.history, timekeepState.yesterdayHistory, timekeepState.activeSessions, UI_TEXT]);
+  const useTimekeepData = !timekeepState.loading && !timekeepState.error;
   const detail = useDestinationDetailLauncher();
   const quickClassification = useQuickClassificationLauncher();
-  const iconThemeColors = useIconThemeColors(icons);
+  const displayedDashboard = timekeepDashboard;
+  const requestedTimekeepExeNames = useMemo(
+    () => displayedDashboard.topApplications.map((app) => app.exeName),
+    [displayedDashboard.topApplications],
+  );
+  const timekeepIcons = useRequestedAppIcons({
+    baseIcons: icons,
+    exeNames: requestedTimekeepExeNames,
+    loadIcons: loadAppIconsForExecutables,
+    enabled: useTimekeepData,
+    onError: (error) => console.warn("Failed to load dashboard Timekeep icons", error),
+  });
+  const iconThemeColors = useIconThemeColors(timekeepIcons);
   const {
     totalTrackedTime,
     dayDeltaTrackedTime,
@@ -148,7 +176,7 @@ export default function Dashboard({
     hourlyActivity,
     hourlyCategoryActivity,
     categoryDist,
-  } = dashboard;
+  } = displayedDashboard;
   const dayDeltaDirection = dayDeltaTrackedTime > 0
     ? "increase"
     : dayDeltaTrackedTime < 0
@@ -222,8 +250,8 @@ export default function Dashboard({
         rightSlot={<TimekeepDashboardCard refreshKey={refreshKey} compact />}
       />
 
-      <div className="flex gap-4 md:gap-5 flex-1 min-h-0 overflow-hidden dashboard-workspace">
-        <div className="w-5/12 flex flex-col gap-4 md:gap-5 min-h-0 dashboard-left-column qp-scroll-region">
+      <div className="flex gap-4 flex-1 min-h-0 overflow-hidden dashboard-workspace">
+        <div className="w-5/12 flex flex-col gap-4 min-h-0 dashboard-left-column qp-scroll-region">
           <div
             ref={focusCardRef}
             className="qp-panel p-5 relative overflow-hidden shrink-0 min-h-[250px] dashboard-focus-card"
@@ -268,6 +296,15 @@ export default function Dashboard({
               <DayDeltaIcon size={12} strokeWidth={2} />
               {dayDeltaLabel}
             </p>
+            {systemRuntime ? (
+              <p className="mt-2 text-[11px] font-medium text-[var(--qp-text-tertiary)]">
+                {UI_TEXT.dashboard.bootTime}: {new Date(systemRuntime.boot_time_ms).toLocaleTimeString(locale, {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hourCycle: "h23",
+                })}
+              </p>
+            ) : null}
           </div>
 
           <div className="qp-panel p-5 flex min-h-0 flex-col overflow-hidden dashboard-pulse-card">
@@ -325,9 +362,12 @@ export default function Dashboard({
                   ? quickOverrides[app.exeName]
                   : AppClassification.getUserOverride(app.exeName);
                 const overrideColor = appOverride?.color;
+                const timekeepCategory = useTimekeepData
+                  ? timekeepDashboard.categoryByExecutable[app.exeName.toLowerCase()]
+                  : undefined;
                 const effectiveCategory = hasQuickOverride
                   ? appOverride?.category ?? "other"
-                  : AppClassification.mapApp(app.exeName, { appName: app.name }).category;
+                  : timekeepCategory ?? AppClassification.mapApp(app.exeName, { appName: app.name }).category;
                 const isUnclassified = effectiveCategory === "other";
                 const displayName = appOverride?.displayName?.trim() || app.name;
                 const accentColor = overrideColor ?? iconThemeColors[app.exeName] ?? app.color;
@@ -338,7 +378,7 @@ export default function Dashboard({
                       identityKeys: [app.exeName],
                       displayName,
                       secondaryText: app.exeName,
-                      iconUrl: icons[app.exeName] ?? null,
+                      iconUrl: getAppIcon(timekeepIcons, app.exeName),
                       color: accentColor,
                     }),
                     initialDateKey: formatLocalDateKey(new Date()),
@@ -403,8 +443,8 @@ export default function Dashboard({
                           }
                         }}
                       >
-                        {icons[app.exeName] ? (
-                          <img src={icons[app.exeName]} className="w-full h-full object-contain" alt="" />
+                        {getAppIcon(timekeepIcons, app.exeName) ? (
+                          <img src={getAppIcon(timekeepIcons, app.exeName) ?? undefined} className="w-full h-full object-contain" alt="" />
                         ) : (
                           <div className="text-xs font-semibold opacity-40 text-[var(--qp-text-secondary)]">{app.categoryInitial}</div>
                         )}

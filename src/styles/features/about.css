@@ -113,6 +113,26 @@
   -webkit-mask: url("../../features/about/assets/github.svg") center / contain no-repeat;
 }
 
+.about-blog-mark {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+  position: relative;
+}
+
+.about-blog-mark::after {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-top: 1.5px solid currentColor;
+  border-right: 1.5px solid currentColor;
+  content: "";
+  right: 1px;
+  bottom: 1px;
+}
+
 .about-pill-label {
   overflow: hidden;
   text-overflow: ellipsis;

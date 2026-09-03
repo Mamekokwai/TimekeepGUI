@@ -6,7 +6,7 @@ import {
   closeCurrentWindow, minimizeCurrentWindow, startCurrentWindowDrag, toggleCurrentWindowMaximized, } from "../../platform/desktop/windowControlGateway";
 
 
-const APP_TITLE = "Patina";
+const APP_TITLE = "TimekeepGUI";
 
 type AppTitleBarProps = {
   isMaximized: boolean;

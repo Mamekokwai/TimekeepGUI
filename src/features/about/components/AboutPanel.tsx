@@ -1,5 +1,4 @@
 import { useLocaleText } from "../../../shared/i18n/index.ts";
-import { FileText, Heart, MessageSquare, } from "lucide-react";
 import type { ReactNode } from "react";
 import appIconUrl from "../../../../src-tauri/icons/icon.png";
 import type { UpdateSnapshot } from "../../../shared/types/update";
@@ -17,10 +16,8 @@ type AboutPanelProps = {
   onOpenUpdateDialog?: () => void;
   onOpenUpdateReleasePage?: () => void;
   onOpenUpdateDownload?: () => void;
-  onOpenReleaseNotes: () => void;
   onOpenRepository: () => void;
-  onOpenFeedback: () => void;
-  onOpenSupportDialog: () => void;
+  onOpenBlog: () => void;
 };
 
 type AboutLinkButtonProps = {
@@ -58,10 +55,8 @@ export default function AboutPanel({
   onOpenUpdateDialog,
   onOpenUpdateReleasePage,
   onOpenUpdateDownload,
-  onOpenReleaseNotes,
   onOpenRepository,
-  onOpenFeedback,
-  onOpenSupportDialog,
+  onOpenBlog,
 }: AboutPanelProps) {
   const UI_TEXT = useLocaleText();
   const versionLabel = appVersion === "-" || appVersion === "unknown"
@@ -75,7 +70,7 @@ export default function AboutPanel({
             <img src={appIconUrl} alt="" draggable={false} />
           </div>
           <div className="about-center-title-row">
-            <h2>Patina</h2>
+            <h2>TimekeepGUI</h2>
             <span className="about-center-version-chip">{versionLabel}</span>
           </div>
           <p>{UI_TEXT.about.description}</p>
@@ -84,27 +79,13 @@ export default function AboutPanel({
         <div className="about-pill-row">
           <AboutLinkButton
             icon={<span className="about-github-mark" />}
-            label={(
-              <>
-                GitHub <span className="about-github-star-label">Star</span>
-              </>
-            )}
+            label="项目地址"
             onClick={onOpenRepository}
           />
           <AboutLinkButton
-            icon={<FileText size={14} />}
-            label={UI_TEXT.update.releaseNotes}
-            onClick={onOpenReleaseNotes}
-          />
-          <AboutLinkButton
-            icon={<MessageSquare size={14} />}
-            label={UI_TEXT.update.feedback}
-            onClick={onOpenFeedback}
-          />
-          <AboutLinkButton
-            icon={<Heart className="about-support-pill-heart" size={14} />}
-            label={UI_TEXT.update.support}
-            onClick={onOpenSupportDialog}
+            icon={<span className="about-blog-mark" />}
+            label={UI_TEXT.about.blog}
+            onClick={onOpenBlog}
           />
         </div>
 
@@ -120,9 +101,9 @@ export default function AboutPanel({
           onOpenConfirmDialog={() => onOpenUpdateDialog?.()}
           onOpenUpdateReleasePage={() => onOpenUpdateReleasePage?.()}
           onOpenUpdateDownload={() => onOpenUpdateDownload?.()}
-          onOpenReleaseNotes={onOpenReleaseNotes}
-          onOpenFeedback={onOpenFeedback}
-          onOpenSupport={onOpenSupportDialog}
+          onOpenReleaseNotes={() => {}}
+          onOpenFeedback={() => {}}
+          onOpenSupport={() => {}}
         />
       </section>
     </div>

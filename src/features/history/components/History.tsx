@@ -83,6 +83,7 @@ import {
   createQuickAppClassificationTarget,
   createQuickWebClassificationTarget,
 } from "../../classification/types.ts";
+import TimekeepDashboardCard from "../../timekeep/components/TimekeepDashboardCard.tsx";
 
 interface Props {
   uiText: UiText;
@@ -1073,20 +1074,23 @@ export default function History({
         title={UI_TEXT.history.title}
         subtitle={UI_TEXT.history.subtitle}
         rightSlot={(
-          <HistoryDateNavigator
-            datePickerRef={datePickerRef}
-            calendarPopoverRef={calendarPopoverRef}
-            selectedDate={presentedDate}
-            today={today}
-            isToday={isToday}
-            calendarOpen={calendarOpen}
-            calendarPosition={calendarPosition}
-            calendarMonth={calendarMonth}
-            onCalendarMonthChange={setCalendarMonth}
-            onChangeDate={changeDate}
-            onOpenDatePicker={openDatePicker}
-            onSelectCalendarDate={selectCalendarDate}
-          />
+          <div className="flex min-w-0 flex-wrap items-center justify-end gap-3">
+            <TimekeepDashboardCard refreshKey={refreshKey ?? 0} compact />
+            <HistoryDateNavigator
+              datePickerRef={datePickerRef}
+              calendarPopoverRef={calendarPopoverRef}
+              selectedDate={presentedDate}
+              today={today}
+              isToday={isToday}
+              calendarOpen={calendarOpen}
+              calendarPosition={calendarPosition}
+              calendarMonth={calendarMonth}
+              onCalendarMonthChange={setCalendarMonth}
+              onChangeDate={changeDate}
+              onOpenDatePicker={openDatePicker}
+              onSelectCalendarDate={selectCalendarDate}
+            />
+          </div>
         )}
       />
 

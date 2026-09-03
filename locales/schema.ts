@@ -906,6 +906,18 @@ export const MESSAGE_SCHEMA = {
     "params": [],
     "surface": "frontend"
   },
+  "about.blog": {
+    "description": "Label for the author's public blog link on the About page.",
+    "kind": "string",
+    "params": [],
+    "surface": "frontend"
+  },
+  "dashboard.bootTime": {
+    "description": "Label for the computer boot time shown on today's Timekeep dashboard.",
+    "kind": "string",
+    "params": [],
+    "surface": "frontend"
+  },
   "dashboard.comparedWithYesterday": {
     "kind": "message",
     "params": [

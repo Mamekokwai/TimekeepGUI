@@ -306,6 +306,12 @@ function tauriStubFor(path: string) {
             loadEpoch: Number(globalThis.__PATINA_MAIN_WINDOW_LOAD_EPOCH__),
           };
         }
+        if (command === "cmd_get_system_runtime_snapshot") {
+          return {
+            boot_time_ms: Date.now() - 2 * 60 * 60 * 1000,
+            uptime_seconds: 2 * 60 * 60,
+          };
+        }
         if (command === "cmd_timekeep_request") {
           const request = payload.request ?? {};
           globalThis.__PATINA_TIMEKEEP_REQUESTS ??= [];
@@ -324,6 +330,12 @@ function tauriStubFor(path: string) {
               name: "code.exe",
               lifetime_seconds: 3720,
               category: "development",
+              project: "Timekeep",
+            }, {
+              id: 2,
+              name: "chrome.exe",
+              lifetime_seconds: 900,
+              category: "browser",
               project: "Timekeep",
             }],
             scan_programs: [
@@ -362,6 +374,12 @@ function tauriStubFor(path: string) {
               start_time: new Date(Date.now() - 65 * 60 * 1000).toISOString(),
               end_time: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
               duration_seconds: 3600,
+            }, {
+              id: 21,
+              program_name: "chrome.exe",
+              start_time: new Date(Date.now() - 35 * 60 * 1000).toISOString(),
+              end_time: new Date(Date.now() - 20 * 60 * 1000).toISOString(),
+              duration_seconds: 900,
             }],
             add_program: { name: String(request.name ?? "code.exe") },
             update_program: { name: String(request.name ?? "code.exe") },

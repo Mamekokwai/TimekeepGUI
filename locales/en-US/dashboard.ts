@@ -2,6 +2,7 @@
 export const MESSAGES = {
   "dashboard.active": "Active now",
   "dashboard.afk": "Idle",
+  "dashboard.bootTime": "Booted at",
   "dashboard.comparedWithYesterday": {
     "$type": "message",
     "body": {

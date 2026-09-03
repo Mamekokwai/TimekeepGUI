@@ -254,19 +254,19 @@ mod tests {
     #[test]
     fn fallback_urls_can_be_attached_to_snapshot() {
         let snapshot = UpdateSnapshot::idle("0.1.0".to_string()).with_fallback_urls(
-            Some("https://github.com/Ceceliaee/patina/releases/latest".to_string()),
+            Some("https://github.com/Mamekokwai/TimekeepGUI/releases/latest".to_string()),
             Some(
-                "https://github.com/Ceceliaee/patina/releases/download/v0.2.0/app.exe".to_string(),
+                "https://github.com/Mamekokwai/TimekeepGUI/releases/download/v0.2.0/app.exe".to_string(),
             ),
         );
 
         assert_eq!(
             snapshot.release_page_url.as_deref(),
-            Some("https://github.com/Ceceliaee/patina/releases/latest")
+            Some("https://github.com/Mamekokwai/TimekeepGUI/releases/latest")
         );
         assert_eq!(
             snapshot.asset_download_url.as_deref(),
-            Some("https://github.com/Ceceliaee/patina/releases/download/v0.2.0/app.exe")
+            Some("https://github.com/Mamekokwai/TimekeepGUI/releases/download/v0.2.0/app.exe")
         );
     }
 }

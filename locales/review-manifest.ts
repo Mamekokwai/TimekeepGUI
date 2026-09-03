@@ -1060,6 +1060,8 @@ export const LOCALE_SOURCE_REVIEWS = {
     "timekeep.historyProgramPlaceholder": "3eeba3df4f0306c6",
     "timekeep.availablePrograms": "782a194fe362e2ac",
     "timekeep.selectAll": "e7dbae80bd76613e",
-    "timekeep.clearSelection": "a866e423b7d1448d"
+    "timekeep.clearSelection": "a866e423b7d1448d",
+    "dashboard.bootTime": "76c2e5c52121400e",
+    "about.blog": "d267921f796c1565"
   }
 } as const;

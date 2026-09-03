@@ -18,6 +18,7 @@ export const LOCALE_METADATA = {
 
 export interface UiText {
   "about": {
+    "blog": string;
     "description": string;
     "feedbackDialog": {
       "description": string;
@@ -207,6 +208,7 @@ export interface UiText {
   "dashboard": {
     "active": string;
     "afk": string;
+    "bootTime": string;
     "comparedWithYesterday": (deltaLabel: string, direction: "increase" | "decrease" | "same") => string;
     "emptyState": string;
     "focusShare": string;

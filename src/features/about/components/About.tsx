@@ -6,8 +6,6 @@ import type { QuietToastTone } from "../../../shared/types/toast";
 import QuietPageHeader from "../../../shared/components/QuietPageHeader";
 import type { UpdateSnapshot } from "../../../shared/types/update";
 import AboutPanel from "./AboutPanel";
-import AboutSupportDialog from "./AboutSupportDialog";
-import AboutFeedbackDialog from "./AboutFeedbackDialog";
 import {
   getSettingsPageBootstrapCache,
   prewarmSettingsBootstrapCache,
@@ -41,8 +39,6 @@ export default function About({
   const cachedBootstrap = getSettingsPageBootstrapCache();
   const initialVersion = updateSnapshot?.currentVersion ?? cachedBootstrap?.appVersion ?? "-";
   const [appVersion, setAppVersion] = useState(initialVersion);
-  const [supportDialogOpen, setSupportDialogOpen] = useState(false);
-  const [feedbackDialogOpen, setFeedbackDialogOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -66,15 +62,6 @@ export default function About({
     onToast?.(message, tone);
   }, [onToast]);
 
-  const handleOpenReleaseNotes = useCallback(async () => {
-    try {
-      await SettingsRuntimeAdapterService.openReleaseNotes();
-    } catch (error) {
-      console.error("open release notes failed", error);
-      notify(UI_TEXT.toast.releaseNotesOpenFailed, "error");
-    }
-  }, [notify, UI_TEXT]);
-
   const handleOpenRepository = useCallback(async () => {
     try {
       await SettingsRuntimeAdapterService.openRepository();
@@ -84,23 +71,12 @@ export default function About({
     }
   }, [notify, UI_TEXT]);
 
-  const handleOpenFeedback = useCallback(async (): Promise<boolean> => {
+  const handleOpenBlog = useCallback(async () => {
     try {
-      await SettingsRuntimeAdapterService.openFeedback();
-      return true;
+      await SettingsRuntimeAdapterService.openBlog();
     } catch (error) {
-      console.error("open feedback link failed", error);
-      notify(UI_TEXT.toast.feedbackOpenFailed, "error");
-      return false;
-    }
-  }, [notify, UI_TEXT]);
-
-  const handleOpenKofiSupport = useCallback(async () => {
-    try {
-      await SettingsRuntimeAdapterService.openKofiSupport();
-    } catch (error) {
-      console.error("open Ko-fi support link failed", error);
-      notify(UI_TEXT.toast.supportOpenFailed, "error");
+      console.error("open blog link failed", error);
+      notify(UI_TEXT.toast.repositoryOpenFailed, "error");
     }
   }, [notify, UI_TEXT]);
 
@@ -146,33 +122,14 @@ export default function About({
             if (!onOpenUpdateDownload) return;
             void onOpenUpdateDownload();
           }}
-          onOpenReleaseNotes={() => {
-            void handleOpenReleaseNotes();
-          }}
           onOpenRepository={() => {
             void handleOpenRepository();
           }}
-          onOpenFeedback={() => {
-            setFeedbackDialogOpen(true);
-          }}
-          onOpenSupportDialog={() => {
-            setSupportDialogOpen(true);
+          onOpenBlog={() => {
+            void handleOpenBlog();
           }}
         />
       </div>
-
-      <AboutSupportDialog
-        open={supportDialogOpen}
-        onClose={() => setSupportDialogOpen(false)}
-        onOpenKofi={() => {
-          void handleOpenKofiSupport();
-        }}
-      />
-      <AboutFeedbackDialog
-        open={feedbackDialogOpen}
-        onClose={() => setFeedbackDialogOpen(false)}
-        onOpenGitHub={handleOpenFeedback}
-      />
     </div>
   );
 }

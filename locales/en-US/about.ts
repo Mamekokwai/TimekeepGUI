@@ -1,5 +1,6 @@
 // en-US about locale resource. Pure data only.
 export const MESSAGES = {
+  "about.blog": "Blog",
   "about.description": "A local-first personal desktop time tracker",
   "about.feedbackDialog.description": "Join the QQ channel for conversation; use GitHub Issues to report a problem.",
   "about.feedbackDialog.githubAction": "GitHub Issues",

@@ -2,6 +2,7 @@
 export const MESSAGES = {
   "dashboard.active": "当前活跃",
   "dashboard.afk": "无操作",
+  "dashboard.bootTime": "本次开机",
   "dashboard.comparedWithYesterday": {
     "$type": "message",
     "body": {

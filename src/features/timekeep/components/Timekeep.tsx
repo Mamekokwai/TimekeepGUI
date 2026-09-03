@@ -7,7 +7,9 @@ import QuietDialog from "../../../shared/components/QuietDialog.tsx";
 import QuietIconAction from "../../../shared/components/QuietIconAction.tsx";
 import QuietPageHeader from "../../../shared/components/QuietPageHeader.tsx";
 import { useQuietDialogs } from "../../../shared/hooks/useQuietDialogs.tsx";
+import { useRequestedAppIcons } from "../../../shared/hooks/useRequestedAppIcons.ts";
 import type { QuietToastTone } from "../../../shared/types/toast.ts";
+import { getAppIcon, loadAppIconsForExecutables } from "../../../platform/persistence/appIconRuntimeCache.ts";
 import { useTimekeepPanelState } from "../hooks/useTimekeepPanelState.ts";
 import {
   loadTimekeepProgramCandidates,
@@ -111,6 +113,17 @@ export default function Timekeep({ onToast }: Props) {
     serviceUnavailableMessage: UI_TEXT.timekeep.serviceOffline,
     requestTimeoutMessage: UI_TEXT.timekeep.requestTimeout,
     partialSuccessMessage: UI_TEXT.timekeep.partialSuccess,
+  });
+  const timekeepIcons = useRequestedAppIcons({
+    baseIcons: {},
+    exeNames: [
+      ...state.programs.map((program) => program.name),
+      ...state.activeSessions.map((session) => session.program_name),
+      ...scanCandidates.map((candidate) => candidate.name),
+    ],
+    loadIcons: loadAppIconsForExecutables,
+    enabled: !state.loading && !state.loadError,
+    onError: (error) => console.warn("Failed to load Timekeep program icons", error),
   });
 
   const visibleScanCandidates = useMemo(() => {
@@ -321,7 +334,14 @@ export default function Timekeep({ onToast }: Props) {
                   <div className="mt-4 space-y-3">
                     {state.activeSessions.map((session) => (
                       <div key={session.id} className="flex items-center justify-between gap-3 text-sm">
-                        <span className="truncate text-[var(--qp-text-primary)]">{session.program_name}</span>
+                        <span className="flex min-w-0 items-center gap-2 text-[var(--qp-text-primary)]">
+                          <span className="flex h-6 w-6 shrink-0 items-center justify-center overflow-hidden rounded-[6px] border border-[var(--qp-border-subtle)] bg-[var(--qp-bg-elevated)]">
+                            {getAppIcon(timekeepIcons, session.program_name) ? (
+                              <img src={getAppIcon(timekeepIcons, session.program_name) ?? undefined} alt="" className="h-4 w-4 object-contain" />
+                            ) : <Activity size={13} className="text-[var(--qp-accent-default)]" />}
+                          </span>
+                          <span className="truncate">{session.program_name}</span>
+                        </span>
                         <span className="shrink-0 text-xs tabular-nums text-[var(--qp-text-tertiary)]">
                           {formatElapsed(Math.max(0, Math.floor((nowMs - new Date(session.start_time).getTime()) / 1000)))}
                         </span>
@@ -382,7 +402,13 @@ export default function Timekeep({ onToast }: Props) {
                 <div className="divide-y divide-[var(--qp-border-subtle)]">
                   {state.programs.map((program) => (
                     <div key={program.id || program.name} className="flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0">
-                      <div className="min-w-0">
+                      <div className="flex min-w-0 items-start gap-3">
+                        <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-[var(--qp-border-subtle)] bg-[var(--qp-bg-elevated)]">
+                          {getAppIcon(timekeepIcons, program.name) ? (
+                            <img src={getAppIcon(timekeepIcons, program.name) ?? undefined} alt="" className="h-6 w-6 object-contain" />
+                          ) : <Activity size={16} className="text-[var(--qp-accent-default)]" />}
+                        </span>
+                        <div className="min-w-0">
                         <div className="flex min-w-0 items-center gap-2">
                           <div className="truncate font-medium text-[var(--qp-text-primary)]">{program.name}</div>
                           {activeProgramNames.has(program.name.toLowerCase()) ? (
@@ -393,6 +419,7 @@ export default function Timekeep({ onToast }: Props) {
                           {program.category ? <span>{program.category}</span> : null}
                           {program.project ? <span>{program.project}</span> : null}
                           <span>{UI_TEXT.timekeep.lifetime}: {formatLifetime(program.lifetime_seconds)}</span>
+                        </div>
                         </div>
                       </div>
                       <div className="flex shrink-0 items-center gap-1">
@@ -580,6 +607,11 @@ export default function Timekeep({ onToast }: Props) {
                         disabled={candidate.tracked}
                         onChange={() => toggleScanSelection(candidate.name)}
                       />
+                      <span className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-[6px] border border-[var(--qp-border-subtle)] bg-[var(--qp-bg-elevated)]">
+                        {getAppIcon(timekeepIcons, candidate.name) ? (
+                          <img src={getAppIcon(timekeepIcons, candidate.name) ?? undefined} alt="" className="h-5 w-5 object-contain" />
+                        ) : <Activity size={13} className="text-[var(--qp-accent-default)]" />}
+                      </span>
                       <span className="min-w-0 flex-1">
                         <span className="block truncate text-sm font-medium text-[var(--qp-text-primary)]">{candidate.name}</span>
                         <span className="mt-0.5 block text-xs text-[var(--qp-text-tertiary)]">

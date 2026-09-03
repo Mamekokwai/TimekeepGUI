@@ -81,9 +81,10 @@ type PrepareBackupRestoreDeps = {
   previewBackup: (path: string) => Promise<BackupPreview>;
 };
 
-const RELEASE_NOTES_URL = "https://github.com/Ceceliaee/patina/releases";
-const REPOSITORY_URL = "https://github.com/Ceceliaee/patina";
-const FEEDBACK_URL = "https://github.com/Ceceliaee/patina/issues/new/choose";
+const RELEASE_NOTES_URL = "https://github.com/Mamekokwai/TimekeepGUI/releases";
+const REPOSITORY_URL = "https://github.com/Mamekokwai/TimekeepGUI";
+const FEEDBACK_URL = "https://github.com/Mamekokwai/TimekeepGUI/issues/new/choose";
+const BLOG_URL = "https://blog.nywerya.com";
 const KOFI_SUPPORT_URL = "https://ko-fi.com/ceceliaee";
 
 export function buildBackupPreviewSummary(preview: BackupPreview, uiText: UiText, locale: Locale): string {
@@ -224,6 +225,10 @@ export class SettingsRuntimeAdapterService {
 
   static async openRepository(): Promise<void> {
     await openExternalUrl(REPOSITORY_URL);
+  }
+
+  static async openBlog(): Promise<void> {
+    await openExternalUrl(BLOG_URL);
   }
 
   static async openFeedback(): Promise<void> {

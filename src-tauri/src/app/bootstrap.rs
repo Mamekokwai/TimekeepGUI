@@ -189,6 +189,7 @@ fn register_invoke_handlers(builder: tauri::Builder<tauri::Wry>) -> tauri::Build
         commands::backup::cmd_download_webdav_backup,
         commands::backup::cmd_delete_remote_backup_temp,
         commands::storage::cmd_get_storage_snapshot,
+        commands::system::cmd_get_system_runtime_snapshot,
         commands::storage::cmd_pick_storage_directory,
         commands::storage::cmd_preview_storage_migration,
         commands::storage::cmd_preview_webview_cache_migration,
