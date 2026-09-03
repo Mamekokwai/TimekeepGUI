@@ -41,16 +41,9 @@ const buildCleanupOptions = (uiText: UiText): Array<{ value: CleanupRange; label
   { value: 7, label: uiText.settings.cleanupRangeLabels[7] },
 ];
 
-const IDLE_TIMEOUT_MINUTES_RANGE = { min: 5, max: 30 } as const;
-const TIMELINE_MERGE_GAP_MINUTES_RANGE = { min: 1, max: 5 } as const;
-
 let cachedStorageSnapshot: StorageSnapshot | null = null;
 let hasCheckedInitialStorageSnapshot = false;
 let pendingInitialStorageSnapshot: Promise<StorageSnapshot | null> | null = null;
-
-const clampMinute = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
-const secondsToMinute = (seconds: number, min: number, max: number) =>
-  clampMinute(Math.round(seconds / 60), min, max);
 
 const loadInitialStorageSnapshotOnce = () => {
   if (cachedStorageSnapshot) {
@@ -652,20 +645,6 @@ export function useSettingsPageState({
     }
   }, [notify, UI_TEXT]);
 
-  const idleTimeoutMinutes = draftSettings
-    ? secondsToMinute(
-      draftSettings.idleTimeoutSecs,
-      IDLE_TIMEOUT_MINUTES_RANGE.min,
-      IDLE_TIMEOUT_MINUTES_RANGE.max,
-    )
-    : IDLE_TIMEOUT_MINUTES_RANGE.min;
-  const timelineMergeGapMinutes = draftSettings
-    ? secondsToMinute(
-      draftSettings.timelineMergeGapSecs,
-      TIMELINE_MERGE_GAP_MINUTES_RANGE.min,
-      TIMELINE_MERGE_GAP_MINUTES_RANGE.max,
-    )
-    : TIMELINE_MERGE_GAP_MINUTES_RANGE.min;
   return {
     dialogs,
     loading,
@@ -704,10 +683,6 @@ export function useSettingsPageState({
     handleOpenStorageDirectory,
     handleOpenReleaseNotes,
     handleOpenFeedback,
-    idleTimeoutMinutes,
-    timelineMergeGapMinutes,
     cleanupOptions,
-    idleTimeoutMinutesRange: IDLE_TIMEOUT_MINUTES_RANGE,
-    timelineMergeGapMinutesRange: TIMELINE_MERGE_GAP_MINUTES_RANGE,
   };
 }

@@ -81,11 +81,7 @@ export default function Settings({
     handleRestoreDefaultDataDirectory,
     handleRestoreDefaultCacheDirectory,
     handleOpenStorageDirectory,
-    idleTimeoutMinutes,
-    timelineMergeGapMinutes,
     cleanupOptions,
-    idleTimeoutMinutesRange,
-    timelineMergeGapMinutesRange,
   } = useSettingsPageState({
     onSettingsChanged,
     onColorSchemeSaved,
@@ -217,22 +213,6 @@ export default function Settings({
       <div className="flex-1 overflow-y-auto qp-scroll-region pr-2">
         <div className="grid grid-cols-1 gap-4 md:gap-5">
           <SettingsTrackingPanel
-            timelineMergeGapControl={{
-              label: UI_TEXT.settings.timelineMergeGapLabel,
-              hint: UI_TEXT.settings.timelineMergeGapHint,
-              minutes: timelineMergeGapMinutes,
-              minMinutes: timelineMergeGapMinutesRange.min,
-              maxMinutes: timelineMergeGapMinutesRange.max,
-              onMinutesChange: (nextMinutes) => handleChange("timelineMergeGapSecs", nextMinutes * 60),
-            }}
-            idleTimeoutControl={{
-              label: UI_TEXT.settings.idleTimeoutLabel,
-              hint: UI_TEXT.settings.idleTimeoutHint,
-              minutes: idleTimeoutMinutes,
-              minMinutes: idleTimeoutMinutesRange.min,
-              maxMinutes: idleTimeoutMinutesRange.max,
-              onMinutesChange: (nextMinutes) => handleChange("idleTimeoutSecs", nextMinutes * 60),
-            }}
             trackingPaused={draftSettings.trackingPaused}
             onTrackingPausedChange={(nextChecked) => handleChange("trackingPaused", nextChecked)}
             titleRecordingEnabled={draftSettings.titleRecordingEnabled}
