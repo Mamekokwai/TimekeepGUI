@@ -221,6 +221,10 @@ export function normalizeSettingsRecord(
       DEFAULT_SETTINGS.minSessionSecs,
       MIN_SESSION_SECONDS_RANGE,
     ),
+    audioKeepsUserActive: parseBooleanSetting(
+      record.audio_keeps_user_active,
+      DEFAULT_SETTINGS.audioKeepsUserActive ?? true,
+    ),
     trackingPaused: parseBooleanSetting(record.tracking_paused, DEFAULT_SETTINGS.trackingPaused),
     titleRecordingEnabled: parseBooleanSetting(
       record.title_recording_enabled,

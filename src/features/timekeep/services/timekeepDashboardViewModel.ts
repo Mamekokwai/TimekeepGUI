@@ -16,6 +16,7 @@ import type {
 
 export interface TimekeepDashboardViewModel {
   totalTrackedTime: number;
+  userActiveTime: number;
   yesterdayTrackedTime: number;
   dayDeltaTrackedTime: number;
   topApplications: TopApplicationItem[];
@@ -42,6 +43,11 @@ function getLocalDayRange(date: Date): TimeRange {
   const start = new Date(date.getFullYear(), date.getMonth(), date.getDate());
   const end = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
   return { startMs: start.getTime(), endMs: end.getTime() };
+}
+
+export function getComputerRuntimeTodayMs(bootTimeMs: number, nowMs = Date.now()): number {
+  const todayStartMs = new Date(nowMs).setHours(0, 0, 0, 0);
+  return Math.max(0, nowMs - Math.max(todayStartMs, bootTimeMs));
 }
 
 function normalizeCategory(value: string | null | undefined): AppCategory {
@@ -85,17 +91,48 @@ function materializeHistory(
   return entries;
 }
 
-function addHourlyDuration(hours: number[], entry: MaterializedEntry) {
-  let cursor = entry.startMs;
-  while (cursor < entry.endMs) {
-    const current = new Date(cursor);
-    const nextHour = new Date(current);
-    nextHour.setMinutes(0, 0, 0);
-    nextHour.setHours(nextHour.getHours() + 1);
-    const segmentEnd = Math.min(entry.endMs, nextHour.getTime());
-    hours[current.getHours()] += segmentEnd - cursor;
-    cursor = segmentEnd;
+type TimeInterval = [startMs: number, endMs: number];
+
+function mergeIntervals(intervals: TimeInterval[]): TimeInterval[] {
+  const sorted = intervals
+    .filter(([startMs, endMs]) => endMs > startMs)
+    .sort(([leftStart], [rightStart]) => leftStart - rightStart);
+  const merged: TimeInterval[] = [];
+
+  for (const [startMs, endMs] of sorted) {
+    const previous = merged[merged.length - 1];
+    if (!previous || startMs > previous[1]) {
+      merged.push([startMs, endMs]);
+    } else {
+      previous[1] = Math.max(previous[1], endMs);
+    }
   }
+
+  return merged;
+}
+
+function buildUserActiveHourlyActivity(entries: MaterializedEntry[]): HourlyActivityPoint[] {
+  const hourlyIntervals: TimeInterval[][] = Array.from({ length: 24 }, () => []);
+
+  for (const entry of entries) {
+    let cursor = entry.startMs;
+    while (cursor < entry.endMs) {
+      const current = new Date(cursor);
+      const nextHour = new Date(current);
+      nextHour.setMinutes(0, 0, 0);
+      nextHour.setHours(nextHour.getHours() + 1);
+      const segmentEnd = Math.min(entry.endMs, nextHour.getTime());
+      hourlyIntervals[current.getHours()]!.push([cursor, segmentEnd]);
+      cursor = segmentEnd;
+    }
+  }
+
+  return hourlyIntervals.map((intervals, hour) => ({
+    hour: `${String(hour).padStart(2, "0")}:00`,
+    minutes: Math.round(
+      mergeIntervals(intervals).reduce((total, [startMs, endMs]) => total + endMs - startMs, 0) / 60000,
+    ),
+  }));
 }
 
 function buildHourlyCategoryActivity(entries: MaterializedEntry[], uiText: UiText): HourlyCategoryActivity {
@@ -160,7 +197,6 @@ function buildViewModelForEntries(entries: MaterializedEntry[], programs: Timeke
   const totals = new Map<string, { duration: number; category: AppCategory }>();
   const categoryTotals = new Map<AppCategory, number>();
   const categoryByExecutable: Record<string, AppCategory> = {};
-  const hours = new Array<number>(24).fill(0);
 
   for (const entry of entries) {
     const current = totals.get(entry.exeName.toLowerCase());
@@ -168,7 +204,6 @@ function buildViewModelForEntries(entries: MaterializedEntry[], programs: Timeke
     else totals.set(entry.exeName.toLowerCase(), { duration: entry.durationMs, category: entry.category });
     categoryTotals.set(entry.category, (categoryTotals.get(entry.category) ?? 0) + entry.durationMs);
     categoryByExecutable[entry.exeName.toLowerCase()] = entry.category;
-    addHourlyDuration(hours, entry);
   }
 
   for (const program of programs) {
@@ -176,6 +211,10 @@ function buildViewModelForEntries(entries: MaterializedEntry[], programs: Timeke
   }
 
   const totalTrackedTime = Array.from(totals.values()).reduce((sum, item) => sum + item.duration, 0);
+  const userActiveTime = mergeIntervals(entries.map((entry) => [entry.startMs, entry.endMs])).reduce(
+    (total, [startMs, endMs]) => total + endMs - startMs,
+    0,
+  );
   const topApplications = Array.from(totals.entries())
     .filter(([, item]) => item.duration > 0)
     .map(([key, item]) => {
@@ -202,14 +241,12 @@ function buildViewModelForEntries(entries: MaterializedEntry[], programs: Timeke
   const hourlyCategoryActivity = buildHourlyCategoryActivity(entries, uiText);
   return {
     totalTrackedTime,
+    userActiveTime,
     yesterdayTrackedTime: 0,
     dayDeltaTrackedTime: 0,
     topApplications,
     categoryDist,
-    hourlyActivity: hours.map((duration, hour) => ({
-      hour: `${String(hour).padStart(2, "0")}:00`,
-      minutes: Math.round(duration / 60000),
-    })),
+    hourlyActivity: buildUserActiveHourlyActivity(entries),
     hourlyCategoryActivity,
     categoryByExecutable,
   };

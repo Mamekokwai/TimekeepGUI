@@ -18,6 +18,16 @@ pub async fn has_web_activity_revision_schema(pool: &Pool<Sqlite>) -> Result<boo
         .all(|required| columns.iter().any(|column| column == required)))
 }
 
+pub async fn has_user_activity_schema(pool: &Pool<Sqlite>) -> Result<bool, String> {
+    let columns = table_columns(pool, "user_activity_sessions").await?;
+    let indexes = table_indexes(pool, "user_activity_sessions").await?;
+    Ok(["id", "start_time", "end_time", "duration"]
+        .iter()
+        .all(|column| columns.contains(*column))
+        && indexes.contains("idx_user_activity_single_active")
+        && indexes.contains("idx_user_activity_sessions_time"))
+}
+
 async fn table_columns(pool: &Pool<Sqlite>, table: &str) -> Result<BTreeSet<String>, String> {
     let rows = sqlx::query(&format!("PRAGMA table_info({table})"))
         .fetch_all(pool)

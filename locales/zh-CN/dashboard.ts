@@ -1,6 +1,6 @@
 // zh-CN dashboard locale resource. Pure data only.
 export const MESSAGES = {
-  "dashboard.active": "当前活跃",
+  "dashboard.active": "用户活跃",
   "dashboard.afk": "无操作",
   "dashboard.bootTime": "本次开机",
   "dashboard.comparedWithYesterday": {
@@ -44,9 +44,9 @@ export const MESSAGES = {
     }
   },
   "dashboard.emptyState": "今天暂无记录",
-  "dashboard.focusShare": "专注分布",
+  "dashboard.focusShare": "电脑运行时长",
   "dashboard.hourlyActivity": "今日活动",
-  "dashboard.idle": "空闲",
+  "dashboard.idle": "挂机",
   "dashboard.paused": "已暂停",
   "dashboard.sharePrefix": "占比",
   "dashboard.showHourlyActivityByCategory": "按分类显示",
@@ -68,7 +68,7 @@ export const MESSAGES = {
       ]
     }
   },
-  "dashboard.total": "总计",
+  "dashboard.total": "运行总计",
   "dashboard.tracking": {
     "$type": "message",
     "body": {

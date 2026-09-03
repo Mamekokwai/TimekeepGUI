@@ -555,6 +555,12 @@
           "markdownDescription": "Enables the cmd_get_storage_snapshot command without any pre-configured scope."
         },
         {
+          "description": "Enables the cmd_get_system_runtime_snapshot command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-cmd-get-system-runtime-snapshot",
+          "markdownDescription": "Enables the cmd_get_system_runtime_snapshot command without any pre-configured scope."
+        },
+        {
           "description": "Enables the cmd_get_tool_alerts command without any pre-configured scope.",
           "type": "string",
           "const": "allow-cmd-get-tool-alerts",
@@ -577,6 +583,12 @@
           "type": "string",
           "const": "allow-cmd-get-update-snapshot",
           "markdownDescription": "Enables the cmd_get_update_snapshot command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the cmd_get_user_activity_snapshot command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-cmd-get-user-activity-snapshot",
+          "markdownDescription": "Enables the cmd_get_user_activity_snapshot command without any pre-configured scope."
         },
         {
           "description": "Enables the cmd_get_web_activity_aggregate_range command without any pre-configured scope.",
@@ -697,6 +709,12 @@
           "type": "string",
           "const": "allow-cmd-pick-canonical-import-file",
           "markdownDescription": "Enables the cmd_pick_canonical_import_file command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the cmd_pick_custom_app_icon command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-cmd-pick-custom-app-icon",
+          "markdownDescription": "Enables the cmd_pick_custom_app_icon command without any pre-configured scope."
         },
         {
           "description": "Enables the cmd_pick_export_save_file command without any pre-configured scope.",
@@ -1179,6 +1197,12 @@
           "markdownDescription": "Denies the cmd_get_storage_snapshot command without any pre-configured scope."
         },
         {
+          "description": "Denies the cmd_get_system_runtime_snapshot command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-cmd-get-system-runtime-snapshot",
+          "markdownDescription": "Denies the cmd_get_system_runtime_snapshot command without any pre-configured scope."
+        },
+        {
           "description": "Denies the cmd_get_tool_alerts command without any pre-configured scope.",
           "type": "string",
           "const": "deny-cmd-get-tool-alerts",
@@ -1201,6 +1225,12 @@
           "type": "string",
           "const": "deny-cmd-get-update-snapshot",
           "markdownDescription": "Denies the cmd_get_update_snapshot command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the cmd_get_user_activity_snapshot command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-cmd-get-user-activity-snapshot",
+          "markdownDescription": "Denies the cmd_get_user_activity_snapshot command without any pre-configured scope."
         },
         {
           "description": "Denies the cmd_get_web_activity_aggregate_range command without any pre-configured scope.",
@@ -1321,6 +1351,12 @@
           "type": "string",
           "const": "deny-cmd-pick-canonical-import-file",
           "markdownDescription": "Denies the cmd_pick_canonical_import_file command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the cmd_pick_custom_app_icon command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-cmd-pick-custom-app-icon",
+          "markdownDescription": "Denies the cmd_pick_custom_app_icon command without any pre-configured scope."
         },
         {
           "description": "Denies the cmd_pick_export_save_file command without any pre-configured scope.",

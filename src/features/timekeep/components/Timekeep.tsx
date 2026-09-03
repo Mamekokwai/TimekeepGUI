@@ -9,10 +9,13 @@ import QuietPageHeader from "../../../shared/components/QuietPageHeader.tsx";
 import { useQuietDialogs } from "../../../shared/hooks/useQuietDialogs.tsx";
 import { useRequestedAppIcons } from "../../../shared/hooks/useRequestedAppIcons.ts";
 import type { QuietToastTone } from "../../../shared/types/toast.ts";
-import { getAppIcon, loadAppIconsForExecutables } from "../../../platform/persistence/appIconRuntimeCache.ts";
 import { useTimekeepPanelState } from "../hooks/useTimekeepPanelState.ts";
 import {
   loadTimekeepProgramCandidates,
+  getAppIcon,
+  loadAppIconsForExecutables,
+  pickCustomAppIcon,
+  setAppIconRuntimeCacheEntry,
   type TimekeepIntegrationConfig,
   type TimekeepProgramCandidate,
   type TimekeepServiceConfig,
@@ -271,6 +274,18 @@ export default function Timekeep({ onToast }: Props) {
     if (confirmed) await state.resetStats(programName);
   };
 
+  const handleCustomIcon = async (programName: string) => {
+    try {
+      const icon = await pickCustomAppIcon(programName);
+      if (!icon) return;
+      setAppIconRuntimeCacheEntry(programName, icon);
+      onToast?.(UI_TEXT.timekeep.settingsSaved, "success");
+    } catch (error) {
+      console.warn("Failed to update application icon", error);
+      onToast?.(UI_TEXT.timekeep.operationFailed, "error");
+    }
+  };
+
   const handleHistorySearch = async () => {
     const parsedLimit = Number.parseInt(historyLimit, 10);
     await state.loadHistory({
@@ -403,11 +418,21 @@ export default function Timekeep({ onToast }: Props) {
                   {state.programs.map((program) => (
                     <div key={program.id || program.name} className="flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0">
                       <div className="flex min-w-0 items-start gap-3">
-                        <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-[var(--qp-border-subtle)] bg-[var(--qp-bg-elevated)]">
-                          {getAppIcon(timekeepIcons, program.name) ? (
-                            <img src={getAppIcon(timekeepIcons, program.name) ?? undefined} alt="" className="h-6 w-6 object-contain" />
-                          ) : <Activity size={16} className="text-[var(--qp-accent-default)]" />}
-                        </span>
+                        <div className="mt-0.5 flex w-9 shrink-0 flex-col items-center gap-1">
+                          <span className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-[8px] border border-[var(--qp-border-subtle)] bg-[var(--qp-bg-elevated)]">
+                            {getAppIcon(timekeepIcons, program.name) ? (
+                              <img src={getAppIcon(timekeepIcons, program.name) ?? undefined} alt="" className="h-6 w-6 object-contain" />
+                            ) : <Activity size={16} className="text-[var(--qp-accent-default)]" />}
+                          </span>
+                          <QuietIconAction
+                            icon={<Pencil size={11} />}
+                            title={UI_TEXT.timekeep.edit}
+                            ariaLabel={`${UI_TEXT.timekeep.edit} ${program.name}`}
+                            className="timekeep-program-action h-6 w-6"
+                            disabled={state.busy}
+                            onClick={() => { void handleCustomIcon(program.name); }}
+                          />
+                        </div>
                         <div className="min-w-0">
                         <div className="flex min-w-0 items-center gap-2">
                           <div className="truncate font-medium text-[var(--qp-text-primary)]">{program.name}</div>

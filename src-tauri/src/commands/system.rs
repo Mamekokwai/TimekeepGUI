@@ -10,12 +10,13 @@ pub struct SystemRuntimeSnapshot {
 pub fn cmd_get_system_runtime_snapshot() -> Result<SystemRuntimeSnapshot, String> {
     #[cfg(target_os = "windows")]
     {
-        let uptime_seconds = unsafe { windows::Win32::System::SystemInformation::GetTickCount64() / 1_000 };
+        let uptime_seconds =
+            unsafe { windows::Win32::System::SystemInformation::GetTickCount64() / 1_000 };
         let now_ms = chrono::Utc::now().timestamp_millis();
-        return Ok(SystemRuntimeSnapshot {
+        Ok(SystemRuntimeSnapshot {
             boot_time_ms: now_ms - (uptime_seconds as i64 * 1_000),
             uptime_seconds,
-        });
+        })
     }
 
     #[cfg(not(target_os = "windows"))]

@@ -1,4 +1,5 @@
 pub mod activity_read_model;
+pub mod app_icon;
 pub mod backup;
 pub mod diagnostics;
 pub mod error;
@@ -12,6 +13,7 @@ pub mod timekeep;
 pub mod tools;
 pub mod tracking;
 pub mod update;
+pub mod user_activity;
 pub mod web_activity;
 pub mod web_activity_analysis;
 pub mod widget;

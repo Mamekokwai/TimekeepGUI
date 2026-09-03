@@ -1,6 +1,6 @@
 // en-US dashboard locale resource. Pure data only.
 export const MESSAGES = {
-  "dashboard.active": "Active now",
+  "dashboard.active": "User active",
   "dashboard.afk": "Idle",
   "dashboard.bootTime": "Booted at",
   "dashboard.comparedWithYesterday": {
@@ -44,7 +44,7 @@ export const MESSAGES = {
     }
   },
   "dashboard.emptyState": "No records today",
-  "dashboard.focusShare": "Focus share",
+  "dashboard.focusShare": "Computer runtime",
   "dashboard.hourlyActivity": "Today's Activity",
   "dashboard.idle": "Idle",
   "dashboard.paused": "Paused",
@@ -68,7 +68,7 @@ export const MESSAGES = {
       ]
     }
   },
-  "dashboard.total": "Total",
+  "dashboard.total": "Runtime",
   "dashboard.tracking": {
     "$type": "message",
     "body": {

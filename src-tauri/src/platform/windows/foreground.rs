@@ -79,6 +79,23 @@ pub fn cmd_set_afk_threshold(threshold_secs: u64) {
     AFK_THRESHOLD_SECS.store(threshold_secs, Ordering::Relaxed);
 }
 
+/// Returns the number of milliseconds since the last keyboard or mouse input.
+/// This is deliberately independent from the foreground window so callers can
+/// track user presence without coupling it to an application.
+pub fn get_last_input_idle_ms() -> u64 {
+    unsafe {
+        let mut last_input = LASTINPUTINFO {
+            cbSize: std::mem::size_of::<LASTINPUTINFO>() as u32,
+            dwTime: 0,
+        };
+        if GetLastInputInfo(&mut last_input).ok().is_ok() {
+            u64::from(GetTickCount().wrapping_sub(last_input.dwTime))
+        } else {
+            0
+        }
+    }
+}
+
 pub fn get_active_window() -> WindowInfo {
     unsafe {
         // AFK detection uses the configured threshold from the tracking runtime.

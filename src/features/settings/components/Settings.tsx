@@ -213,12 +213,15 @@ export default function Settings({
       <div className="flex-1 overflow-y-auto qp-scroll-region pr-2">
         <div className="grid grid-cols-1 gap-4 md:gap-5">
           <SettingsTrackingPanel
+            activeHoldMinutes={Math.round(draftSettings.timelineMergeGapSecs / 60)}
+            onActiveHoldMinutesChange={(minutes) => handleChange("timelineMergeGapSecs", minutes * 60)}
+            audioKeepsUserActive={draftSettings.audioKeepsUserActive ?? true}
+            onAudioKeepsUserActiveChange={(nextChecked) => handleChange("audioKeepsUserActive", nextChecked)}
             trackingPaused={draftSettings.trackingPaused}
             onTrackingPausedChange={(nextChecked) => handleChange("trackingPaused", nextChecked)}
             titleRecordingEnabled={draftSettings.titleRecordingEnabled}
             onTitleRecordingEnabledChange={(nextChecked) => handleChange("titleRecordingEnabled", nextChecked)}
           />
-
           <SettingsAppearancePanel
             themeMode={draftSettings.themeMode}
             onThemeModeChange={(nextThemeMode) => handleChange("themeMode", nextThemeMode)}

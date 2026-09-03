@@ -49,6 +49,17 @@ pub fn start_signal_source() {
     });
 }
 
+pub fn is_media_playing() -> bool {
+    let Some(state) = MEDIA_SIGNAL_SOURCE.get() else {
+        return false;
+    };
+    state
+        .snapshot
+        .lock()
+        .map(|snapshot| snapshot.signal.is_active && now_ms() <= snapshot.freshness_deadline_ms)
+        .unwrap_or(false)
+}
+
 pub async fn get_sustained_participation_signal(
     window: &WindowInfo,
 ) -> SustainedParticipationSignalSnapshot {

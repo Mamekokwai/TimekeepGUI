@@ -27,6 +27,8 @@ pub const SCHEDULED_EXPORT_MIGRATION_DESCRIPTION: &str = "create_scheduled_expor
 pub const ACTIVITY_REMINDER_RULES_MIGRATION_VERSION: i64 = 13;
 pub const ACTIVITY_REMINDER_RULES_MIGRATION_DESCRIPTION: &str =
     "generalize_activity_reminder_rules";
+pub const USER_ACTIVITY_MIGRATION_VERSION: i64 = 14;
+pub const USER_ACTIVITY_MIGRATION_DESCRIPTION: &str = "create_user_activity_sessions";
 
 pub const CURRENT_BASELINE_SCHEMA_SQL: &str = "
     CREATE TABLE IF NOT EXISTS sessions (
@@ -255,6 +257,24 @@ pub const ACTIVITY_REMINDER_RULES_SCHEMA_SQL: &str = "
     CREATE INDEX IF NOT EXISTS idx_tool_activity_reminder_rules_web
     ON tool_activity_reminder_rules(target_kind, normalized_domain)
     WHERE disabled_at IS NULL AND target_kind = 'web';
+";
+
+pub const USER_ACTIVITY_SCHEMA_SQL: &str = "
+    CREATE TABLE IF NOT EXISTS user_activity_sessions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        start_time INTEGER NOT NULL,
+        end_time INTEGER,
+        duration INTEGER,
+        CHECK(end_time IS NULL OR end_time >= start_time),
+        CHECK(duration IS NULL OR duration >= 0)
+    );
+
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_user_activity_single_active
+    ON user_activity_sessions((1))
+    WHERE end_time IS NULL;
+
+    CREATE INDEX IF NOT EXISTS idx_user_activity_sessions_time
+    ON user_activity_sessions(start_time, end_time);
 ";
 
 pub const WEB_ACTIVITY_SCHEMA_SQL: &str = "
@@ -1139,6 +1159,12 @@ pub fn tracker_migrations() -> Vec<Migration> {
             version: ACTIVITY_REMINDER_RULES_MIGRATION_VERSION,
             description: ACTIVITY_REMINDER_RULES_MIGRATION_DESCRIPTION,
             sql: ACTIVITY_REMINDER_RULES_SCHEMA_SQL,
+            kind: MigrationKind::Up,
+        },
+        Migration {
+            version: USER_ACTIVITY_MIGRATION_VERSION,
+            description: USER_ACTIVITY_MIGRATION_DESCRIPTION,
+            sql: USER_ACTIVITY_SCHEMA_SQL,
             kind: MigrationKind::Up,
         },
     ]

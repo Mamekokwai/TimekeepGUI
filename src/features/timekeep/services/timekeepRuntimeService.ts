@@ -17,12 +17,19 @@ import {
   type TimekeepServiceStatus,
   type TimekeepServiceConfig,
 } from "../../../platform/timekeep/timekeepGateway.ts";
+import { pickCustomAppIcon } from "../../../platform/persistence/appIconGateway.ts";
+import {
+  getAppIcon,
+  loadAppIconsForExecutables,
+  setAppIconRuntimeCacheEntry,
+} from "../../../platform/persistence/appIconRuntimeCache.ts";
 
 export { getTimekeepErrorCode } from "../../../platform/timekeep/timekeepGateway.ts";
 
 export type { TimekeepProgram, TimekeepProgramCandidate, TimekeepServiceStatus };
 export type { TimekeepActiveSession, TimekeepHistoryEntry } from "../../../platform/timekeep/timekeepGateway.ts";
 export type { TimekeepIntegrationConfig, TimekeepServiceConfig } from "../../../platform/timekeep/timekeepGateway.ts";
+export { getAppIcon, loadAppIconsForExecutables, pickCustomAppIcon, setAppIconRuntimeCacheEntry };
 
 export function loadTimekeepPrograms(): Promise<TimekeepProgram[]> {
   return listTimekeepPrograms();

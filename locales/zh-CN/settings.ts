@@ -182,8 +182,8 @@ export const MESSAGES = {
   "settings.globalTitleHint": "保存应用窗口标题和网页标题，用于历史活动明细。",
   "settings.globalTitleLabel": "全局标题",
   "settings.idle": "已保存",
-  "settings.idleTimeoutHint": "当前应用有音频等持续信号时，继续计入这段时间。",
-  "settings.idleTimeoutLabel": "持续计入时间",
+  "settings.idleTimeoutHint": "Windows 检测到音频播放时，即使没有键盘或鼠标操作，也计入用户活跃。",
+  "settings.idleTimeoutLabel": "音频播放时计为活跃",
   "settings.importRecordCount": {
     "$type": "message",
     "body": {
@@ -404,8 +404,8 @@ export const MESSAGES = {
   "settings.themeModeOptions.dark": "深色",
   "settings.themeModeOptions.light": "浅色",
   "settings.themeModeOptions.system": "跟随系统",
-  "settings.timelineMergeGapHint": "无操作后停止计时；短暂切屏返回，时间线保持连续。",
-  "settings.timelineMergeGapLabel": "活动保持时间",
+  "settings.timelineMergeGapHint": "键盘或鼠标操作后，在此时间内计入用户活跃。",
+  "settings.timelineMergeGapLabel": "用户活跃保持时间",
   "settings.title": "设置",
   "settings.tracking": "追踪",
   "settings.trackingPanelTitle": "追踪",

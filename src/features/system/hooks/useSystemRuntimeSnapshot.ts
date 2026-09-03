@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import {
   getSystemRuntimeSnapshot,
   type SystemRuntimeSnapshot,
-} from "../../../platform/system/systemRuntimeGateway.ts";
+} from "../services/systemRuntimeService.ts";
 
 export function useSystemRuntimeSnapshot() {
   const [snapshot, setSnapshot] = useState<SystemRuntimeSnapshot | null>(null);

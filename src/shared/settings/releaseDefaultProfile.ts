@@ -5,6 +5,7 @@ interface ReleaseDefaultSettingsProfile {
   timelineMergeGapSecs: number;
   refreshIntervalSecs: number;
   minSessionSecs: number;
+  audioKeepsUserActive: boolean;
   trackingPaused: boolean;
   titleRecordingEnabled: boolean;
   closeBehavior: "exit" | "tray";
@@ -73,9 +74,10 @@ interface ReleaseDefaultSettingsProfile {
 
 export const RELEASE_DEFAULT_SETTINGS: ReleaseDefaultSettingsProfile = {
   idleTimeoutSecs: 900,
-  timelineMergeGapSecs: 180,
+  timelineMergeGapSecs: 300,
   refreshIntervalSecs: 2,
   minSessionSecs: 300,
+  audioKeepsUserActive: true,
   trackingPaused: false,
   titleRecordingEnabled: true,
   closeBehavior: "tray",

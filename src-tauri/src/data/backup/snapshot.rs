@@ -954,6 +954,10 @@ mod tests {
             .execute(&pool)
             .await
             .expect("remove the version 13 activity reminder table");
+        sqlx::query("DROP TABLE user_activity_sessions")
+            .execute(&pool)
+            .await
+            .expect("remove the version 14 user activity table");
         sqlx::query("DELETE FROM _sqlx_migrations WHERE version = ?")
             .bind(removed_version)
             .execute(&pool)

@@ -1,11 +1,10 @@
 import { useLocale, useLocaleText } from "../../../shared/i18n/index.ts";
-import { getCategoryToken } from "../../../shared/classification/categoryTokens.ts";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, } from "react";
-import { Layers3, Monitor, Minus, TrendingDown, TrendingUp } from "lucide-react";
+import { Layers3, Monitor } from "lucide-react";
 
 import { useIconThemeColors } from "../../../shared/hooks/useIconThemeColors";
 import { useRequestedAppIcons } from "../../../shared/hooks/useRequestedAppIcons.ts";
-import { getAppIcon, loadAppIconsForExecutables } from "../../../platform/persistence/appIconRuntimeCache.ts";
+import { getAppIcon, loadAppIconsForExecutables } from "../services/dashboardIconService.ts";
 import { formatDashboardDuration } from "../services/dashboardFormatting";
 import type { DashboardReadModel } from "../services/dashboardReadModel";
 import { AppClassification } from "../../../shared/classification/appClassification.ts";
@@ -28,8 +27,12 @@ import {
 } from "../../classification/types.ts";
 import TimekeepDashboardCard from "../../timekeep/components/TimekeepDashboardCard.tsx";
 import { useTimekeepDashboardState } from "../../timekeep/hooks/useTimekeepDashboardState.ts";
-import { buildTimekeepDashboardViewModel } from "../../timekeep/services/timekeepDashboardViewModel.ts";
+import {
+  buildTimekeepDashboardViewModel,
+  getComputerRuntimeTodayMs,
+} from "../../timekeep/services/timekeepDashboardViewModel.ts";
 import { useSystemRuntimeSnapshot } from "../../system/hooks/useSystemRuntimeSnapshot.ts";
+import { useUserActivitySnapshot } from "../hooks/useUserActivitySnapshot.ts";
 
 interface Props {
   dashboard: DashboardReadModel;
@@ -55,8 +58,14 @@ const DONUT_STROKE_WIDTH = 16;
 const DONUT_CIRCUMFERENCE = 2 * Math.PI * DONUT_RADIUS;
 const DONUT_GAP_DEGREES = 4;
 
+interface DurationDistributionItem {
+  name: string;
+  value: number;
+  color: string;
+}
+
 function buildFocusCategoryDist(
-  categoryDist: DashboardReadModel["categoryDist"],
+  categoryDist: DurationDistributionItem[],
   limit: number,
   otherLabel: string,
 ) {
@@ -70,19 +79,14 @@ function buildFocusCategoryDist(
 
   return [
     ...visible,
-    {
-      category: "other" as const,
-      name: otherLabel,
-      value: restValue,
-      color: "var(--qp-text-tertiary)",
-    },
+    { name: otherLabel, value: restValue, color: "var(--qp-text-tertiary)" },
   ];
 }
 
 function DashboardFocusDonut({
   categoryDist,
 }: {
-  categoryDist: DashboardReadModel["categoryDist"];
+  categoryDist: DurationDistributionItem[];
 }) {
   const UI_TEXT = useLocaleText();
   const total = categoryDist.reduce((sum, item) => sum + Math.max(0, item.value), 0);
@@ -145,6 +149,12 @@ export default function Dashboard({
   const { refreshKey, mappingVersion, mergeThresholdSecs, trackerHealth } = runtime;
   const timekeepState = useTimekeepDashboardState(refreshKey);
   const systemRuntime = useSystemRuntimeSnapshot();
+  const userActivity = useUserActivitySnapshot(refreshKey);
+  const [nowMs, setNowMs] = useState(() => Date.now());
+  useEffect(() => {
+    const timer = window.setInterval(() => setNowMs(Date.now()), 1000);
+    return () => window.clearInterval(timer);
+  }, []);
   const timekeepDashboard = useMemo(() => buildTimekeepDashboardViewModel({
     date: new Date(),
     programs: timekeepState.programs,
@@ -157,6 +167,21 @@ export default function Dashboard({
   const detail = useDestinationDetailLauncher();
   const quickClassification = useQuickClassificationLauncher();
   const displayedDashboard = timekeepDashboard;
+  const computerRuntimeToday = systemRuntime
+    ? getComputerRuntimeTodayMs(systemRuntime.boot_time_ms, nowMs)
+    : displayedDashboard.userActiveTime;
+  const userActiveTime = Math.min(userActivity?.activeMs ?? 0, computerRuntimeToday);
+  const runtimeDistribution = useMemo<DurationDistributionItem[]>(() => {
+    const idleTime = Math.max(0, computerRuntimeToday - userActiveTime);
+    return [
+      userActiveTime > 0
+        ? { name: UI_TEXT.dashboard.active, value: userActiveTime, color: "var(--qp-success)" }
+        : null,
+      idleTime > 0
+        ? { name: UI_TEXT.dashboard.idle, value: idleTime, color: "var(--qp-warning)" }
+        : null,
+    ].filter((item): item is DurationDistributionItem => item !== null);
+  }, [UI_TEXT, computerRuntimeToday, userActiveTime]);
   const requestedTimekeepExeNames = useMemo(
     () => displayedDashboard.topApplications.map((app) => app.exeName),
     [displayedDashboard.topApplications],
@@ -170,41 +195,21 @@ export default function Dashboard({
   });
   const iconThemeColors = useIconThemeColors(timekeepIcons);
   const {
-    totalTrackedTime,
-    dayDeltaTrackedTime,
     topApplications,
-    hourlyActivity,
     hourlyCategoryActivity,
-    categoryDist,
   } = displayedDashboard;
-  const dayDeltaDirection = dayDeltaTrackedTime > 0
-    ? "increase"
-    : dayDeltaTrackedTime < 0
-      ? "decrease"
-      : "same";
-  const dayDeltaLabel = UI_TEXT.dashboard.comparedWithYesterday(
-    formatDashboardDuration(Math.abs(dayDeltaTrackedTime)),
-    dayDeltaDirection,
-  );
-  const DayDeltaIcon = dayDeltaDirection === "increase"
-    ? TrendingUp
-    : dayDeltaDirection === "decrease"
-      ? TrendingDown
-      : Minus;
+  const hourlyActivity = (userActivity?.hourlyActiveMs ?? Array.from({ length: 24 }, () => 0))
+    .map((activeMs, hour) => ({
+      hour: `${String(hour).padStart(2, "0")}:00`,
+      minutes: Math.round(activeMs / 60000),
+    }));
   const focusCardRef = useRef<HTMLDivElement | null>(null);
   const topAppsListRef = useRef<HTMLDivElement | null>(null);
   const [focusCategoryLimit, setFocusCategoryLimit] = useState(FOCUS_CATEGORY_LIMIT);
   const [topAppsListOverflows, setTopAppsListOverflows] = useState(false);
   const [quickOverrides, setQuickOverrides] = useState<Record<string, AppOverride | null>>({});
-  const localizedCategoryDist = useMemo(
-    () => categoryDist.map((item) => ({
-      ...item,
-      name: item.name || getCategoryToken(item.category, UI_TEXT).label,
-    })),
-    [categoryDist, UI_TEXT],
-  );
   const visibleCategoryDist = buildFocusCategoryDist(
-    localizedCategoryDist,
+    runtimeDistribution,
     focusCategoryLimit,
     UI_TEXT.categories.other,
   );
@@ -264,7 +269,7 @@ export default function Dashboard({
                 <DashboardFocusDonut categoryDist={visibleCategoryDist} />
                 <div className="dashboard-focus-total-center absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                   <span className="text-[22px] font-semibold text-[var(--qp-text-primary)] tabular-nums">
-                    {formatDashboardDuration(totalTrackedTime)}
+                    {formatDashboardDuration(computerRuntimeToday)}
                   </span>
                   <span className="max-w-[88px] truncate text-[11px] font-semibold text-[var(--qp-text-tertiary)] uppercase tracking-[0.06em]">
                     {UI_TEXT.dashboard.total}
@@ -293,8 +298,7 @@ export default function Dashboard({
               </div>
             </div>
             <p className="dashboard-focus-delta text-[11px] font-medium text-[var(--qp-text-tertiary)]">
-              <DayDeltaIcon size={12} strokeWidth={2} />
-              {dayDeltaLabel}
+              {UI_TEXT.dashboard.active}: {formatDashboardDuration(userActiveTime)}
             </p>
             {systemRuntime ? (
               <p className="mt-2 text-[11px] font-medium text-[var(--qp-text-tertiary)]">

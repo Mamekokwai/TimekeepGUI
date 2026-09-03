@@ -51,6 +51,17 @@ pub fn start_signal_source() {
     });
 }
 
+pub fn is_audio_active() -> bool {
+    let Some(state) = AUDIO_SIGNAL_SOURCE.get() else {
+        return false;
+    };
+    state
+        .snapshot
+        .lock()
+        .map(|snapshot| snapshot.signal_state(now_ms()) == AudioSignalState::Active)
+        .unwrap_or(false)
+}
+
 pub async fn get_sustained_participation_signal(
     window: &WindowInfo,
 ) -> SustainedParticipationSignalSnapshot {

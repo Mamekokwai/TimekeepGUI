@@ -41,6 +41,7 @@ export interface AppSettings {
   timelineMergeGapSecs: number;
   refreshIntervalSecs: number;
   minSessionSecs: number;
+  audioKeepsUserActive?: boolean;
   trackingPaused: boolean;
   titleRecordingEnabled: boolean;
   closeBehavior: CloseBehavior;

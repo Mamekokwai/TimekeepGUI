@@ -8,6 +8,30 @@ use tokio::time::{sleep, Duration};
 
 const RETRY_DELAY_SECS: u64 = 2;
 const MAX_RETRY_DELAY_SECS: u64 = 30;
+const USER_ACTIVITY_POLL_INTERVAL: Duration = Duration::from_secs(1);
+
+pub(crate) fn spawn_user_activity_runtime<R: Runtime + 'static>(app: AppHandle<R>) {
+    tauri::async_runtime::spawn(async move {
+        if let Err(error) = crate::data::user_activity::close_open_session(
+            &app,
+            crate::platform::clock::unix_timestamp_millis_i64(),
+        )
+        .await
+        {
+            eprintln!("[user-activity] failed to seal previous session: {error}");
+        }
+        loop {
+            let now_ms = crate::platform::clock::unix_timestamp_millis_i64();
+            let idle_ms = crate::platform::windows::foreground::get_last_input_idle_ms();
+            if let Err(error) =
+                crate::data::user_activity::record_presence(&app, now_ms, idle_ms).await
+            {
+                eprintln!("[user-activity] failed to record presence: {error}");
+            }
+            sleep(USER_ACTIVITY_POLL_INTERVAL).await;
+        }
+    });
+}
 
 pub(crate) fn spawn_updater_startup_auto_check<R: Runtime + 'static>(app: AppHandle<R>) {
     let updater_state: UpdaterRuntimeState = {

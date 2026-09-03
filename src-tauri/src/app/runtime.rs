@@ -71,6 +71,7 @@ pub fn setup(
     crate::app::remote_status_bridge::start(app.handle().clone());
     crate::app::web_activity::spawn_startup_repair(app.handle().clone());
     crate::data::activity_read_model::spawn_background_worker(app.handle().clone());
+    crate::app::runtime_tasks::spawn_user_activity_runtime(app.handle().clone());
     crate::app::widget::start_widget_fullscreen_watcher(app.handle().clone());
 
     let app_handle = app.handle().clone();

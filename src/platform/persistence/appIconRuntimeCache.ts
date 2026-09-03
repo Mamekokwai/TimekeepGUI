@@ -191,6 +191,10 @@ export function getAppIconRuntimeCacheSnapshot(): Record<string, string> {
   return Object.fromEntries(appIconCache.entries());
 }
 
+export function setAppIconRuntimeCacheEntry(exeName: string, icon: string): void {
+  setRuntimeIconCacheEntry(resolveAppIconRetryKey(exeName), icon);
+}
+
 export function getCachedAppIconsForExecutables(exeNames: string[]): Record<string, string> {
   const requestedExeNames = normalizeRequestedExecutables(exeNames);
   const icons: Record<string, string> = {};

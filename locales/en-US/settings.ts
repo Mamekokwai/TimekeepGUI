@@ -191,8 +191,8 @@ export const MESSAGES = {
   "settings.globalTitleHint": "Save application window titles and webpage titles for activity history details.",
   "settings.globalTitleLabel": "Global titles",
   "settings.idle": "Saved",
-  "settings.idleTimeoutHint": "When the current app has audio or similar signals, keep counting that time.",
-  "settings.idleTimeoutLabel": "Continue counting",
+  "settings.idleTimeoutHint": "Count the user as active while Windows reports audio playback, even without keyboard or mouse input.",
+  "settings.idleTimeoutLabel": "Audio playback counts as active",
   "settings.importRecordCount": {
     "$type": "message",
     "body": {
@@ -413,8 +413,8 @@ export const MESSAGES = {
   "settings.themeModeOptions.dark": "Dark",
   "settings.themeModeOptions.light": "Light",
   "settings.themeModeOptions.system": "System",
-  "settings.timelineMergeGapHint": "Stop after inactivity; brief app switches keep the timeline continuous.",
-  "settings.timelineMergeGapLabel": "Activity hold time",
+  "settings.timelineMergeGapHint": "After keyboard or mouse input, count the user as active for this duration.",
+  "settings.timelineMergeGapLabel": "User active hold time",
   "settings.title": "Settings",
   "settings.tracking": "Tracking",
   "settings.trackingPanelTitle": "Tracking",
