@@ -5,6 +5,9 @@
       "label": "Go: Test all packages",
       "type": "shell",
       "command": "go test ./... -cover",
+      "options": {
+        "cwd": "${workspaceFolder}/sample/timekeep"
+      },
       "group": {
         "kind": "test",
         "isDefault": true
@@ -17,24 +20,36 @@
       "label": "Go: Format",
       "type": "shell",
       "command": "gofmt -w .",
+      "options": {
+        "cwd": "${workspaceFolder}/sample/timekeep"
+      },
       "problemMatcher": []
     },
     {
       "label": "Go: Staticcheck",
       "type": "shell",
       "command": "staticcheck ./...",
+      "options": {
+        "cwd": "${workspaceFolder}/sample/timekeep"
+      },
       "problemMatcher": []
     },
     {
       "label": "SQLC: Generate",
       "type": "shell",
       "command": "sqlc generate",
+      "options": {
+        "cwd": "${workspaceFolder}/sample/timekeep"
+      },
       "problemMatcher": []
     },
     {
       "label": "Build: CLI",
       "type": "shell",
       "command": "go build -o timekeep.exe ./cmd/cli",
+      "options": {
+        "cwd": "${workspaceFolder}/sample/timekeep"
+      },
       "problemMatcher": [
         "$go"
       ],
@@ -44,6 +59,9 @@
       "label": "Build: Service",
       "type": "shell",
       "command": "go build -o timekeep-service.exe ./cmd/service",
+      "options": {
+        "cwd": "${workspaceFolder}/sample/timekeep"
+      },
       "problemMatcher": [
         "$go"
       ],
@@ -54,7 +72,7 @@
       "type": "shell",
       "command": "go run ./cmd/service --debug",
       "options": {
-        "cwd": "${workspaceFolder}"
+        "cwd": "${workspaceFolder}/sample/timekeep"
       },
       "problemMatcher": []
     },
@@ -63,7 +81,7 @@
       "type": "shell",
       "command": "npm ci",
       "options": {
-        "cwd": "${workspaceFolder}/sample/patina"
+        "cwd": "${workspaceFolder}"
       },
       "problemMatcher": []
     },
@@ -72,7 +90,7 @@
       "type": "shell",
       "command": "npm run dev",
       "options": {
-        "cwd": "${workspaceFolder}/sample/patina"
+        "cwd": "${workspaceFolder}"
       },
       "problemMatcher": []
     },
@@ -81,7 +99,7 @@
       "type": "shell",
       "command": "npm run tauri -- dev",
       "options": {
-        "cwd": "${workspaceFolder}/sample/patina"
+        "cwd": "${workspaceFolder}"
       },
       "problemMatcher": []
     },
@@ -99,7 +117,7 @@
       "type": "shell",
       "command": "npm run check:types",
       "options": {
-        "cwd": "${workspaceFolder}/sample/patina"
+        "cwd": "${workspaceFolder}"
       },
       "problemMatcher": []
     },
@@ -108,7 +126,7 @@
       "type": "shell",
       "command": "npm run check:lint",
       "options": {
-        "cwd": "${workspaceFolder}/sample/patina"
+        "cwd": "${workspaceFolder}"
       },
       "problemMatcher": []
     },
@@ -117,7 +135,7 @@
       "type": "shell",
       "command": "npm test",
       "options": {
-        "cwd": "${workspaceFolder}/sample/patina"
+        "cwd": "${workspaceFolder}"
       },
       "problemMatcher": [
         "$tsc"
@@ -132,7 +150,7 @@
       "type": "shell",
       "command": "npm run build",
       "options": {
-        "cwd": "${workspaceFolder}/sample/patina"
+        "cwd": "${workspaceFolder}"
       },
       "problemMatcher": [
         "$tsc"
@@ -144,7 +162,7 @@
       "type": "shell",
       "command": "npm run test:ui-browser-smoke",
       "options": {
-        "cwd": "${workspaceFolder}/sample/patina"
+        "cwd": "${workspaceFolder}"
       },
       "problemMatcher": [],
       "group": {

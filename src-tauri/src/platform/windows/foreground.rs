@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use std::collections::HashSet;
 use std::ffi::OsString;
 use std::os::windows::prelude::OsStringExt;
 use std::sync::{
@@ -244,6 +245,49 @@ pub fn get_process_path(process_id: u32) -> String {
 
 pub fn get_process_exe_name(process_id: u32) -> String {
     get_process_details(process_id).0
+}
+
+/// Returns executable basenames for every process currently present in the
+/// system snapshot. This is intentionally independent from the foreground
+/// window and is used by the Timekeep-compatible process-presence fallback.
+pub fn get_running_process_names() -> HashSet<String> {
+    let mut names = HashSet::new();
+    let snapshot = unsafe { CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0) }
+        .ok()
+        .and_then(OwnedHandle::new);
+    let Some(snapshot) = snapshot else {
+        return names;
+    };
+
+    let mut entry = PROCESSENTRY32W {
+        dwSize: std::mem::size_of::<PROCESSENTRY32W>() as u32,
+        ..Default::default()
+    };
+
+    unsafe {
+        if Process32FirstW(snapshot.raw(), &mut entry).is_ok() {
+            loop {
+                let len = entry
+                    .szExeFile
+                    .iter()
+                    .position(|&ch| ch == 0)
+                    .unwrap_or(entry.szExeFile.len());
+                let name = OsString::from_wide(&entry.szExeFile[..len])
+                    .to_string_lossy()
+                    .trim()
+                    .to_ascii_lowercase();
+                if !name.is_empty() {
+                    names.insert(name);
+                }
+
+                if Process32NextW(snapshot.raw(), &mut entry).is_err() {
+                    break;
+                }
+            }
+        }
+    }
+
+    names
 }
 
 fn get_process_details(process_id: u32) -> (String, String) {

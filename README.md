@@ -7,9 +7,9 @@ https://github.com/jms-guy/timekeep
 https://github.com/Ceceliaee/patina
 将patina的GUI和timekeep的功能结合
 
-Local-first time tracking for Windows desktop work.
+面向 Windows 桌面的本地优先时间管理工具。
 
-English · [简体中文](README.zh-CN.md)
+简体中文
 
 ![Platform](https://img.shields.io/badge/platform-Windows-4f6f8f)
 ![Built with Tauri](https://img.shields.io/badge/built%20with-Tauri%20v2-4f7f8f)
@@ -20,7 +20,7 @@ English · [简体中文](README.zh-CN.md)
 
 
 <p align="center">
-TimekeepGUI combines local foreground activity tracking with a quiet, trustworthy desktop time-management interface.
+TimekeepGUI 将 Timekeep 的程序存在时间追踪与安静、可信的桌面时间管理界面结合起来。
 </p>
 
 ## 项目定位
@@ -31,19 +31,19 @@ TimekeepGUI 是一个 Windows 桌面端时间管理项目，使用 Patina 的 Ta
 
 ## 工作方式
 
-GUI 通过 Rust/Tauri command 调用 Timekeep bridge，再通过 Windows named pipe 与 Timekeep service 通信：
+GUI 通过 Rust/Tauri command 调用 Timekeep bridge。桥接层使用与 `sample/timekeep` 相同的数据库结构；如果已安装 Timekeep 服务，则通过 named pipe 通知服务刷新，否则由父级 GUI 执行同语义的进程存在同步：
 
 ```text
 React/TypeScript GUI
         ↓
 Tauri command: cmd_timekeep_request
         ↓
-Windows named pipe: \\.\pipe\Timekeep
-        ↓
-Timekeep service
+Timekeep 数据库：C:\ProgramData\TimeKeep\timekeep.db
+        ↓（可选）
+Windows named pipe: \\.\pipe\Timekeep → Timekeep service
 ```
 
-Timekeep service 未运行时，GUI 仍可以启动，但 Timekeep 页面会显示服务不可用。Windows 服务端需要监听 `\\.\pipe\Timekeep`，请求和响应使用逐行 JSON 格式。
+Timekeep 服务未运行时，GUI 仍可直接根据配置的程序名称枚举当前进程并维护会话；服务运行时则由服务负责进程事件监控，GUI 只读取其活动会话。
 
 ## 目录结构
 
@@ -60,172 +60,218 @@ TimekeepGUI/
 <p align="center">
   <img src=".github/assets/readme/hero.png" alt="TimekeepGUI dashboard">
 </p>
+## 编译调试运行方式
 
-## Why TimekeepGUI
+以下命令默认在实际 GUI 项目根目录执行：
 
-- Records foreground apps automatically, without manually starting or stopping timers.
-- Handles idle, lock, sleep, and abnormal-exit boundaries to keep records more trustworthy.
-- Keeps data local by default, with no account, cloud sync, or server dependency.
-- Lets you manage app names, categories, colors, stats exclusions, and window title capture.
-- Provides lightweight local tools such as reminders, timers, and Pomodoro.
-- Keeps the interface restrained, clear, and low-interruption for long-term daily use.
+```powershell
+cd E:\Github\TimekeepGUI
+```
 
-## Download
+### 前端编译
 
-TimekeepGUI 当前版本需要从源码构建，独立 Release 页面将在项目正式发布后补充。构建方法见下方 [Build From Source](#build-from-source)。
+```powershell
+npm ci
+npm run check:types
+npm run check:lint
+npm run build
+```
 
-Patina 的公开版本和素材仅作为本项目的参考来源，不代表 TimekeepGUI 的发行包。
+### Rust/Tauri 编译检查
 
-[Patina Web Sync](https://github.com/Ceceliaee/patina-web-sync) adds specific webpage details to browser activity. Install it as needed:
+```powershell
+cargo check --manifest-path src-tauri/Cargo.toml --locked
+cargo test --manifest-path src-tauri/Cargo.toml --locked
+cargo clippy --manifest-path src-tauri/Cargo.toml --locked -- -D warnings
+```
 
-<p align="center">
-  <a href="https://chromewebstore.google.com/detail/patina-web-sync/gimdckblhckibmeklhemgccabmbnoemd"><img src=".github/assets/store-badges/chrome-web-store.png" height="36" alt="Install Patina Web Sync from the Chrome Web Store"></a>
-  <a href="https://addons.mozilla.org/firefox/addon/patina-web-sync/"><img src=".github/assets/store-badges/firefox-add-ons.svg" height="36" alt="Install Patina Web Sync from Firefox Add-ons"></a>
-  <a href="https://microsoftedge.microsoft.com/addons/detail/gogmlpjhbfjghilmpcciedplifdiibai"><img src=".github/assets/store-badges/edge-add-ons.png" height="36" alt="Install Patina Web Sync from Microsoft Edge Add-ons"></a>
-</p>
+### GUI 调试运行
 
-## Core Features
+```powershell
+npm run tauri dev
+```
 
-### Automatic Tracking
+GUI 启动后会使用开发配置，并连接本机的 Timekeep IPC。若需要完整联调，请先在另一个终端启动 Timekeep service：
 
-- Automatically records the current foreground app and turns activity into time records.
-- Detects idle, lock, and sleep states to reduce invalid time in statistics.
-- Handles record boundaries after long-away periods and abnormal exits, reducing accidentally merged time.
-- Reduces missed effective activity in low-interaction scenarios such as videos, meetings, courses, and livestreams.
+```powershell
+cd E:\Github\TimekeepGUI\sample\timekeep
+go run ./cmd/service --debug
+```
 
-### Review And Analysis
+然后在 GUI 项目终端执行：
 
-- Review effective activity, app rankings, and category distribution in today's overview.
-- Use the timeline to review activity by date and inspect app switches and window title details.
-- Understand long-term time distribution through trends, heatmaps, and app curves.
+```powershell
+cd E:\Github\TimekeepGUI
+npm run tauri dev
+```
 
-### Management And Control
+Timekeep service 成功运行后应监听 Windows named pipe `\\.\pipe\Timekeep`。如果服务未启动，GUI 仍可打开，但 Timekeep 页面会显示服务不可用。
 
-- Rename apps and adjust categories, colors, and statistics rules.
-- Exclude apps you do not want in statistics, or disable window title capture for specific apps.
-- Export local backups, restore backups, and clean up historical records.
+## 从源码构建
 
-### Lightweight Tools
-
-- Create one-off reminders and app usage limit reminders.
-- Use stopwatch, countdown, and Pomodoro for active focus tasks.
-- Tool state stays local and does not replace automatic tracking records.
-
-## Interface Preview
-
-<table>
-  <tr>
-    <td width="50%" align="center"><strong>History</strong></td>
-    <td width="50%" align="center"><strong>Data</strong></td>
-  </tr>
-  <tr>
-    <td width="50%"><img src=".github/assets/readme/history.png" alt="History page"></td>
-    <td width="50%"><img src=".github/assets/readme/data.png" alt="Data page"></td>
-  </tr>
-  <tr>
-    <td width="50%" align="center"><strong>Classification</strong></td>
-    <td width="50%" align="center"><strong>Tools</strong></td>
-  </tr>
-  <tr>
-    <td width="50%"><img src=".github/assets/readme/classification.png" alt="Classification page"></td>
-    <td width="50%"><img src=".github/assets/readme/tools.png" alt="Tools page"></td>
-  </tr>
-  <tr>
-    <td width="50%" align="center"><strong>Settings</strong></td>
-    <td width="50%" align="center"><strong>About</strong></td>
-  </tr>
-  <tr>
-    <td width="50%"><img src=".github/assets/readme/settings.png" alt="Settings page"></td>
-    <td width="50%"><img src=".github/assets/readme/about.png" alt="About page"></td>
-  </tr>
-</table>
-
-## Reliability And Privacy
-
-Time tracking has long-term value only when the records are trustworthy. TimekeepGUI focuses on these boundaries:
-
-- **Foreground app recognition**: records the window and app that are actually in the foreground, reducing temporary-window and system noise.
-- **Idle handling**: idle time does not continue counting as effective activity.
-- **State boundaries**: handles record boundaries after lock, sleep, resume, long-away periods, and abnormal exits.
-- **Effective-duration stats**: rankings, distributions, and totals use effective activity time, not just open spans.
-- **Title capture control**: window title capture can be disabled per app to reduce unnecessary sensitive information retention.
-- **Local data control**: core data stays local, and backups, restores, and history cleanup are initiated by the user.
-
-## Current Scope
-
-TimekeepGUI currently focuses on personal local time records:
-
-- Windows 10/11 desktop use
-- Personal local data storage and control
-- Automatic tracking, review, classification, and backup or restore
-- Lightweight local tools
-
-It is not currently aimed at team collaboration, account systems, cloud sync, multi-platform sync, or heavy AI insights.
-
-## Build From Source
-
-### Requirements
+### 环境要求
 
 - Windows 10/11 x64
-- [Node.js](https://nodejs.org/) `25.8.0` and npm `11.11.0`
-- [Rust](https://www.rust-lang.org/tools/install) `1.94.1` with the `x86_64-pc-windows-msvc` toolchain
-- Visual Studio C++ Build Tools and Windows 10/11 SDK
+- [Node.js](https://nodejs.org/) `25.8.0` 和 npm `11.11.0`
+- [Rust](https://www.rust-lang.org/tools/install) `1.94.1` 及 `x86_64-pc-windows-msvc` 工具链
+- Visual Studio C++ Build Tools 和 Windows 10/11 SDK
 
-The Node and Rust versions are pinned in [`.node-version`](.node-version) and [`rust-toolchain.toml`](rust-toolchain.toml).
+Node 和 Rust 版本分别锁定在 [`.node-version`](.node-version) 与 [`rust-toolchain.toml`](rust-toolchain.toml) 中。
 
-### Install Dependencies
+### 安装依赖
 
 ```powershell
 cd E:\Github\TimekeepGUI
 npm ci
 ```
 
-### Run In Development
+### 开发运行
 
 ```powershell
 npm run tauri dev
 ```
 
-Start the Timekeep service separately before using the Timekeep page. The GUI connects to the Windows named pipe `\\.\pipe\Timekeep` and does not start the service automatically.
+使用 Timekeep 页面前，请先单独启动 Timekeep service。GUI 通过 Windows named pipe `\\.\pipe\Timekeep` 连接服务，不会自动启动服务。
 
-### Build Installer
+### 构建安装包
 
 ```powershell
-# Unsigned local installer
+# 本地未签名安装包
 npm run tauri -- build --bundles nsis --no-sign
 
-# Signed installer (requires TAURI_SIGNING_PRIVATE_KEY and
-# TAURI_SIGNING_PRIVATE_KEY_PASSWORD in the environment)
+# 签名安装包（需要配置 TAURI_SIGNING_PRIVATE_KEY 和
+# TAURI_SIGNING_PRIVATE_KEY_PASSWORD 环境变量）
 npm run tauri -- build --bundles nsis
 ```
 
-Installers are generated under:
+安装包生成在：
 
 ```text
 src-tauri/target/release/bundle/nsis/
 ```
 
-The signed build also generates the updater signature file `*.exe.sig`. Keep the updater private key outside the repository and never commit it.
+签名构建还会生成 updater 签名文件 `*.exe.sig`。请将 updater 私钥保存在仓库之外，禁止提交到 Git。
 
-## Tech Stack
+## 为什么选择 TimekeepGUI
 
-- Desktop shell: Tauri v2
-- Native backend and Windows integration: Rust
-- Time tracking service: Timekeep (Go), connected through local IPC
-- Frontend: React + Vite + TypeScript
-- Styling: Tailwind CSS
-- Animation: Framer Motion
-- Charts: Recharts
-- Database: SQLite via `@tauri-apps/plugin-sql`
-- Windows integration: `windows` crate
+- 只要被配置的程序进程存在，就自动记录运行时长，不依赖活动窗口或窗口焦点。
+- 处理无操作、锁屏、睡眠和异常退出等边界，让记录更加可信。
+- 数据默认保存在本地，不依赖账号、云同步或远程服务器。
+- 支持管理应用名称、分类、颜色和统计排除规则。
+- 提供提醒、计时器和番茄钟等轻量本地工具。
+- 界面保持克制、清晰、低打扰，适合长期日常使用。
 
-## Contributing
+## 下载
 
-If you want to contribute, understand the product direction, or review architecture boundaries, start with [`CONTRIBUTING.md`](CONTRIBUTING.md#english).
+TimekeepGUI 当前版本需要从源码构建，独立 Release 页面将在项目正式发布后补充。构建方法见下方“从源码构建”章节。
 
-## Feedback
+Patina 的公开版本和素材仅作为本项目的参考来源，不代表 TimekeepGUI 的发行包。
 
-Use GitHub Issues for bugs and feedback that needs follow-up, or scan the QR code to join the QQ channel for everyday conversation:
+[Patina Web Sync](https://github.com/Ceceliaee/patina-web-sync) 可以为浏览器活动补充具体网页信息，可按需安装：
+
+<p align="center">
+  <a href="https://chromewebstore.google.com/detail/patina-web-sync/gimdckblhckibmeklhemgccabmbnoemd"><img src=".github/assets/store-badges/chrome-web-store.png" height="36" alt="从 Chrome 应用商店安装 Patina Web Sync"></a>
+  <a href="https://addons.mozilla.org/firefox/addon/patina-web-sync/"><img src=".github/assets/store-badges/firefox-add-ons.svg" height="36" alt="从 Firefox 附加组件安装 Patina Web Sync"></a>
+  <a href="https://microsoftedge.microsoft.com/addons/detail/gogmlpjhbfjghilmpcciedplifdiibai"><img src=".github/assets/store-badges/edge-add-ons.png" height="36" alt="从 Microsoft Edge 加载项安装 Patina Web Sync"></a>
+</p>
+
+## 核心能力
+
+### 自动追踪
+
+- 依据进程启动和退出记录会话：首个进程启动会话，最后一个同名进程退出会话。
+- 同一个程序同时打开多个进程时，只要还有一个进程存在，会话就会继续计时。
+- 计时由 Timekeep 后台服务负责，GUI 关闭或隐藏到托盘不会中断计时。
+- 不读取活动窗口、窗口标题或键鼠空闲状态，因此不会因为切换窗口而暂停。
+
+### 回看与分析
+
+- 在今日概览中查看有效活动、应用排行和分类分布。
+- 在 Timekeep 页面查看当前运行中的程序、累计时长和历史会话。
+- 通过趋势、热力图和应用曲线了解长期时间分布。
+
+### 管理与控制
+
+- 重命名应用，调整分类、颜色和统计规则。
+- 管理需要追踪的程序，不想统计的程序不加入追踪列表。
+- 导出本地备份、恢复备份并清理历史记录。
+
+### 轻量工具
+
+- 创建一次性提醒和应用使用时长限制提醒。
+- 使用秒表、倒计时和番茄钟处理主动专注任务。
+- 工具状态保存在本地，不会替代自动追踪记录。
+
+## 界面预览
+
+<table>
+  <tr>
+    <td width="50%" align="center"><strong>历史</strong></td>
+    <td width="50%" align="center"><strong>数据</strong></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src=".github/assets/readme/history.png" alt="历史页面"></td>
+    <td width="50%"><img src=".github/assets/readme/data.png" alt="数据页面"></td>
+  </tr>
+  <tr>
+    <td width="50%" align="center"><strong>分类</strong></td>
+    <td width="50%" align="center"><strong>工具</strong></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src=".github/assets/readme/classification.png" alt="分类页面"></td>
+    <td width="50%"><img src=".github/assets/readme/tools.png" alt="工具页面"></td>
+  </tr>
+  <tr>
+    <td width="50%" align="center"><strong>设置</strong></td>
+    <td width="50%" align="center"><strong>关于</strong></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src=".github/assets/readme/settings.png" alt="设置页面"></td>
+    <td width="50%"><img src=".github/assets/readme/about.png" alt="关于页面"></td>
+  </tr>
+</table>
+
+## 可靠性与隐私
+
+时间记录只有可信才具备长期价值。TimekeepGUI 重点保护以下边界：
+
+- **进程存在识别**：只记录用户主动配置的程序进程，不会因为切换到其他窗口而暂停。
+- **会话边界**：首个同名进程启动时开始，最后一个同名进程退出时结束。
+- **后台持续运行**：GUI 隐藏、最小化或关闭主窗口时，Timekeep 服务仍可继续计时。
+- **隐私边界**：计时不读取活动窗口标题、前台 HWND 或键鼠空闲状态。
+- **本地数据控制**：核心数据保存在本地，备份、恢复和历史清理由用户主动发起。
+
+## 当前范围
+
+TimekeepGUI 当前专注于个人本地时间记录：
+
+- Windows 10/11 桌面端使用
+- 个人本地数据存储与控制
+- 自动追踪、回看、分类、备份与恢复
+- 轻量本地工具
+
+当前不面向团队协作、账号系统、云同步、多平台同步或重型 AI 洞察。
+
+
+## 技术栈
+
+- 桌面外壳：Tauri v2
+- 原生后端与 Windows 集成：Rust
+- 时间追踪服务：Timekeep（Go），通过本地 IPC 连接
+- 前端：React + Vite + TypeScript
+- 样式：Tailwind CSS
+- 动效：Framer Motion
+- 图表：Recharts
+- 数据库：SQLite，通过 `@tauri-apps/plugin-sql` 访问
+- Windows 集成：`windows` crate
+
+## 参与贡献
+
+如果你希望参与贡献、了解产品方向或查看架构边界，请先阅读 [`CONTRIBUTING.md`](CONTRIBUTING.md#zh-cn)。
+
+## 反馈与问题
+
+需要持续跟进的缺陷和建议请使用 GitHub Issues；日常交流可以扫描二维码加入 QQ 频道：
 
 <div align="center">
   <a href="https://github.com/Ceceliaee/patina/issues/new/choose">
@@ -237,16 +283,16 @@ Use GitHub Issues for bugs and feedback that needs follow-up, or scan the QR cod
   <br><br>
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset=".github/assets/feedback/qq-channel-dark.jpg">
-    <img src=".github/assets/feedback/qq-channel-light.jpg" width="200" alt="Patina QQ channel QR code">
+      <img src=".github/assets/feedback/qq-channel-light.jpg" width="200" alt="Patina QQ 频道二维码">
   </picture>
 </div>
 
-## Support
+## 支持项目
 
-TimekeepGUI is a personal, local-first open-source project. If it has been useful in your daily life or work, you can support ongoing maintenance in whichever way is convenient:
+TimekeepGUI 是一个个人维护的本地优先开源项目。如果它对你的日常生活或工作有所帮助，欢迎通过方便的方式支持项目持续维护：
 
 <div align="center">
-  <a href="https://ko-fi.com/ceceliaee"><img src="https://storage.ko-fi.com/cdn/kofi2.png?v=3" height="36" alt="Buy me a coffee"></a>
+  <a href="https://ko-fi.com/ceceliaee"><img src="https://storage.ko-fi.com/cdn/kofi2.png?v=3" height="36" alt="请作者喝咖啡"></a>
   <br><br>
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset=".github/assets/support/wechat-reward-dark.png">
@@ -254,9 +300,9 @@ TimekeepGUI is a personal, local-first open-source project. If it has been usefu
   </picture>
 </div>
 
-Sponsorship helps sustain maintenance, but it does not affect feature priority, issue handling, the roadmap, or the product direction.
+赞助将用于项目维护，但不会影响功能优先级、问题处理、路线图或产品方向。
 
-## Star History
+## Star 历史
 
 <a href="https://www.star-history.com/?repos=Ceceliaee%2Fpatina">
  <picture>
@@ -266,6 +312,6 @@ Sponsorship helps sustain maintenance, but it does not affect feature priority, 
  </picture>
 </a>
 
-## License
+## 许可证
 
 [MIT](LICENSE)

@@ -50,6 +50,18 @@ pub use support::emit_tracking_data_changed;
 use support::{log_tracker_error, now_ms};
 use window_polling::poll_active_window_with_timeout;
 
+/// The product tracker is process-presence based. Timekeep owns process
+/// start/stop detection and session persistence; the legacy foreground-window
+/// loop remains below only as a compatibility implementation for its focused
+/// unit tests and migration work.
+pub async fn run<R: Runtime>(
+    app: AppHandle<R>,
+    health_state: Arc<watchdog::RuntimeHealthState>,
+    data: SharedTrackingDataStore,
+) -> Result<(), String> {
+    super::process_presence::run(app, health_state, data).await
+}
+
 fn should_preserve_tracking_projection(window: &tracker::WindowInfo) -> bool {
     !window.is_afk
         && is_tracking_control_surface_window(WindowTrackingCandidate::from_window_fields(
@@ -76,7 +88,8 @@ fn emit_tracking_loop_change<R: Runtime>(
 // Owner ledger: run() owns runtime loop orchestration only. Polling,
 // loop-state loading, power lifecycle handling, and event support stay in the
 // sibling runtime/* modules so commands.rs and lib.rs remain thin IPC entrypoints.
-pub async fn run<R: Runtime>(
+#[allow(dead_code)]
+async fn run_foreground_legacy<R: Runtime>(
     app: AppHandle<R>,
     health_state: Arc<watchdog::RuntimeHealthState>,
     data: SharedTrackingDataStore,

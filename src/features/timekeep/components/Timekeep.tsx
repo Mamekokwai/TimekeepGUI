@@ -21,6 +21,15 @@ function formatLifetime(seconds: number): string {
   return `${minutes}m`;
 }
 
+function formatElapsed(seconds: number): string {
+  if (!Number.isFinite(seconds)) return "-";
+  if (seconds < 60) return `${seconds}s`;
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  if (hours > 0) return `${hours}h ${minutes}m`;
+  return `${minutes}m`;
+}
+
 function formatTimestamp(value: string, locale: string): string {
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? "-" : date.toLocaleString(locale, {
@@ -42,6 +51,7 @@ export default function Timekeep({ onToast }: Props) {
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [editingProgramName, setEditingProgramName] = useState<string | null>(null);
   const [configDraft, setConfigDraft] = useState<TimekeepServiceConfig | null>(null);
+  const [nowMs, setNowMs] = useState(() => Date.now());
   const notifyError = useCallback((message: string) => {
     onToast?.(message, "error");
   }, [onToast]);
@@ -58,6 +68,11 @@ export default function Timekeep({ onToast }: Props) {
   useEffect(() => {
     if (state.config) setConfigDraft(state.config);
   }, [state.config]);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setNowMs(Date.now()), 1000);
+    return () => window.clearInterval(timer);
+  }, []);
 
   const updateIntegration = (integration: "wakatime" | "wakapi", patch: Partial<TimekeepIntegrationConfig>) => {
     setConfigDraft((current) => current ? {
@@ -202,7 +217,9 @@ export default function Timekeep({ onToast }: Props) {
                     {state.activeSessions.map((session) => (
                       <div key={session.id} className="flex items-center justify-between gap-3 text-sm">
                         <span className="truncate text-[var(--qp-text-primary)]">{session.program_name}</span>
-                        <span className="shrink-0 text-xs text-[var(--qp-text-tertiary)]">{formatTimestamp(session.start_time, locale)}</span>
+                        <span className="shrink-0 text-xs tabular-nums text-[var(--qp-text-tertiary)]">
+                          {formatElapsed(Math.max(0, Math.floor((nowMs - new Date(session.start_time).getTime()) / 1000)))}
+                        </span>
                       </div>
                     ))}
                   </div>

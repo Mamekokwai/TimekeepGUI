@@ -6,7 +6,7 @@
   "go.lintTool": "staticcheck",
   "go.lintOnSave": "package",
   "terminal.integrated.env.windows": {
-    "PATH": "${env:PATH};${config:go.goroot}\\bin"
+    "PATH": "${env:PATH};${config:go.goroot}\\bin;${env:USERPROFILE}\\.cargo\\bin"
   },
   "go.testTimeout": "10m",
   "go.testFlags": [
@@ -17,7 +17,7 @@
   },
   "eslint.workingDirectories": [
     {
-      "directory": "${workspaceFolder}/sample/patina",
+      "directory": "${workspaceFolder}",
       "mode": "location"
     }
   ],
@@ -26,9 +26,9 @@
     "typescript",
     "typescriptreact"
   ],
-  "typescript.tsdk": "${workspaceFolder}/sample/patina/node_modules/typescript/lib",
+  "typescript.tsdk": "${workspaceFolder}/node_modules/typescript/lib",
   "rust-analyzer.linkedProjects": [
-    "${workspaceFolder}/sample/patina/src-tauri/Cargo.toml"
+    "${workspaceFolder}/src-tauri/Cargo.toml"
   ],
   "rust-analyzer.check.command": "clippy",
   "rust-analyzer.cargo.buildScripts.enable": true,
@@ -76,11 +76,11 @@
   },
   "search.exclude": {
     "**/internal/database/*.sql.go": true,
-    "**/sample/patina/node_modules": true,
-    "**/sample/patina/src-tauri/target": true
+    "**/node_modules": true,
+    "**/src-tauri/target": true
   },
   "files.watcherExclude": {
-    "**/sample/patina/node_modules/**": true,
-    "**/sample/patina/src-tauri/target/**": true
+    "**/node_modules/**": true,
+    "**/src-tauri/target/**": true
   }
 }

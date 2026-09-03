@@ -41,5 +41,21 @@ export function useTimekeepDashboardState(refreshKey: number) {
     };
   }, [refreshKey]);
 
+  useEffect(() => {
+    let cancelled = false;
+    const refreshActiveSessions = () => {
+      void loadTimekeepActiveSessions().then((nextActiveSessions) => {
+        if (!cancelled) setActiveSessions(nextActiveSessions);
+      }).catch((reason) => {
+        if (!cancelled) console.warn("Failed to refresh Timekeep active sessions", reason);
+      });
+    };
+    const timer = window.setInterval(refreshActiveSessions, 1000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+    };
+  }, []);
+
   return { status, programs, activeSessions, loading, error };
 }

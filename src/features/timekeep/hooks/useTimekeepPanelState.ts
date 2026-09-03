@@ -98,6 +98,23 @@ export function useTimekeepPanelState({
     }
   }, [loadFailedMessage, reportError]);
 
+  const refreshActiveSessions = useCallback(async () => {
+    try {
+      setActiveSessions(await loadTimekeepActiveSessions());
+      return true;
+    } catch (error) {
+      console.warn("Failed to refresh Timekeep active sessions", error);
+      return false;
+    }
+  }, []);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      void refreshActiveSessions();
+    }, 1000);
+    return () => window.clearInterval(timer);
+  }, [refreshActiveSessions]);
+
   useEffect(() => {
     void load();
   }, [load]);
@@ -203,6 +220,7 @@ export function useTimekeepPanelState({
     historyLoading,
     retry: load,
     loadHistory,
+    refreshActiveSessions,
     add,
     remove,
     update,
