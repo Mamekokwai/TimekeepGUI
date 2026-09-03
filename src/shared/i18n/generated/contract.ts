@@ -904,6 +904,7 @@ export interface UiText {
     "globalProject": string;
     "historyDate": string;
     "historyLimit": string;
+    "historyProgramPlaceholder": string;
     "historySearch": string;
     "lifetime": string;
     "loadFailed": string;
@@ -939,7 +940,10 @@ export interface UiText {
     "server": string;
     "serviceOffline": string;
     "serviceSettings": string;
+    "serviceSettingsHint": string;
     "settingsSaved": string;
+    "statusRunning": string;
+    "statusUnavailable": string;
     "subtitle": string;
     "title": string;
     "trackingNow": string;

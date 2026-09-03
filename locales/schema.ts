@@ -5894,6 +5894,16 @@ export const MESSAGE_SCHEMA = {
     "params": [],
     "surface": "frontend"
   },
+  "timekeep.statusRunning": {
+    "kind": "string",
+    "params": [],
+    "surface": "frontend"
+  },
+  "timekeep.statusUnavailable": {
+    "kind": "string",
+    "params": [],
+    "surface": "frontend"
+  },
   "timekeep.activeSessions": {
     "kind": "string",
     "params": [],
@@ -5915,6 +5925,11 @@ export const MESSAGE_SCHEMA = {
     "surface": "frontend"
   },
   "timekeep.serviceSettings": {
+    "kind": "string",
+    "params": [],
+    "surface": "frontend"
+  },
+  "timekeep.serviceSettingsHint": {
     "kind": "string",
     "params": [],
     "surface": "frontend"
@@ -5990,6 +6005,11 @@ export const MESSAGE_SCHEMA = {
     "surface": "frontend"
   },
   "timekeep.historyDate": {
+    "kind": "string",
+    "params": [],
+    "surface": "frontend"
+  },
+  "timekeep.historyProgramPlaceholder": {
     "kind": "string",
     "params": [],
     "surface": "frontend"

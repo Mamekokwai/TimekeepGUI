@@ -1758,6 +1758,7 @@
 .qp-dialog-actions {
   margin-top: 14px;
   display: flex;
+  flex-wrap: wrap;
   justify-content: flex-end;
   gap: 8px;
 }

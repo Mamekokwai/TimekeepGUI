@@ -1,9 +1,10 @@
-import { Activity, Eraser, Pencil, Plus, RefreshCw, Save, Search, Server, Trash2 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { Activity, ChevronDown, Eraser, Pencil, Plus, RefreshCw, Save, Search, Server, Trash2 } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocale, useLocaleText } from "../../../shared/i18n/index.ts";
 import QuietBadge from "../../../shared/components/QuietBadge.tsx";
 import QuietButton from "../../../shared/components/QuietButton.tsx";
 import QuietDialog from "../../../shared/components/QuietDialog.tsx";
+import QuietIconAction from "../../../shared/components/QuietIconAction.tsx";
 import QuietPageHeader from "../../../shared/components/QuietPageHeader.tsx";
 import { useQuietDialogs } from "../../../shared/hooks/useQuietDialogs.tsx";
 import type { QuietToastTone } from "../../../shared/types/toast.ts";
@@ -97,6 +98,8 @@ export default function Timekeep({ onToast }: Props) {
   const [scanProject, setScanProject] = useState("");
   const [scanLoading, setScanLoading] = useState(false);
   const [scanError, setScanError] = useState(false);
+  const scanFilterRef = useRef<HTMLInputElement>(null);
+  const programNameRef = useRef<HTMLInputElement>(null);
   const notifyError = useCallback((message: string) => {
     onToast?.(message, "error");
   }, [onToast]);
@@ -176,7 +179,10 @@ export default function Timekeep({ onToast }: Props) {
     setScanProject("");
     try {
       const candidates = await loadTimekeepProgramCandidates();
-      setScanCandidates(candidates);
+      // A disconnected/older bridge may acknowledge the request without a
+      // candidate list. Keep the picker usable instead of letting a malformed
+      // response crash the whole Timekeep page during filtering.
+      setScanCandidates(Array.isArray(candidates) ? candidates : []);
       // Keep the first scan opt-in: process discovery can include development
       // tools and background apps that the user did not intend to track.
       setScanSelection(new Set());
@@ -264,14 +270,11 @@ export default function Timekeep({ onToast }: Props) {
         icon={<Activity size={18} />}
         title={UI_TEXT.timekeep.title}
         subtitle={UI_TEXT.timekeep.subtitle}
-        rightSlot={(
-          <div className="flex items-center gap-2">
+          rightSlot={(
+          <div className="flex flex-wrap items-center justify-end gap-2">
             <QuietButton size="compact" onClick={() => { void state.refresh(); }} busy={state.busy}>
               <RefreshCw size={14} />
               {UI_TEXT.timekeep.refresh}
-            </QuietButton>
-            <QuietButton size="compact" tone="danger" onClick={() => { void handleResetAllStats(); }} disabled={state.busy}>
-              {UI_TEXT.timekeep.resetStats}
             </QuietButton>
             <QuietButton size="compact" tone="primary" onClick={() => { void openScanDialog(); }}>
               <Plus size={14} />
@@ -326,7 +329,7 @@ export default function Timekeep({ onToast }: Props) {
               <section className="qp-panel p-5">
                 <h2 className="text-base font-semibold text-[var(--qp-text-primary)]">{UI_TEXT.timekeep.recentHistory}</h2>
                 <form className="mt-4 grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto_auto_auto]" onSubmit={(event) => { event.preventDefault(); void handleHistorySearch(); }}>
-                  <input value={historyProgram} onChange={(event) => setHistoryProgram(event.target.value)} className="qp-input h-9 min-w-0" aria-label={UI_TEXT.timekeep.programName} />
+                  <input value={historyProgram} onChange={(event) => setHistoryProgram(event.target.value)} className="qp-input h-9 min-w-0" placeholder={UI_TEXT.timekeep.historyProgramPlaceholder} aria-label={UI_TEXT.timekeep.programName} />
                   <label className="sr-only" htmlFor="timekeep-history-date">{UI_TEXT.timekeep.historyDate}</label>
                   <input id="timekeep-history-date" type="date" value={historyDate} onChange={(event) => setHistoryDate(event.target.value)} className="qp-input h-9" aria-label={UI_TEXT.timekeep.historyDate} />
                   <label className="sr-only" htmlFor="timekeep-history-limit">{UI_TEXT.timekeep.historyLimit}</label>
@@ -354,9 +357,20 @@ export default function Timekeep({ onToast }: Props) {
             </div>
 
             <section className="qp-panel min-h-0 overflow-hidden p-5">
-              <div className="mb-4 flex items-center justify-between">
+              <div className="mb-4 flex items-center justify-between gap-3">
                 <h2 className="text-base font-semibold text-[var(--qp-text-primary)]">{UI_TEXT.timekeep.programs}</h2>
-                <span className="text-xs text-[var(--qp-text-tertiary)]">{state.status?.running ? "●" : "○"}</span>
+                <div className="flex items-center gap-2">
+                  <QuietBadge tone={state.status?.running ? "subtle" : "warning"} size="compact">
+                    {state.status?.running ? UI_TEXT.timekeep.statusRunning : UI_TEXT.timekeep.statusUnavailable}
+                  </QuietBadge>
+                  <QuietIconAction
+                    icon={<Eraser size={14} />}
+                    title={UI_TEXT.timekeep.resetAllStats}
+                    tone="danger"
+                    disabled={state.busy}
+                    onClick={() => { void handleResetAllStats(); }}
+                  />
+                </div>
               </div>
               {state.programs.length === 0 ? (
                 <p className="py-8 text-center text-sm text-[var(--qp-text-tertiary)]">{UI_TEXT.timekeep.empty}</p>
@@ -377,19 +391,33 @@ export default function Timekeep({ onToast }: Props) {
                           <span>{UI_TEXT.timekeep.lifetime}: {formatLifetime(program.lifetime_seconds)}</span>
                         </div>
                       </div>
-                      <div className="flex shrink-0 items-center gap-2">
-                        <QuietButton size="compact" onClick={() => openEditDialog(program)} disabled={state.busy} aria-label={`${UI_TEXT.timekeep.edit} ${program.name}`}>
-                          <Pencil size={14} />
-                          {UI_TEXT.timekeep.edit}
-                        </QuietButton>
-                        <QuietButton size="compact" tone="danger" onClick={() => { void handleResetProgramStats(program.name); }} disabled={state.busy} aria-label={`${UI_TEXT.timekeep.resetStats} ${program.name}`}>
-                          <Eraser size={14} />
-                          {UI_TEXT.timekeep.resetStats}
-                        </QuietButton>
-                        <QuietButton size="compact" tone="danger" onClick={() => { void handleRemove(program.name); }} disabled={state.busy} aria-label={`${UI_TEXT.timekeep.remove} ${program.name}`}>
-                          <Trash2 size={14} />
-                          {UI_TEXT.timekeep.remove}
-                        </QuietButton>
+                      <div className="flex shrink-0 items-center gap-1">
+                        <QuietIconAction
+                          icon={<Pencil size={14} />}
+                          title={UI_TEXT.timekeep.edit}
+                          ariaLabel={`${UI_TEXT.timekeep.edit} ${program.name}`}
+                          className="timekeep-program-action"
+                          disabled={state.busy}
+                          onClick={() => openEditDialog(program)}
+                        />
+                        <QuietIconAction
+                          icon={<Eraser size={14} />}
+                          title={UI_TEXT.timekeep.resetStats}
+                          ariaLabel={`${UI_TEXT.timekeep.resetStats} ${program.name}`}
+                          tone="danger"
+                          className="timekeep-program-action"
+                          disabled={state.busy}
+                          onClick={() => { void handleResetProgramStats(program.name); }}
+                        />
+                        <QuietIconAction
+                          icon={<Trash2 size={14} />}
+                          title={UI_TEXT.timekeep.remove}
+                          ariaLabel={`${UI_TEXT.timekeep.remove} ${program.name}`}
+                          tone="danger"
+                          className="timekeep-program-action"
+                          disabled={state.busy}
+                          onClick={() => { void handleRemove(program.name); }}
+                        />
                       </div>
                     </div>
                   ))}
@@ -398,9 +426,14 @@ export default function Timekeep({ onToast }: Props) {
             </section>
 
             {configDraft ? (
-              <section className="qp-panel p-5">
+              <details className="qp-panel overflow-hidden" data-timekeep-service-settings>
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-5 text-base font-semibold text-[var(--qp-text-primary)] [&::-webkit-details-marker]:hidden">
+                  <span>{UI_TEXT.timekeep.serviceSettings}</span>
+                  <ChevronDown size={16} className="shrink-0 text-[var(--qp-text-tertiary)]" aria-hidden="true" />
+                </summary>
+                <div className="border-t border-[var(--qp-border-subtle)] p-5">
                 <div className="mb-5 flex items-center justify-between gap-4">
-                  <h2 className="text-base font-semibold text-[var(--qp-text-primary)]">{UI_TEXT.timekeep.serviceSettings}</h2>
+                  <p className="text-sm text-[var(--qp-text-tertiary)]">{UI_TEXT.timekeep.serviceSettingsHint}</p>
                   <QuietButton size="compact" tone="primary" onClick={() => { void handleSaveConfig(); }} busy={state.busy}>
                     <Save size={14} />
                     {UI_TEXT.timekeep.saveSettings}
@@ -453,7 +486,8 @@ export default function Timekeep({ onToast }: Props) {
                     </div>
                   </div>
                 </div>
-              </section>
+                </div>
+              </details>
             ) : null}
           </>
         )}
@@ -465,6 +499,7 @@ export default function Timekeep({ onToast }: Props) {
         description={UI_TEXT.timekeep.scanHint}
         onClose={() => setScanDialogOpen(false)}
         surfaceClassName="max-w-2xl"
+        initialFocusRef={scanFilterRef}
         actions={(
           <>
             <QuietButton onClick={() => { setScanDialogOpen(false); openAddDialog(); }}>{UI_TEXT.timekeep.manualAdd}</QuietButton>
@@ -485,6 +520,7 @@ export default function Timekeep({ onToast }: Props) {
             <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[var(--qp-text-tertiary)]" />
             <input
               value={scanFilter}
+              ref={scanFilterRef}
               onChange={(event) => setScanFilter(event.target.value)}
               className="qp-input h-9 w-full pl-9"
               placeholder={UI_TEXT.timekeep.programName}
@@ -555,6 +591,7 @@ export default function Timekeep({ onToast }: Props) {
         open={addDialogOpen}
         title={editingProgramName ? UI_TEXT.timekeep.edit : UI_TEXT.timekeep.add}
         onClose={() => { setAddDialogOpen(false); setEditingProgramName(null); }}
+        initialFocusRef={programNameRef}
         actions={(
           <>
             <QuietButton onClick={() => { setAddDialogOpen(false); setEditingProgramName(null); }}>{UI_TEXT.common.cancel}</QuietButton>
@@ -565,7 +602,7 @@ export default function Timekeep({ onToast }: Props) {
         <div className="space-y-3">
           <label className="block text-sm text-[var(--qp-text-secondary)]">
             <span className="mb-1 block">{UI_TEXT.timekeep.programName}</span>
-            <input autoFocus value={name} onChange={(event) => setName(event.target.value)} className="qp-input h-9 w-full" />
+            <input ref={programNameRef} value={name} onChange={(event) => setName(event.target.value)} className="qp-input h-9 w-full" />
           </label>
           <label className="block text-sm text-[var(--qp-text-secondary)]">
             <span className="mb-1 block">{UI_TEXT.timekeep.category}</span>

@@ -100,6 +100,11 @@
   background: color-mix(in srgb, var(--qp-danger) 10%, transparent);
 }
 
+.timekeep-program-action {
+  width: 32px;
+  height: 32px;
+}
+
 .hourly-chart-mode-toggle.qp-icon-action-pressed,
 .history-timeline-mode-toggle.qp-icon-action-pressed {
   border-color: transparent;

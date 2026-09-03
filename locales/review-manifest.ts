@@ -1053,6 +1053,10 @@ export const LOCALE_SOURCE_REVIEWS = {
     "timekeep.requestTimeout": "4542b5cf05f242f4",
     "timekeep.partialSuccess": "196e60b2dbeb036a",
     "timekeep.resetProgram": "708a545ff0758597",
-    "timekeep.resetProgramConfirm": "dd4907be4ef76443"
+    "timekeep.resetProgramConfirm": "dd4907be4ef76443",
+    "timekeep.statusRunning": "b02298b550413fde",
+    "timekeep.statusUnavailable": "b1df2ebbd0c05e08",
+    "timekeep.serviceSettingsHint": "6e6607e27a5c0032",
+    "timekeep.historyProgramPlaceholder": "3eeba3df4f0306c6"
   }
 } as const;
