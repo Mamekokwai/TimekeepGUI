@@ -87,6 +87,25 @@ export async function runTimekeepScenarios(context: BrowserSmokeContext) {
     assert.equal(scanFocus.programActionSize, "32px");
 
     await evaluate(client!, sessionId, `
+      Array.from(document.querySelectorAll('[role="dialog"] button'))
+        .find((node) => node.textContent?.trim() === "全选")
+        ?.click();
+    `);
+    await waitForExpression(
+      client!,
+      sessionId,
+      `Array.from(document.querySelectorAll('[role="dialog"] button'))
+        .some((node) => node.textContent?.includes("添加选中程序 (1)"))`,
+      5_000,
+      "Timekeep scan dialog should select all visible untracked programs",
+    );
+    await evaluate(client!, sessionId, `
+      Array.from(document.querySelectorAll('[role="dialog"] button'))
+        .find((node) => node.textContent?.trim() === "清空选择")
+        ?.click();
+    `);
+
+    await evaluate(client!, sessionId, `
       Array.from(document.querySelectorAll("button"))
         .find((node) => node.textContent?.trim() === "手动添加")
         ?.click();
@@ -107,5 +126,41 @@ export async function runTimekeepScenarios(context: BrowserSmokeContext) {
         .find((node) => node.textContent?.trim() === "取消")
         ?.click();
     `);
+  });
+
+  await runTest("Timekeep remains usable in a narrow desktop window", async () => {
+    await client!.command("Emulation.setDeviceMetricsOverride", {
+      width: 480,
+      height: 820,
+      deviceScaleFactor: 1,
+      mobile: false,
+    }, sessionId);
+    try {
+      const result = await evaluate(client!, sessionId, `({
+        viewportWidth: window.innerWidth,
+        documentWidth: document.documentElement.scrollWidth,
+        bodyWidth: document.body.scrollWidth,
+        scrollRegionWidth: document.querySelector(".qp-scroll-region")?.clientWidth ?? 0,
+        headerActionsWrap: getComputedStyle(document.querySelector(".qp-page-header-right > div")).flexWrap,
+      })`) as {
+        viewportWidth: number;
+        documentWidth: number;
+        bodyWidth: number;
+        scrollRegionWidth: number;
+        headerActionsWrap: string;
+      };
+      assert.equal(result.viewportWidth, 480);
+      assert.ok(result.documentWidth <= result.viewportWidth + 1, "Timekeep should not create horizontal page overflow");
+      assert.ok(result.bodyWidth <= result.viewportWidth + 1, "Timekeep body should not create horizontal overflow");
+      assert.ok(result.scrollRegionWidth <= result.viewportWidth, "Timekeep scroll region should stay within the viewport");
+      assert.equal(result.headerActionsWrap, "wrap");
+    } finally {
+      await client!.command("Emulation.setDeviceMetricsOverride", {
+        width: 1280,
+        height: 820,
+        deviceScaleFactor: 1,
+        mobile: false,
+      }, sessionId);
+    }
   });
 }

@@ -896,7 +896,9 @@ export interface UiText {
     "addFailed": string;
     "addSelected": string;
     "apiKey": string;
+    "availablePrograms": string;
     "category": string;
+    "clearSelection": string;
     "cliPath": string;
     "edit": string;
     "empty": string;
@@ -936,6 +938,7 @@ export interface UiText {
     "scanFailed": string;
     "scanHint": string;
     "scanPrograms": string;
+    "selectAll": string;
     "selectedPrograms": string;
     "server": string;
     "serviceOffline": string;

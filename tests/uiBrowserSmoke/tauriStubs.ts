@@ -326,6 +326,24 @@ function tauriStubFor(path: string) {
               category: "development",
               project: "Timekeep",
             }],
+            scan_programs: [
+              {
+                name: "code.exe",
+                running_instances: 1,
+                tracked: true,
+                lifetime_seconds: 3720,
+                category: "development",
+                project: "Timekeep",
+              },
+              {
+                name: "chrome.exe",
+                running_instances: 2,
+                tracked: false,
+                lifetime_seconds: 900,
+                category: null,
+                project: null,
+              },
+            ],
             get_program: {
               id: 1,
               name: "code.exe",

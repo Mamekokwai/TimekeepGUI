@@ -5839,6 +5839,21 @@ export const MESSAGE_SCHEMA = {
     "params": [],
     "surface": "frontend"
   },
+  "timekeep.availablePrograms": {
+    "kind": "string",
+    "params": [],
+    "surface": "frontend"
+  },
+  "timekeep.selectAll": {
+    "kind": "string",
+    "params": [],
+    "surface": "frontend"
+  },
+  "timekeep.clearSelection": {
+    "kind": "string",
+    "params": [],
+    "surface": "frontend"
+  },
   "timekeep.trackingNow": {
     "kind": "string",
     "params": [],

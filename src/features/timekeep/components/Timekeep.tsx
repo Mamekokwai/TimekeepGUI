@@ -120,6 +120,10 @@ export default function Timekeep({ onToast }: Props) {
       && (!filter || candidate.name.toLowerCase().includes(filter))
     ));
   }, [scanCandidates, scanFilter]);
+  const selectableScanNames = useMemo(
+    () => visibleScanCandidates.filter((candidate) => !candidate.tracked).map((candidate) => candidate.name),
+    [visibleScanCandidates],
+  );
   const activeProgramNames = useMemo(
     () => new Set(state.activeSessions.map((session) => session.program_name.toLowerCase())),
     [state.activeSessions],
@@ -428,12 +432,15 @@ export default function Timekeep({ onToast }: Props) {
             {configDraft ? (
               <details className="qp-panel overflow-hidden" data-timekeep-service-settings>
                 <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-5 text-base font-semibold text-[var(--qp-text-primary)] [&::-webkit-details-marker]:hidden">
-                  <span>{UI_TEXT.timekeep.serviceSettings}</span>
-                  <ChevronDown size={16} className="shrink-0 text-[var(--qp-text-tertiary)]" aria-hidden="true" />
+                  <span className="min-w-0">
+                    <span className="block">{UI_TEXT.timekeep.serviceSettings}</span>
+                    <span className="mt-1 block truncate text-xs font-normal text-[var(--qp-text-tertiary)]">{UI_TEXT.timekeep.serviceSettingsHint}</span>
+                  </span>
+                  <ChevronDown className="timekeep-settings-summary-icon shrink-0 text-[var(--qp-text-tertiary)]" size={16} aria-hidden="true" />
                 </summary>
                 <div className="border-t border-[var(--qp-border-subtle)] p-5">
                 <div className="mb-5 flex items-center justify-between gap-4">
-                  <p className="text-sm text-[var(--qp-text-tertiary)]">{UI_TEXT.timekeep.serviceSettingsHint}</p>
+                  <span />
                   <QuietButton size="compact" tone="primary" onClick={() => { void handleSaveConfig(); }} busy={state.busy}>
                     <Save size={14} />
                     {UI_TEXT.timekeep.saveSettings}
@@ -502,8 +509,8 @@ export default function Timekeep({ onToast }: Props) {
         initialFocusRef={scanFilterRef}
         actions={(
           <>
-            <QuietButton onClick={() => { setScanDialogOpen(false); openAddDialog(); }}>{UI_TEXT.timekeep.manualAdd}</QuietButton>
             <QuietButton onClick={() => setScanDialogOpen(false)}>{UI_TEXT.common.cancel}</QuietButton>
+            <QuietButton onClick={() => { setScanDialogOpen(false); openAddDialog(); }}>{UI_TEXT.timekeep.manualAdd}</QuietButton>
             <QuietButton
               tone="primary"
               onClick={() => { void handleAddSelected(); }}
@@ -539,9 +546,25 @@ export default function Timekeep({ onToast }: Props) {
             <p className="py-8 text-center text-sm text-[var(--qp-text-tertiary)]">{UI_TEXT.timekeep.scanEmpty}</p>
           ) : (
             <>
-              <div className="flex items-center justify-between text-xs text-[var(--qp-text-tertiary)]">
+              <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-[var(--qp-text-tertiary)]">
                 <span>{UI_TEXT.timekeep.selectedPrograms}: {scanSelection.size}</span>
-                <span>{visibleScanCandidates.length}</span>
+                <div className="flex flex-wrap items-center justify-end gap-1">
+                  <span className="mr-1">{UI_TEXT.timekeep.availablePrograms}: {visibleScanCandidates.length}</span>
+                  <QuietButton
+                    size="compact"
+                    onClick={() => setScanSelection(new Set(selectableScanNames))}
+                    disabled={selectableScanNames.length === 0}
+                  >
+                    {UI_TEXT.timekeep.selectAll}
+                  </QuietButton>
+                  <QuietButton
+                    size="compact"
+                    onClick={() => setScanSelection(new Set())}
+                    disabled={scanSelection.size === 0}
+                  >
+                    {UI_TEXT.timekeep.clearSelection}
+                  </QuietButton>
+                </div>
               </div>
               <div className="max-h-[360px] space-y-1 overflow-y-auto overscroll-contain pr-1">
                 {visibleScanCandidates.map((candidate) => {
@@ -564,8 +587,8 @@ export default function Timekeep({ onToast }: Props) {
                           {candidate.tracked ? ` · ${UI_TEXT.timekeep.trackingNow}` : ""}
                         </span>
                       </span>
-                      <span className="shrink-0 text-xs tabular-nums text-[var(--qp-text-tertiary)]">
-                        {formatLifetime(candidate.lifetime_seconds)}
+                       <span className="shrink-0 text-xs tabular-nums text-[var(--qp-text-tertiary)]">
+                         {UI_TEXT.timekeep.lifetime}: {formatLifetime(candidate.lifetime_seconds)}
                       </span>
                     </label>
                   );

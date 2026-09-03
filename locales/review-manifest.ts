@@ -1057,6 +1057,9 @@ export const LOCALE_SOURCE_REVIEWS = {
     "timekeep.statusRunning": "b02298b550413fde",
     "timekeep.statusUnavailable": "b1df2ebbd0c05e08",
     "timekeep.serviceSettingsHint": "6e6607e27a5c0032",
-    "timekeep.historyProgramPlaceholder": "3eeba3df4f0306c6"
+    "timekeep.historyProgramPlaceholder": "3eeba3df4f0306c6",
+    "timekeep.availablePrograms": "782a194fe362e2ac",
+    "timekeep.selectAll": "e7dbae80bd76613e",
+    "timekeep.clearSelection": "a866e423b7d1448d"
   }
 } as const;

@@ -105,6 +105,14 @@
   height: 32px;
 }
 
+.timekeep-settings-summary-icon {
+  transition: transform var(--qp-motion-fast) var(--qp-motion-ease);
+}
+
+details[open] .timekeep-settings-summary-icon {
+  transform: rotate(180deg);
+}
+
 .hourly-chart-mode-toggle.qp-icon-action-pressed,
 .history-timeline-mode-toggle.qp-icon-action-pressed {
   border-color: transparent;
