@@ -191,8 +191,8 @@ export const MESSAGES = {
   "settings.globalTitleHint": "Save application window titles and webpage titles for activity history details.",
   "settings.globalTitleLabel": "Global titles",
   "settings.idle": "Saved",
-  "settings.idleTimeoutHint": "Count the user as active while Windows reports audio playback, even without keyboard or mouse input.",
-  "settings.idleTimeoutLabel": "Audio playback counts as active",
+  "settings.idleTimeoutHint": "When audio is detected, use this longer active hold time from the last keyboard or mouse input.",
+  "settings.idleTimeoutLabel": "Active hold time with audio",
   "settings.importRecordCount": {
     "$type": "message",
     "body": {

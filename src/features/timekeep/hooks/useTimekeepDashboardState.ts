@@ -54,8 +54,10 @@ export function useTimekeepDashboardState(refreshKey: number) {
   useEffect(() => {
     let cancelled = false;
     const refreshActiveSessions = () => {
-      void loadTimekeepActiveSessions().then((nextActiveSessions) => {
-        if (!cancelled) setActiveSessions(nextActiveSessions);
+      void Promise.all([loadTimekeepPrograms(), loadTimekeepActiveSessions()]).then(([nextPrograms, nextActiveSessions]) => {
+        if (cancelled) return;
+        setPrograms(nextPrograms);
+        setActiveSessions(nextActiveSessions);
       }).catch((reason) => {
         if (!cancelled) console.warn("Failed to refresh Timekeep active sessions", reason);
       });

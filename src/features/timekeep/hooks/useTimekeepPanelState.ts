@@ -101,7 +101,12 @@ export function useTimekeepPanelState({
 
   const refreshActiveSessions = useCallback(async () => {
     try {
-      setActiveSessions(await loadTimekeepActiveSessions());
+      const [nextPrograms, nextActiveSessions] = await Promise.all([
+        loadTimekeepPrograms(),
+        loadTimekeepActiveSessions(),
+      ]);
+      setPrograms(nextPrograms);
+      setActiveSessions(nextActiveSessions);
       return true;
     } catch (error) {
       console.warn("Failed to refresh Timekeep active sessions", error);

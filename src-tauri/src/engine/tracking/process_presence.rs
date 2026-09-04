@@ -31,6 +31,9 @@ pub async fn run<R: Runtime>(
     if let Err(error) = data.end_active_sessions(startup_time_ms).await {
         eprintln!("[process-tracker] failed to seal legacy active session: {error}");
     }
+    if let Err(error) = timekeep_bridge::prepare_user_usage().await {
+        eprintln!("[process-tracker] failed to prepare focused usage tracking: {error}");
+    }
 
     let mut previous_signature = String::new();
     let mut previous_window: Option<WindowInfo> = None;
@@ -85,6 +88,13 @@ pub async fn run<R: Runtime>(
                 }
                 eprintln!("[process-tracker] {error}");
             }
+        }
+
+        // Focused usage is sampled independently from process presence. A
+        // running process contributes runtime even while another window is
+        // focused; only the primary foreground window contributes usage.
+        if let Err(error) = timekeep_bridge::sync_user_usage().await {
+            eprintln!("[process-tracker] failed to sync focused usage: {error}");
         }
 
         sleep(PROCESS_PRESENCE_POLL_INTERVAL).await;

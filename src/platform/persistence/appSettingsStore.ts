@@ -27,7 +27,7 @@ type RawAppSettingsKey =
   | "timeline_merge_gap_secs"
   | "refresh_interval_secs"
   | "min_session_secs"
-  | "audio_keeps_user_active"
+  | "audio_active_hold_secs"
   | "tracking_paused"
   | "title_recording_enabled"
   | "close_behavior"
@@ -55,7 +55,7 @@ const APP_SETTINGS_RAW_KEYS: Record<keyof AppSettings, RawAppSettingsKey> = {
   timelineMergeGapSecs: "timeline_merge_gap_secs",
   refreshIntervalSecs: "refresh_interval_secs",
   minSessionSecs: "min_session_secs",
-  audioKeepsUserActive: "audio_keeps_user_active",
+  audioActiveHoldSecs: "audio_active_hold_secs",
   trackingPaused: "tracking_paused",
   titleRecordingEnabled: "title_recording_enabled",
   closeBehavior: "close_behavior",

@@ -426,8 +426,8 @@ export default function Timekeep({ onToast }: Props) {
                           </span>
                           <QuietIconAction
                             icon={<Pencil size={11} />}
-                            title={UI_TEXT.timekeep.edit}
-                            ariaLabel={`${UI_TEXT.timekeep.edit} ${program.name}`}
+                            title={UI_TEXT.timekeep.editIcon}
+                            ariaLabel={`${UI_TEXT.timekeep.editIcon} ${program.name}`}
                             className="timekeep-program-action h-6 w-6"
                             disabled={state.busy}
                             onClick={() => { void handleCustomIcon(program.name); }}
@@ -443,7 +443,8 @@ export default function Timekeep({ onToast }: Props) {
                         <div className="mt-1 flex flex-wrap gap-2 text-xs text-[var(--qp-text-tertiary)]">
                           {program.category ? <span>{program.category}</span> : null}
                           {program.project ? <span>{program.project}</span> : null}
-                          <span>{UI_TEXT.timekeep.lifetime}: {formatLifetime(program.lifetime_seconds)}</span>
+                           <span className="text-[var(--qp-accent-default)]">{UI_TEXT.timekeep.runtime}: {formatLifetime(program.runtime_seconds ?? program.lifetime_seconds)}</span>
+                           <span className="text-[var(--qp-success)]">{UI_TEXT.timekeep.userUsage}: {formatLifetime(program.usage_seconds ?? 0)}</span>
                         </div>
                         </div>
                       </div>
@@ -645,7 +646,7 @@ export default function Timekeep({ onToast }: Props) {
                         </span>
                       </span>
                        <span className="shrink-0 text-xs tabular-nums text-[var(--qp-text-tertiary)]">
-                         {UI_TEXT.timekeep.lifetime}: {formatLifetime(candidate.lifetime_seconds)}
+                         {UI_TEXT.timekeep.runtime}: {formatLifetime(candidate.lifetime_seconds)}
                       </span>
                     </label>
                   );

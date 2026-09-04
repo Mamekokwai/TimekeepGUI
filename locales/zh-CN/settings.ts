@@ -182,8 +182,8 @@ export const MESSAGES = {
   "settings.globalTitleHint": "保存应用窗口标题和网页标题，用于历史活动明细。",
   "settings.globalTitleLabel": "全局标题",
   "settings.idle": "已保存",
-  "settings.idleTimeoutHint": "Windows 检测到音频播放时，即使没有键盘或鼠标操作，也计入用户活跃。",
-  "settings.idleTimeoutLabel": "音频播放时计为活跃",
+  "settings.idleTimeoutHint": "检测到音频时，从最后一次键盘或鼠标操作起，使用更长的活跃保持时间。",
+  "settings.idleTimeoutLabel": "有音频时用户活跃保持时间",
   "settings.importRecordCount": {
     "$type": "message",
     "body": {

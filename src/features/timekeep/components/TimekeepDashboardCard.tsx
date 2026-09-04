@@ -13,6 +13,8 @@ function formatLifetime(seconds: number): string {
 export default function TimekeepDashboardCard({ refreshKey, compact = false }: { refreshKey: number; compact?: boolean }) {
   const UI_TEXT = useLocaleText();
   const state = useTimekeepDashboardState(refreshKey);
+  const totalRuntime = state.programs.reduce((total, program) => total + (program.runtime_seconds ?? program.lifetime_seconds), 0);
+  const totalUsage = state.programs.reduce((total, program) => total + (program.usage_seconds ?? 0), 0);
 
   if (compact) {
     return (
@@ -38,7 +40,10 @@ export default function TimekeepDashboardCard({ refreshKey, compact = false }: {
               {UI_TEXT.timekeep.activeSessions}: <strong className="font-semibold tabular-nums text-[var(--qp-text-primary)]">{state.activeSessions.length}</strong>
             </span>
             <span className="text-[var(--qp-text-tertiary)]">
-              {UI_TEXT.timekeep.lifetime}: <strong className="font-semibold tabular-nums text-[var(--qp-text-primary)]">{formatLifetime(state.programs.reduce((total, program) => total + program.lifetime_seconds, 0))}</strong>
+              {UI_TEXT.timekeep.runtime}: <strong className="font-semibold tabular-nums text-[var(--qp-accent-default)]">{formatLifetime(totalRuntime)}</strong>
+            </span>
+            <span className="text-[var(--qp-text-tertiary)]">
+              {UI_TEXT.timekeep.userUsage}: <strong className="font-semibold tabular-nums text-[var(--qp-success)]">{formatLifetime(totalUsage)}</strong>
             </span>
           </div>
         )}
@@ -63,7 +68,7 @@ export default function TimekeepDashboardCard({ refreshKey, compact = false }: {
           <span>{UI_TEXT.timekeep.serviceOffline}</span>
         </div>
       ) : (
-        <div className="grid grid-cols-3 gap-2 text-xs">
+        <div className="grid grid-cols-2 gap-2 text-xs sm:grid-cols-4">
           <div className="rounded-[8px] border border-[var(--qp-border-subtle)] px-3 py-2">
             <div className="text-[var(--qp-text-tertiary)]">{UI_TEXT.timekeep.programs}</div>
             <div className="mt-1 text-base font-semibold tabular-nums text-[var(--qp-text-primary)]">{state.programs.length}</div>
@@ -73,9 +78,15 @@ export default function TimekeepDashboardCard({ refreshKey, compact = false }: {
             <div className="mt-1 text-base font-semibold tabular-nums text-[var(--qp-text-primary)]">{state.activeSessions.length}</div>
           </div>
           <div className="rounded-[8px] border border-[var(--qp-border-subtle)] px-3 py-2">
-            <div className="text-[var(--qp-text-tertiary)]">{UI_TEXT.timekeep.lifetime}</div>
-            <div className="mt-1 text-base font-semibold tabular-nums text-[var(--qp-text-primary)]">
-              {formatLifetime(state.programs.reduce((total, program) => total + program.lifetime_seconds, 0))}
+            <div className="text-[var(--qp-text-tertiary)]">{UI_TEXT.timekeep.runtime}</div>
+            <div className="mt-1 text-base font-semibold tabular-nums text-[var(--qp-accent-default)]">
+              {formatLifetime(totalRuntime)}
+            </div>
+          </div>
+          <div className="rounded-[8px] border border-[var(--qp-border-subtle)] px-3 py-2">
+            <div className="text-[var(--qp-text-tertiary)]">{UI_TEXT.timekeep.userUsage}</div>
+            <div className="mt-1 text-base font-semibold tabular-nums text-[var(--qp-success)]">
+              {formatLifetime(totalUsage)}
             </div>
           </div>
         </div>

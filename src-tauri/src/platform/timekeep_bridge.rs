@@ -3,6 +3,7 @@ use serde_json::{json, Value};
 use sqlx::{Row, SqlitePool};
 use std::collections::{HashMap, HashSet};
 use std::path::Path;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Duration;
 use tokio::io::AsyncWriteExt;
 use tokio::time::timeout;
@@ -67,6 +68,119 @@ pub async fn process_presence_snapshot() -> Result<Vec<TimekeepActiveProcess>, S
         .map_err(|error| format!("invalid Timekeep active-session data: {error}"))
 }
 
+/// Prepare the GUI-owned usage tables and discard an unfinished foreground
+/// session from a previous GUI run. The process-lifetime tables remain owned by
+/// Timekeep; only the additional focused-window accounting is managed here.
+pub async fn prepare_user_usage() -> Result<(), String> {
+    ensure_timekeep_usage_schema().await?;
+    seal_stale_user_usage().await
+}
+
+/// Record one foreground sample for the currently focused tracked program.
+/// This is intentionally independent from process presence: a program can be
+/// running without being the user's primary window.
+#[cfg(target_os = "windows")]
+pub async fn sync_user_usage() -> Result<(), String> {
+    ensure_timekeep_usage_schema().await?;
+    let pool = open_timekeep_database(false).await?;
+    let current_program = current_tracked_foreground_program(&pool).await?;
+    let now = chrono::Utc::now();
+    let now_text = now.to_rfc3339();
+    let active = sqlx::query(
+        "SELECT id, program_name, start_time, last_sample_time
+         FROM tracked_program_usage_sessions LIMIT 1",
+    )
+    .fetch_optional(&pool)
+    .await
+    .map_err(|error| format!("failed to read focused usage session: {error}"))?;
+
+    let mut tx = pool
+        .begin()
+        .await
+        .map_err(|error| format!("failed to begin focused usage sync: {error}"))?;
+
+    if let Some(row) = active {
+        let id = row.get::<i64, _>("id");
+        let program_name = row.get::<String, _>("program_name");
+        let start_text = row.get::<String, _>("start_time");
+        let last_sample_text = row.get::<String, _>("last_sample_time");
+        let last_sample = parse_timekeep_datetime(&last_sample_text)
+            .ok_or_else(|| format!("invalid focused usage sample time: {last_sample_text}"))?;
+        let close_at = if current_program.is_some() {
+            now
+        } else {
+            last_sample
+        };
+        let close_text = if current_program.is_some() {
+            &now_text
+        } else {
+            &last_sample_text
+        };
+        let delta_seconds = bounded_usage_delta(last_sample, close_at);
+
+        if current_program
+            .as_deref()
+            .is_some_and(|name| name.eq_ignore_ascii_case(&program_name))
+        {
+            if delta_seconds > 0 {
+                increment_usage(&mut tx, &program_name, delta_seconds).await?;
+            }
+            sqlx::query(
+                "UPDATE tracked_program_usage_sessions
+                 SET last_sample_time = ? WHERE id = ?",
+            )
+            .bind(&now_text)
+            .bind(id)
+            .execute(&mut *tx)
+            .await
+            .map_err(|error| format!("failed to update focused usage session: {error}"))?;
+        } else {
+            archive_usage_session(
+                &mut tx,
+                id,
+                &program_name,
+                &start_text,
+                close_text,
+                delta_seconds,
+            )
+            .await?;
+
+            if let Some(name) = current_program.as_deref() {
+                sqlx::query(
+                    "INSERT INTO tracked_program_usage_sessions
+                     (program_name, start_time, last_sample_time) VALUES (?, ?, ?)",
+                )
+                .bind(name)
+                .bind(&now_text)
+                .bind(&now_text)
+                .execute(&mut *tx)
+                .await
+                .map_err(|error| format!("failed to start focused usage session: {error}"))?;
+            }
+        }
+    } else if let Some(name) = current_program.as_deref() {
+        sqlx::query(
+            "INSERT INTO tracked_program_usage_sessions
+             (program_name, start_time, last_sample_time) VALUES (?, ?, ?)",
+        )
+        .bind(name)
+        .bind(&now_text)
+        .bind(&now_text)
+        .execute(&mut *tx)
+        .await
+        .map_err(|error| format!("failed to start focused usage session: {error}"))?;
+    }
+
+    tx.commit()
+        .await
+        .map_err(|error| format!("failed to commit focused usage sync: {error}"))
+}
+
+#[cfg(not(target_os = "windows"))]
+pub async fn sync_user_usage() -> Result<(), String> {
+    Ok(())
+}
+
 /// The upstream sample service exposes a command pipe for refresh requests and
 /// stores its authoritative process sessions in SQLite. The GUI deliberately
 /// reads that same database instead of inventing a foreground-window timer.
@@ -90,6 +204,7 @@ async fn handle_request(request: TimekeepRequest) -> Result<Value, String> {
         "history" => list_history(&request).await?,
         "add_program" => {
             let name = normalize_program_name(request.name.as_deref().unwrap_or_default())?;
+            ensure_timekeep_usage_schema().await?;
             let pool = open_timekeep_database(false).await?;
             sqlx::query(
                 "INSERT OR IGNORE INTO tracked_programs (name, category, project) VALUES (?, ?, ?)",
@@ -114,6 +229,7 @@ async fn handle_request(request: TimekeepRequest) -> Result<Value, String> {
                 return Err("at least one program is required".to_string());
             }
 
+            ensure_timekeep_usage_schema().await?;
             let pool = open_timekeep_database(false).await?;
             let mut tx = pool
                 .begin()
@@ -138,6 +254,7 @@ async fn handle_request(request: TimekeepRequest) -> Result<Value, String> {
         }
         "update_program" => {
             let name = normalize_program_name(request.name.as_deref().unwrap_or_default())?;
+            ensure_timekeep_usage_schema().await?;
             let pool = open_timekeep_database(false).await?;
             if request.category.is_some() {
                 sqlx::query("UPDATE tracked_programs SET category = ? WHERE name = ?")
@@ -160,6 +277,7 @@ async fn handle_request(request: TimekeepRequest) -> Result<Value, String> {
         }
         "remove_program" => {
             let name = normalize_program_name(request.name.as_deref().unwrap_or_default())?;
+            ensure_timekeep_usage_schema().await?;
             let pool = open_timekeep_database(false).await?;
             let result = sqlx::query("DELETE FROM tracked_programs WHERE name = ?")
                 .bind(&name)
@@ -170,6 +288,7 @@ async fn handle_request(request: TimekeepRequest) -> Result<Value, String> {
             json!({ "removed": result.rows_affected() > 0 })
         }
         "reset_stats" => {
+            ensure_timekeep_usage_schema().await?;
             let pool = open_timekeep_database(false).await?;
             if request.all.unwrap_or(false) || request.name.is_none() {
                 sqlx::query("DELETE FROM active_sessions")
@@ -184,6 +303,18 @@ async fn handle_request(request: TimekeepRequest) -> Result<Value, String> {
                     .execute(&pool)
                     .await
                     .map_err(|error| format!("failed to reset program lifetimes: {error}"))?;
+                sqlx::query("UPDATE tracked_programs SET usage_seconds = 0")
+                    .execute(&pool)
+                    .await
+                    .map_err(|error| format!("failed to reset focused usage durations: {error}"))?;
+                sqlx::query("DELETE FROM tracked_program_usage_sessions")
+                    .execute(&pool)
+                    .await
+                    .map_err(|error| format!("failed to reset focused usage sessions: {error}"))?;
+                sqlx::query("DELETE FROM tracked_program_usage_history")
+                    .execute(&pool)
+                    .await
+                    .map_err(|error| format!("failed to reset focused usage history: {error}"))?;
             } else {
                 let name = normalize_program_name(request.name.as_deref().unwrap_or_default())?;
                 sqlx::query("DELETE FROM active_sessions WHERE program_name = ?")
@@ -201,6 +332,21 @@ async fn handle_request(request: TimekeepRequest) -> Result<Value, String> {
                     .execute(&pool)
                     .await
                     .map_err(|error| format!("failed to reset program lifetime: {error}"))?;
+                sqlx::query("UPDATE tracked_programs SET usage_seconds = 0 WHERE name = ?")
+                    .bind(&name)
+                    .execute(&pool)
+                    .await
+                    .map_err(|error| format!("failed to reset focused usage duration: {error}"))?;
+                sqlx::query("DELETE FROM tracked_program_usage_sessions WHERE program_name = ?")
+                    .bind(&name)
+                    .execute(&pool)
+                    .await
+                    .map_err(|error| format!("failed to reset focused usage session: {error}"))?;
+                sqlx::query("DELETE FROM tracked_program_usage_history WHERE program_name = ?")
+                    .bind(&name)
+                    .execute(&pool)
+                    .await
+                    .map_err(|error| format!("failed to reset focused usage history: {error}"))?;
             }
             refresh_service().await?;
             json!({ "reset": true })
@@ -235,6 +381,191 @@ fn non_empty(value: Option<&str>) -> Option<&str> {
     value.map(str::trim).filter(|value| !value.is_empty())
 }
 
+static TIMEKEEP_USAGE_SCHEMA_READY: AtomicBool = AtomicBool::new(false);
+
+async fn ensure_timekeep_usage_schema() -> Result<(), String> {
+    if TIMEKEEP_USAGE_SCHEMA_READY.load(Ordering::Acquire) {
+        return Ok(());
+    }
+
+    let pool = open_timekeep_database(false).await?;
+    let columns = sqlx::query("PRAGMA table_info(tracked_programs)")
+        .fetch_all(&pool)
+        .await
+        .map_err(|error| format!("failed to inspect Timekeep program schema: {error}"))?;
+    let has_usage_column = columns.iter().any(|row| {
+        row.get::<String, _>("name")
+            .eq_ignore_ascii_case("usage_seconds")
+    });
+    if !has_usage_column {
+        sqlx::query(
+            "ALTER TABLE tracked_programs
+             ADD COLUMN usage_seconds INTEGER NOT NULL DEFAULT 0",
+        )
+        .execute(&pool)
+        .await
+        .map_err(|error| format!("failed to add focused usage column: {error}"))?;
+    }
+
+    sqlx::query(
+        "CREATE TABLE IF NOT EXISTS tracked_program_usage_sessions (
+            id INTEGER PRIMARY KEY,
+            program_name TEXT UNIQUE NOT NULL
+                REFERENCES tracked_programs(name) ON DELETE CASCADE,
+            start_time DATETIME NOT NULL,
+            last_sample_time DATETIME NOT NULL
+        )",
+    )
+    .execute(&pool)
+    .await
+    .map_err(|error| format!("failed to create focused usage sessions: {error}"))?;
+    sqlx::query(
+        "CREATE TABLE IF NOT EXISTS tracked_program_usage_history (
+            id INTEGER PRIMARY KEY,
+            program_name TEXT NOT NULL
+                REFERENCES tracked_programs(name) ON DELETE CASCADE,
+            start_time DATETIME NOT NULL,
+            end_time DATETIME NOT NULL,
+            duration_seconds INTEGER NOT NULL
+        )",
+    )
+    .execute(&pool)
+    .await
+    .map_err(|error| format!("failed to create focused usage history: {error}"))?;
+
+    TIMEKEEP_USAGE_SCHEMA_READY.store(true, Ordering::Release);
+    Ok(())
+}
+
+async fn seal_stale_user_usage() -> Result<(), String> {
+    let pool = open_timekeep_database(false).await?;
+    let rows = sqlx::query(
+        "SELECT id, program_name, start_time, last_sample_time
+         FROM tracked_program_usage_sessions",
+    )
+    .fetch_all(&pool)
+    .await
+    .map_err(|error| format!("failed to read stale focused usage sessions: {error}"))?;
+    if rows.is_empty() {
+        return Ok(());
+    }
+
+    let mut tx = pool
+        .begin()
+        .await
+        .map_err(|error| format!("failed to begin stale usage cleanup: {error}"))?;
+    for row in rows {
+        let id = row.get::<i64, _>("id");
+        let program_name = row.get::<String, _>("program_name");
+        let start_text = row.get::<String, _>("start_time");
+        let end_text = row.get::<String, _>("last_sample_time");
+        let start = parse_timekeep_datetime(&start_text)
+            .ok_or_else(|| format!("invalid stale usage start time: {start_text}"))?;
+        let end = parse_timekeep_datetime(&end_text)
+            .ok_or_else(|| format!("invalid stale usage end time: {end_text}"))?;
+        let duration_seconds = (end - start).num_seconds().max(0);
+        if duration_seconds > 0 {
+            sqlx::query(
+                "INSERT INTO tracked_program_usage_history
+                 (program_name, start_time, end_time, duration_seconds)
+                 VALUES (?, ?, ?, ?)",
+            )
+            .bind(&program_name)
+            .bind(&start_text)
+            .bind(&end_text)
+            .bind(duration_seconds)
+            .execute(&mut *tx)
+            .await
+            .map_err(|error| format!("failed to archive stale focused usage: {error}"))?;
+        }
+        sqlx::query("DELETE FROM tracked_program_usage_sessions WHERE id = ?")
+            .bind(id)
+            .execute(&mut *tx)
+            .await
+            .map_err(|error| format!("failed to remove stale focused usage: {error}"))?;
+    }
+    tx.commit()
+        .await
+        .map_err(|error| format!("failed to commit stale usage cleanup: {error}"))
+}
+
+#[cfg(target_os = "windows")]
+async fn current_tracked_foreground_program(pool: &SqlitePool) -> Result<Option<String>, String> {
+    let window = crate::platform::windows::foreground::get_active_window();
+    if window.is_afk || window.exe_name.trim().is_empty() {
+        return Ok(None);
+    }
+
+    sqlx::query("SELECT name FROM tracked_programs WHERE name = ? COLLATE NOCASE")
+        .bind(window.exe_name.trim())
+        .fetch_optional(pool)
+        .await
+        .map(|row| row.map(|row| row.get::<String, _>("name")))
+        .map_err(|error| format!("failed to match focused tracked program: {error}"))
+}
+
+fn bounded_usage_delta(
+    start: chrono::DateTime<chrono::Utc>,
+    end: chrono::DateTime<chrono::Utc>,
+) -> i64 {
+    (end - start).num_seconds().clamp(0, 2)
+}
+
+async fn increment_usage(
+    tx: &mut sqlx::Transaction<'_, sqlx::Sqlite>,
+    program_name: &str,
+    delta_seconds: i64,
+) -> Result<(), String> {
+    sqlx::query(
+        "UPDATE tracked_programs
+         SET usage_seconds = usage_seconds + ? WHERE name = ?",
+    )
+    .bind(delta_seconds)
+    .bind(program_name)
+    .execute(&mut **tx)
+    .await
+    .map_err(|error| format!("failed to update focused usage duration: {error}"))?;
+    Ok(())
+}
+
+async fn archive_usage_session(
+    tx: &mut sqlx::Transaction<'_, sqlx::Sqlite>,
+    id: i64,
+    program_name: &str,
+    start_text: &str,
+    end_text: &str,
+    delta_seconds: i64,
+) -> Result<(), String> {
+    if delta_seconds > 0 {
+        increment_usage(tx, program_name, delta_seconds).await?;
+    }
+    let start = parse_timekeep_datetime(start_text)
+        .ok_or_else(|| format!("invalid focused usage start time: {start_text}"))?;
+    let end = parse_timekeep_datetime(end_text)
+        .ok_or_else(|| format!("invalid focused usage end time: {end_text}"))?;
+    let duration_seconds = (end - start).num_seconds().max(0);
+    if duration_seconds > 0 {
+        sqlx::query(
+            "INSERT INTO tracked_program_usage_history
+             (program_name, start_time, end_time, duration_seconds)
+             VALUES (?, ?, ?, ?)",
+        )
+        .bind(program_name)
+        .bind(start_text)
+        .bind(end_text)
+        .bind(duration_seconds)
+        .execute(&mut **tx)
+        .await
+        .map_err(|error| format!("failed to archive focused usage: {error}"))?;
+    }
+    sqlx::query("DELETE FROM tracked_program_usage_sessions WHERE id = ?")
+        .bind(id)
+        .execute(&mut **tx)
+        .await
+        .map_err(|error| format!("failed to close focused usage session: {error}"))?;
+    Ok(())
+}
+
 async fn open_timekeep_database(read_only: bool) -> Result<SqlitePool, String> {
     let path = Path::new(TIMEKEEP_DATABASE_PATH);
     if !path.exists() {
@@ -255,21 +586,44 @@ async fn open_timekeep_database(read_only: bool) -> Result<SqlitePool, String> {
 }
 
 async fn list_programs() -> Result<Value, String> {
+    ensure_timekeep_usage_schema().await?;
     let pool = open_timekeep_database(true).await?;
     let rows = sqlx::query(
-        "SELECT id, name, lifetime_seconds, category, project
+        "SELECT id, name, lifetime_seconds, usage_seconds, category, project
          FROM tracked_programs ORDER BY name COLLATE NOCASE ASC",
     )
     .fetch_all(&pool)
     .await
     .map_err(|error| format!("failed to read tracked programs: {error}"))?;
+    let active_rows = sqlx::query("SELECT program_name, start_time FROM active_sessions")
+        .fetch_all(&pool)
+        .await
+        .map_err(|error| format!("failed to read active process sessions: {error}"))?;
+    let now = chrono::Utc::now();
+    let mut active_runtime = HashMap::<String, i64>::new();
+    for row in active_rows {
+        let name = row.get::<String, _>("program_name");
+        let start_text = row.get::<String, _>("start_time");
+        if let Some(start) = parse_timekeep_datetime(&start_text) {
+            *active_runtime.entry(name.to_ascii_lowercase()).or_default() +=
+                (now - start).num_seconds().max(0);
+        }
+    }
     let programs = rows
         .into_iter()
         .map(|row| {
+            let name = row.get::<String, _>("name");
+            let runtime_seconds = row.get::<i64, _>("lifetime_seconds")
+                + active_runtime
+                    .get(&name.to_ascii_lowercase())
+                    .copied()
+                    .unwrap_or_default();
             json!({
                 "id": row.get::<i64, _>("id"),
-                "name": row.get::<String, _>("name"),
+                "name": name,
                 "lifetime_seconds": row.get::<i64, _>("lifetime_seconds"),
+                "runtime_seconds": runtime_seconds,
+                "usage_seconds": row.get::<i64, _>("usage_seconds"),
                 "category": row.get::<Option<String>, _>("category"),
                 "project": row.get::<Option<String>, _>("project"),
             })
@@ -280,12 +634,14 @@ async fn list_programs() -> Result<Value, String> {
 
 #[cfg(target_os = "windows")]
 async fn scan_programs() -> Result<Value, String> {
+    ensure_timekeep_usage_schema().await?;
     let pool = open_timekeep_database(true).await?;
-    let rows =
-        sqlx::query("SELECT name, lifetime_seconds, category, project FROM tracked_programs")
-            .fetch_all(&pool)
-            .await
-            .map_err(|error| format!("failed to read tracked program statistics: {error}"))?;
+    let rows = sqlx::query(
+        "SELECT name, lifetime_seconds, usage_seconds, category, project FROM tracked_programs",
+    )
+    .fetch_all(&pool)
+    .await
+    .map_err(|error| format!("failed to read tracked program statistics: {error}"))?;
     let tracked = rows
         .into_iter()
         .map(|row| {
@@ -293,6 +649,7 @@ async fn scan_programs() -> Result<Value, String> {
                 row.get::<String, _>("name").to_ascii_lowercase(),
                 json!({
                     "lifetime_seconds": row.get::<i64, _>("lifetime_seconds"),
+                    "usage_seconds": row.get::<i64, _>("usage_seconds"),
                     "category": row.get::<Option<String>, _>("category"),
                     "project": row.get::<Option<String>, _>("project"),
                 }),
@@ -313,6 +670,7 @@ async fn scan_programs() -> Result<Value, String> {
                     "running_instances": running.get(&name).copied().unwrap_or_default(),
                     "tracked": stored.is_some(),
                     "lifetime_seconds": stored.and_then(|value| value.get("lifetime_seconds")).and_then(Value::as_i64).unwrap_or(0),
+                    "usage_seconds": stored.and_then(|value| value.get("usage_seconds")).and_then(Value::as_i64).unwrap_or(0),
                     "category": stored.and_then(|value| value.get("category")).cloned().unwrap_or(Value::Null),
                     "project": stored.and_then(|value| value.get("project")).cloned().unwrap_or(Value::Null),
                 })
@@ -328,9 +686,10 @@ async fn scan_programs() -> Result<Value, String> {
 
 async fn get_program(name: &str) -> Result<Value, String> {
     let name = normalize_program_name(name)?;
+    ensure_timekeep_usage_schema().await?;
     let pool = open_timekeep_database(true).await?;
     let row = sqlx::query(
-        "SELECT id, name, lifetime_seconds, category, project
+        "SELECT id, name, lifetime_seconds, usage_seconds, category, project
          FROM tracked_programs WHERE name = ? COLLATE NOCASE",
     )
     .bind(name)
@@ -338,10 +697,24 @@ async fn get_program(name: &str) -> Result<Value, String> {
     .await
     .map_err(|error| format!("failed to read tracked program: {error}"))?
     .ok_or_else(|| "tracked program not found".to_string())?;
+    let program_name = row.get::<String, _>("name");
+    let active_rows =
+        sqlx::query("SELECT start_time FROM active_sessions WHERE program_name = ? COLLATE NOCASE")
+            .bind(&program_name)
+            .fetch_all(&pool)
+            .await
+            .map_err(|error| format!("failed to read active process sessions: {error}"))?;
+    let active_runtime = active_rows
+        .into_iter()
+        .filter_map(|active| parse_timekeep_datetime(&active.get::<String, _>("start_time")))
+        .map(|start| (chrono::Utc::now() - start).num_seconds().max(0))
+        .sum::<i64>();
     Ok(json!({
         "id": row.get::<i64, _>("id"),
-        "name": row.get::<String, _>("name"),
+        "name": program_name,
         "lifetime_seconds": row.get::<i64, _>("lifetime_seconds"),
+        "runtime_seconds": row.get::<i64, _>("lifetime_seconds") + active_runtime,
+        "usage_seconds": row.get::<i64, _>("usage_seconds"),
         "category": row.get::<Option<String>, _>("category"),
         "project": row.get::<Option<String>, _>("project"),
     }))
@@ -719,5 +1092,25 @@ mod tests {
         assert_eq!(response["ok"], true);
         assert_eq!(response["data"]["running"], true);
         server_task.await.unwrap();
+    }
+
+    #[test]
+    fn focused_usage_delta_is_bounded_to_one_poll_window() {
+        let start = chrono::DateTime::parse_from_rfc3339("2026-09-04T10:00:00Z")
+            .unwrap()
+            .with_timezone(&chrono::Utc);
+
+        assert_eq!(
+            bounded_usage_delta(start, start + chrono::Duration::seconds(1)),
+            1
+        );
+        assert_eq!(
+            bounded_usage_delta(start, start + chrono::Duration::seconds(30)),
+            2
+        );
+        assert_eq!(
+            bounded_usage_delta(start, start - chrono::Duration::seconds(1)),
+            0
+        );
     }
 }

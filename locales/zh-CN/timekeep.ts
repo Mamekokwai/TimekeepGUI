@@ -22,10 +22,13 @@ export const MESSAGES = {
   "timekeep.clearSelection": "清空选择",
   "timekeep.trackingNow": "正在计时",
   "timekeep.edit": "编辑程序",
+  "timekeep.editIcon": "编辑图标",
   "timekeep.programName": "程序名",
   "timekeep.category": "分类（可选）",
   "timekeep.project": "项目（可选）",
   "timekeep.lifetime": "累计时长",
+  "timekeep.runtime": "运行时长",
+  "timekeep.userUsage": "用户使用时长",
   "timekeep.remove": "移除",
   "timekeep.removeConfirm": "确定要移除这个追踪程序吗？已有记录不会被删除。",
   "timekeep.addFailed": "添加程序失败。",
@@ -52,7 +55,7 @@ export const MESSAGES = {
   "timekeep.settingsSaved": "Timekeep 服务设置已保存。",
   "timekeep.resetStats": "重置统计",
   "timekeep.resetAllStats": "重置全部统计",
-  "timekeep.resetConfirm": "确定要重置全部统计吗？活跃会话和历史记录会被清除，无法恢复。",
+  "timekeep.resetConfirm": "确定要重置全部统计吗？运行会话、用户使用会话和历史记录都会被清除，无法恢复。",
   "timekeep.historyDate": "日期（可选）",
   "timekeep.historyProgramPlaceholder": "按程序名筛选，留空查看全部",
   "timekeep.historyLimit": "数量",
@@ -61,5 +64,5 @@ export const MESSAGES = {
   "timekeep.requestTimeout": "Timekeep 服务响应超时，请确认服务正在运行。",
   "timekeep.partialSuccess": "操作已完成，但最新数据未能刷新；请稍后重试刷新。",
   "timekeep.resetProgram": "重置程序统计",
-  "timekeep.resetProgramConfirm": "确定要重置该程序的统计吗？它的活跃会话、历史记录和累计时长都会被清除，无法恢复。"
+  "timekeep.resetProgramConfirm": "确定要重置该程序的统计吗？它的运行会话、用户使用会话、历史记录、运行时长和用户使用时长都会被清除，无法恢复。"
 } as const;

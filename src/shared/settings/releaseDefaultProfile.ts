@@ -5,7 +5,7 @@ interface ReleaseDefaultSettingsProfile {
   timelineMergeGapSecs: number;
   refreshIntervalSecs: number;
   minSessionSecs: number;
-  audioKeepsUserActive: boolean;
+  audioActiveHoldSecs: number;
   trackingPaused: boolean;
   titleRecordingEnabled: boolean;
   closeBehavior: "exit" | "tray";
@@ -77,7 +77,7 @@ export const RELEASE_DEFAULT_SETTINGS: ReleaseDefaultSettingsProfile = {
   timelineMergeGapSecs: 300,
   refreshIntervalSecs: 2,
   minSessionSecs: 300,
-  audioKeepsUserActive: true,
+  audioActiveHoldSecs: 300,
   trackingPaused: false,
   titleRecordingEnabled: true,
   closeBehavior: "tray",

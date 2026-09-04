@@ -903,6 +903,7 @@ export interface UiText {
     "clearSelection": string;
     "cliPath": string;
     "edit": string;
+    "editIcon": string;
     "empty": string;
     "enabled": string;
     "globalProject": string;
@@ -934,6 +935,7 @@ export interface UiText {
     "resetStats": string;
     "retry": string;
     "runningInstances": string;
+    "runtime": string;
     "saveSettings": string;
     "scanAgain": string;
     "scanEmpty": string;
@@ -952,6 +954,7 @@ export interface UiText {
     "subtitle": string;
     "title": string;
     "trackingNow": string;
+    "userUsage": string;
     "version": string;
     "wakapi": string;
     "wakatime": string;

@@ -22,10 +22,13 @@ export const MESSAGES = {
   "timekeep.clearSelection": "Clear selection",
   "timekeep.trackingNow": "Tracking now",
   "timekeep.edit": "Edit program",
+  "timekeep.editIcon": "Edit icon",
   "timekeep.programName": "Program name",
   "timekeep.category": "Category (optional)",
   "timekeep.project": "Project (optional)",
   "timekeep.lifetime": "Lifetime",
+  "timekeep.runtime": "Runtime",
+  "timekeep.userUsage": "User usage",
   "timekeep.remove": "Remove",
   "timekeep.removeConfirm": "Remove this tracked program? Existing records will not be deleted.",
   "timekeep.addFailed": "Failed to add program.",
@@ -52,7 +55,7 @@ export const MESSAGES = {
   "timekeep.settingsSaved": "Timekeep service settings saved.",
   "timekeep.resetStats": "Reset statistics",
   "timekeep.resetAllStats": "Reset all statistics",
-  "timekeep.resetConfirm": "Reset all statistics? Active sessions and history will be deleted and cannot be recovered.",
+  "timekeep.resetConfirm": "Reset all statistics? Runtime sessions, user-usage sessions, and history will be deleted and cannot be recovered.",
   "timekeep.historyDate": "Date (optional)",
   "timekeep.historyProgramPlaceholder": "Filter by program; leave blank for all",
   "timekeep.historyLimit": "Limit",
@@ -61,5 +64,5 @@ export const MESSAGES = {
   "timekeep.requestTimeout": "Timekeep service did not respond in time. Check that it is running.",
   "timekeep.partialSuccess": "The operation completed, but the latest data could not be refreshed. Try refreshing again.",
   "timekeep.resetProgram": "Reset program statistics",
-  "timekeep.resetProgramConfirm": "Reset this program's statistics? Its active session, history, and lifetime will be deleted and cannot be recovered."
+  "timekeep.resetProgramConfirm": "Reset this program's statistics? Its runtime session, user-usage session, history, runtime, and user usage will be deleted and cannot be recovered."
 } as const;

@@ -215,8 +215,8 @@ export default function Settings({
           <SettingsTrackingPanel
             activeHoldMinutes={Math.round(draftSettings.timelineMergeGapSecs / 60)}
             onActiveHoldMinutesChange={(minutes) => handleChange("timelineMergeGapSecs", minutes * 60)}
-            audioKeepsUserActive={draftSettings.audioKeepsUserActive ?? true}
-            onAudioKeepsUserActiveChange={(nextChecked) => handleChange("audioKeepsUserActive", nextChecked)}
+            audioActiveHoldMinutes={Math.round((draftSettings.audioActiveHoldSecs ?? 300) / 60)}
+            onAudioActiveHoldMinutesChange={(minutes) => handleChange("audioActiveHoldSecs", minutes * 60)}
             trackingPaused={draftSettings.trackingPaused}
             onTrackingPausedChange={(nextChecked) => handleChange("trackingPaused", nextChecked)}
             titleRecordingEnabled={draftSettings.titleRecordingEnabled}

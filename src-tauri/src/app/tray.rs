@@ -702,13 +702,7 @@ mod tests {
             .to_rgba8();
         let installed_geometry = installed_icon
             .pixels()
-            .map(|pixel| {
-                if pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0 {
-                    0
-                } else {
-                    pixel[3]
-                }
-            })
+            .map(|pixel| pixel[3])
             .collect::<Vec<_>>();
         let decoded = TRAY_ICON_ASSETS
             .iter()
@@ -734,17 +728,15 @@ mod tests {
     }
 
     #[test]
-    fn tray_icon_assets_contain_their_declared_ring_and_focus_colors() {
+    fn tray_icon_assets_contain_their_declared_theme_color() {
         let expected_colors = [
-            (0x5F, 0x6B, 0x7A, 0x39, 0x46, 0x57),
-            (0xA8, 0xAF, 0xB8, 0x7B, 0x85, 0x92),
-            (0xC9, 0xD1, 0xDC, 0xEE, 0xF2, 0xF6),
-            (0x48, 0x4C, 0x51, 0x65, 0x6A, 0x71),
+            (0x2F, 0x36, 0x40),
+            (0x7A, 0x85, 0x92),
+            (0xEE, 0xF2, 0xF6),
+            (0xA8, 0xAF, 0xB8),
         ];
 
-        for ((variant, bytes), (rr, rg, rb, fr, fg, fb)) in
-            TRAY_ICON_ASSETS.iter().zip(expected_colors)
-        {
+        for ((variant, bytes), (red, green, blue)) in TRAY_ICON_ASSETS.iter().zip(expected_colors) {
             let image = image::load_from_memory(bytes)
                 .unwrap_or_else(|error| panic!("failed to decode {variant:?}: {error}"))
                 .to_rgba8();
@@ -755,8 +747,8 @@ mod tests {
                 .collect::<std::collections::BTreeSet<_>>();
             assert_eq!(
                 visible_colors,
-                std::collections::BTreeSet::from([[rr, rg, rb], [fr, fg, fb]]),
-                "{variant:?} contains colors outside the two declared roles"
+                std::collections::BTreeSet::from([[red, green, blue]]),
+                "{variant:?} contains colors outside its declared theme color"
             );
         }
     }

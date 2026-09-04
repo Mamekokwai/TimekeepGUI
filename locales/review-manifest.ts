@@ -530,8 +530,8 @@ export const LOCALE_SOURCE_REVIEWS = {
     "settings.cancel": "4fa6cdbf13079926",
     "settings.cancelled": "8214dcb7f9afde91",
     "settings.tracking": "0c731e334ef32989",
-    "settings.idleTimeoutLabel": "4b771fd83276edd7",
-    "settings.idleTimeoutHint": "7c21d31ccc37bef4",
+    "settings.idleTimeoutLabel": "b9af3654246249dc",
+    "settings.idleTimeoutHint": "81379c4b84f96d6e",
     "settings.timelineMergeGapLabel": "531456f59038d5fc",
     "settings.timelineMergeGapHint": "ad708a09f41ceaca",
     "settings.cleanup": "8878175f0c960564",
@@ -1045,7 +1045,7 @@ export const LOCALE_SOURCE_REVIEWS = {
     "timekeep.settingsSaved": "ac568b3514f6e458",
     "timekeep.resetStats": "673614fd392ed39c",
     "timekeep.resetAllStats": "5625ad2ade6c9511",
-    "timekeep.resetConfirm": "9354890006e7d99a",
+    "timekeep.resetConfirm": "701eaa5ed6c24833",
     "timekeep.historyDate": "fb0c2f6d9bd39409",
     "timekeep.historyLimit": "9453b6667df47abf",
     "timekeep.historySearch": "ea7c176d63753c92",
@@ -1053,7 +1053,7 @@ export const LOCALE_SOURCE_REVIEWS = {
     "timekeep.requestTimeout": "4542b5cf05f242f4",
     "timekeep.partialSuccess": "196e60b2dbeb036a",
     "timekeep.resetProgram": "708a545ff0758597",
-    "timekeep.resetProgramConfirm": "dd4907be4ef76443",
+    "timekeep.resetProgramConfirm": "69a1a75d8a8b1682",
     "timekeep.statusRunning": "b02298b550413fde",
     "timekeep.statusUnavailable": "b1df2ebbd0c05e08",
     "timekeep.serviceSettingsHint": "6e6607e27a5c0032",
@@ -1062,6 +1062,9 @@ export const LOCALE_SOURCE_REVIEWS = {
     "timekeep.selectAll": "e7dbae80bd76613e",
     "timekeep.clearSelection": "a866e423b7d1448d",
     "dashboard.bootTime": "76c2e5c52121400e",
-    "about.blog": "d267921f796c1565"
+    "about.blog": "d267921f796c1565",
+    "timekeep.editIcon": "1ca0e94d49769c4f",
+    "timekeep.runtime": "32f86bddd2d53e9c",
+    "timekeep.userUsage": "e743d4e96213cf55"
   }
 } as const;

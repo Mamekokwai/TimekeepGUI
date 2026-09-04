@@ -12,6 +12,7 @@ import { SUPPORTED_LOCALES } from "../i18n/generated/contract.ts";
 
 const IDLE_TIMEOUT_SECONDS_RANGE = { min: 300, max: 1800, step: 60 } as const;
 const TIMELINE_MERGE_GAP_SECONDS_RANGE = { min: 60, max: 300, step: 60 } as const;
+const AUDIO_ACTIVE_HOLD_SECONDS_RANGE = { min: 300, max: 1200, step: 60 } as const;
 const REFRESH_INTERVAL_OPTIONS = [1, 3];
 const MIN_SESSION_SECONDS_RANGE = { min: 60, max: 600, step: 60 } as const;
 const WEB_ACTIVITY_PORT_RANGE = { min: 1024, max: 65535 } as const;
@@ -221,9 +222,10 @@ export function normalizeSettingsRecord(
       DEFAULT_SETTINGS.minSessionSecs,
       MIN_SESSION_SECONDS_RANGE,
     ),
-    audioKeepsUserActive: parseBooleanSetting(
-      record.audio_keeps_user_active,
-      DEFAULT_SETTINGS.audioKeepsUserActive ?? true,
+    audioActiveHoldSecs: normalizeRangeStepValue(
+      record.audio_active_hold_secs,
+      DEFAULT_SETTINGS.audioActiveHoldSecs ?? 300,
+      AUDIO_ACTIVE_HOLD_SECONDS_RANGE,
     ),
     trackingPaused: parseBooleanSetting(record.tracking_paused, DEFAULT_SETTINGS.trackingPaused),
     titleRecordingEnabled: parseBooleanSetting(

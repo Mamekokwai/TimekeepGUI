@@ -4,8 +4,9 @@ use sqlx::{Pool, Row, Sqlite};
 use tauri::{AppHandle, Runtime};
 
 const TRACKING_PAUSED_KEY: &str = "tracking_paused";
-const AUDIO_KEEPS_USER_ACTIVE_KEY: &str = "audio_keeps_user_active";
 const DEFAULT_ACTIVE_HOLD_SECS: u64 = 300;
+const DEFAULT_AUDIO_ACTIVE_HOLD_SECS: u64 = 300;
+const MAX_AUDIO_ACTIVE_HOLD_SECS: u64 = 1200;
 
 #[derive(Clone, Debug, serde::Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -22,20 +23,31 @@ pub async fn record_presence(
     idle_ms: u64,
 ) -> Result<(), String> {
     let pool = wait_for_sqlite_pool(app).await?;
-    let hold_secs = load_u64_setting(&pool, "timeline_merge_gap_secs", DEFAULT_ACTIVE_HOLD_SECS)
-        .await
-        .map_err(|error| format!("failed to load active hold setting: {error}"))?
-        .clamp(60, 1800);
+    let user_hold_secs =
+        load_u64_setting(&pool, "timeline_merge_gap_secs", DEFAULT_ACTIVE_HOLD_SECS)
+            .await
+            .map_err(|error| format!("failed to load active hold setting: {error}"))?
+            .clamp(60, 1800);
     let paused = load_boolean_setting(&pool, TRACKING_PAUSED_KEY, false)
         .await
         .map_err(|error| format!("failed to load tracking pause setting: {error}"))?;
-    let audio_enabled = load_boolean_setting(&pool, AUDIO_KEEPS_USER_ACTIVE_KEY, true)
-        .await
-        .map_err(|error| format!("failed to load audio activity setting: {error}"))?;
-    let audio_active = audio_enabled && (audio::is_audio_active() || media::is_media_playing());
+    let audio_active = audio::is_audio_active() || media::is_media_playing();
+    let audio_hold_secs = load_u64_setting(
+        &pool,
+        "audio_active_hold_secs",
+        DEFAULT_AUDIO_ACTIVE_HOLD_SECS,
+    )
+    .await
+    .map_err(|error| format!("failed to load audio active hold setting: {error}"))?
+    .clamp(300, MAX_AUDIO_ACTIVE_HOLD_SECS);
+    let hold_secs = if audio_active {
+        audio_hold_secs
+    } else {
+        user_hold_secs
+    };
     let keyboard_or_mouse_active = idle_ms <= hold_secs.saturating_mul(1000);
 
-    if !paused && (keyboard_or_mouse_active || audio_active) {
+    if !paused && keyboard_or_mouse_active {
         let inferred_start = now_ms.saturating_sub(idle_ms.min(i64::MAX as u64) as i64);
         let updated = sqlx::query(
             "UPDATE user_activity_sessions
@@ -54,7 +66,7 @@ pub async fn record_presence(
                 "INSERT INTO user_activity_sessions (start_time, end_time, duration)
                  VALUES (?, NULL, NULL)",
             )
-            .bind(if audio_active { now_ms } else { inferred_start })
+            .bind(inferred_start)
             .execute(&pool)
             .await
             .map_err(|error| format!("failed to start user activity: {error}"))?;
@@ -133,18 +145,28 @@ pub async fn load_snapshot(
 
     let idle_since_ms = load_last_input_idle_ms()
         .map(|idle_ms| now_ms.saturating_sub(idle_ms.min(i64::MAX as u64) as i64));
-    let hold_secs = load_u64_setting(&pool, "timeline_merge_gap_secs", DEFAULT_ACTIVE_HOLD_SECS)
-        .await
-        .unwrap_or(DEFAULT_ACTIVE_HOLD_SECS)
-        .clamp(60, 1800);
-    let audio_enabled = load_boolean_setting(&pool, AUDIO_KEEPS_USER_ACTIVE_KEY, true)
-        .await
-        .unwrap_or(true);
-    let audio_active = audio_enabled && (audio::is_audio_active() || media::is_media_playing());
+    let user_hold_secs =
+        load_u64_setting(&pool, "timeline_merge_gap_secs", DEFAULT_ACTIVE_HOLD_SECS)
+            .await
+            .unwrap_or(DEFAULT_ACTIVE_HOLD_SECS)
+            .clamp(60, 1800);
+    let audio_active = audio::is_audio_active() || media::is_media_playing();
+    let audio_hold_secs = load_u64_setting(
+        &pool,
+        "audio_active_hold_secs",
+        DEFAULT_AUDIO_ACTIVE_HOLD_SECS,
+    )
+    .await
+    .unwrap_or(DEFAULT_AUDIO_ACTIVE_HOLD_SECS)
+    .clamp(300, MAX_AUDIO_ACTIVE_HOLD_SECS);
+    let hold_secs = if audio_active {
+        audio_hold_secs
+    } else {
+        user_hold_secs
+    };
     let is_active = idle_since_ms
         .map(|last_input_ms| now_ms.saturating_sub(last_input_ms) <= hold_secs as i64 * 1000)
-        .unwrap_or(false)
-        || audio_active;
+        .unwrap_or(false);
 
     Ok(UserActivitySnapshot {
         active_ms,

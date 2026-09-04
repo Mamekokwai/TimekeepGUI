@@ -9,8 +9,8 @@ import SettingsPanelHeader from "./SettingsPanelHeader";
 type SettingsTrackingPanelProps = {
   activeHoldMinutes: number;
   onActiveHoldMinutesChange: (minutes: number) => void;
-  audioKeepsUserActive: boolean;
-  onAudioKeepsUserActiveChange: (checked: boolean) => void;
+  audioActiveHoldMinutes: number;
+  onAudioActiveHoldMinutesChange: (minutes: number) => void;
   trackingPaused: boolean;
   onTrackingPausedChange: (checked: boolean) => void;
   titleRecordingEnabled: boolean;
@@ -34,8 +34,8 @@ function SettingRow({ label, hint, children }: { label: string; hint: ReactNode;
 export default function SettingsTrackingPanel({
   activeHoldMinutes,
   onActiveHoldMinutesChange,
-  audioKeepsUserActive,
-  onAudioKeepsUserActiveChange,
+  audioActiveHoldMinutes,
+  onAudioActiveHoldMinutesChange,
   trackingPaused,
   onTrackingPausedChange,
   titleRecordingEnabled,
@@ -72,16 +72,26 @@ export default function SettingsTrackingPanel({
           </div>
         </div>
 
-        <SettingRow
-          label={UI_TEXT.settings.idleTimeoutLabel}
-          hint={UI_TEXT.settings.idleTimeoutHint}
-        >
-          <QuietSwitch
-            checked={audioKeepsUserActive}
-            onChange={onAudioKeepsUserActiveChange}
-            ariaLabel={UI_TEXT.settings.idleTimeoutLabel}
-          />
-        </SettingRow>
+        <div>
+          <label className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[var(--qp-text-tertiary)]">
+            {UI_TEXT.settings.idleTimeoutLabel}
+          </label>
+          <div className="mt-2 grid grid-cols-1 items-start gap-3 md:grid-cols-[minmax(0,1fr)_minmax(240px,260px)] md:gap-4">
+            <p className="text-sm leading-relaxed text-[var(--qp-text-secondary)]">
+              {UI_TEXT.settings.idleTimeoutHint}
+            </p>
+            <QuietStepperSlider
+              ariaLabel={UI_TEXT.settings.idleTimeoutLabel}
+              value={audioActiveHoldMinutes}
+              min={5}
+              max={20}
+              displayValue={UI_TEXT.settings.minuteValue(audioActiveHoldMinutes)}
+              decreaseAriaLabel={UI_TEXT.settings.decreaseMinute(UI_TEXT.settings.idleTimeoutLabel)}
+              increaseAriaLabel={UI_TEXT.settings.increaseMinute(UI_TEXT.settings.idleTimeoutLabel)}
+              onChange={onAudioActiveHoldMinutesChange}
+            />
+          </div>
+        </div>
 
         <SettingRow label={UI_TEXT.settings.trackingPausedLabel} hint={UI_TEXT.settings.trackingPausedHint}>
           <QuietSwitch

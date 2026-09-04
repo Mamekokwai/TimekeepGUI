@@ -5876,6 +5876,11 @@ export const MESSAGE_SCHEMA = {
     "params": [],
     "surface": "frontend"
   },
+  "timekeep.editIcon": {
+    "kind": "string",
+    "params": [],
+    "surface": "frontend"
+  },
   "timekeep.programName": {
     "kind": "string",
     "params": [],
@@ -5892,6 +5897,16 @@ export const MESSAGE_SCHEMA = {
     "surface": "frontend"
   },
   "timekeep.lifetime": {
+    "kind": "string",
+    "params": [],
+    "surface": "frontend"
+  },
+  "timekeep.runtime": {
+    "kind": "string",
+    "params": [],
+    "surface": "frontend"
+  },
+  "timekeep.userUsage": {
     "kind": "string",
     "params": [],
     "surface": "frontend"

@@ -56,6 +56,8 @@ export interface TimekeepProgram {
   id: number;
   name: string;
   lifetime_seconds: number;
+  runtime_seconds?: number;
+  usage_seconds?: number;
   category?: string;
   project?: string;
 }
@@ -65,6 +67,7 @@ export interface TimekeepProgramCandidate {
   running_instances: number;
   tracked: boolean;
   lifetime_seconds: number;
+  usage_seconds?: number;
   category?: string | null;
   project?: string | null;
 }
