@@ -276,11 +276,11 @@ mod tests {
 
     #[test]
     fn remote_dir_normalization_matches_frontend_contract() {
-        assert_eq!(normalize_remote_dir("").unwrap(), "/Patina");
+        assert_eq!(normalize_remote_dir("").unwrap(), "/TimekeepGUI");
         assert_eq!(normalize_remote_dir("TimeTracker").unwrap(), "/TimeTracker");
         assert_eq!(
-            normalize_remote_dir("/Patina/backups/").unwrap(),
-            "/Patina/backups"
+            normalize_remote_dir("/TimekeepGUI/backups/").unwrap(),
+            "/TimekeepGUI/backups"
         );
         assert!(normalize_remote_dir("../outside").is_err());
     }

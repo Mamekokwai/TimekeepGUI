@@ -329,14 +329,14 @@ jobs:
       - name: Attest Windows installer
         uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4
         with:
-          subject-path: dist-release/Patina_${{ needs.resolve.outputs.version }}_x64-setup.exe
+          subject-path: dist-release/TimekeepGUI_${{ needs.resolve.outputs.version }}_x64-setup.exe
 
       - name: Upload release assets
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: release-assets
           path: |
-            dist-release/Patina_${{ needs.resolve.outputs.version }}_x64-setup.exe
+            dist-release/TimekeepGUI_${{ needs.resolve.outputs.version }}_x64-setup.exe
             dist-release/SHA256SUMS.txt
             dist-release/latest.json
           if-no-files-found: error
@@ -346,13 +346,13 @@ jobs:
         uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3
         with:
           tag_name: ${{ needs.resolve.outputs.tag }}
-          name: Patina v${{ needs.resolve.outputs.version }}
+          name: TimekeepGUI v${{ needs.resolve.outputs.version }}
           body_path: dist-release/release-notes.md
           draft: false
           prerelease: ${{ contains(needs.resolve.outputs.version, '-') }}
           overwrite_files: false
           files: |
-            dist-release/Patina_${{ needs.resolve.outputs.version }}_x64-setup.exe
+            dist-release/TimekeepGUI_${{ needs.resolve.outputs.version }}_x64-setup.exe
             dist-release/SHA256SUMS.txt
             dist-release/latest.json
 
@@ -435,7 +435,7 @@ jobs:
         run: |
           New-Item -ItemType Directory -Force dist-release/r2 | Out-Null
           $version = "${{ needs.resolve.outputs.version }}"
-          $installerName = "Patina_${version}_x64-setup.exe"
+          $installerName = "TimekeepGUI_${version}_x64-setup.exe"
           $r2BaseUrl = $env:R2_PUBLIC_BASE_URL.TrimEnd("/")
           $r2InstallerUrl = "$r2BaseUrl/releases/v$version/$installerName"
           $githubLatest = Get-Content "dist-release/latest.json" -Raw | ConvertFrom-Json
@@ -458,7 +458,7 @@ jobs:
           R2_BUCKET: ${{ secrets.R2_BUCKET }}
         run: |
           $version = "${{ needs.resolve.outputs.version }}"
-          $installerName = "Patina_${version}_x64-setup.exe"
+          $installerName = "TimekeepGUI_${version}_x64-setup.exe"
           $r2Endpoint = "https://$env:R2_ACCOUNT_ID.r2.cloudflarestorage.com"
 
           aws s3 cp `

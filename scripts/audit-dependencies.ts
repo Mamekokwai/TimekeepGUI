@@ -3,13 +3,13 @@ import { spawnSync } from "node:child_process";
 const MANIFEST = "src-tauri/Cargo.toml";
 const LOCKFILE = "src-tauri/Cargo.lock";
 const WINDOWS_TARGET = "x86_64-pc-windows-msvc";
-const OFFLINE = process.env.PATINA_DEPENDENCY_AUDIT_OFFLINE === "1";
+const OFFLINE = process.env.TIMEKEEPGUI_DEPENDENCY_AUDIT_OFFLINE === "1";
 
 const LOCK_ONLY_ADVISORIES = [
   {
     id: "RUSTSEC-2023-0071",
     crate: "rsa@0.9.10",
-    reason: "optional SQLx dependency is not enabled by Patina's SQLite-only feature set",
+    reason: "optional SQLx dependency is not enabled by TimekeepGUI's SQLite-only feature set",
   },
   {
     id: "RUSTSEC-2026-0194",

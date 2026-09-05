@@ -17,7 +17,7 @@ use windows::Win32::UI::WindowsAndMessaging::{
 
 static APP_HANDLE: OnceLock<AppHandle> = OnceLock::new();
 
-const WINDOW_CLASS_NAME: &str = "PatinaPowerWatcherWindow";
+const WINDOW_CLASS_NAME: &str = "TimekeepGUIPowerWatcherWindow";
 const POWER_EVENT_SOURCE: &str = "power_lifecycle_v1";
 const WTS_SESSION_LOCK_ID: u32 = 0x7;
 const WTS_SESSION_UNLOCK_ID: u32 = 0x8;

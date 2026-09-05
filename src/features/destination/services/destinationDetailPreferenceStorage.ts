@@ -2,11 +2,11 @@ import { DEFAULT_DESTINATION_DETAIL_ZOOM_HOURS } from "./destinationDetailTimeli
 import { getBrowserLocalStorage } from "../../../platform/browser/browserStorageGateway.ts";
 
 const DESTINATION_DETAIL_TIMELINE_ZOOM_HOURS_KEY =
-  "patina:destination-detail-timeline-zoom-hours:v1";
+  "timekeepgui:destination-detail-timeline-zoom-hours:v1";
 const LEGACY_DETAIL_TIMELINE_ZOOM_HOURS_KEY =
-  "patina:data-destination-detail-timeline-zoom-hours:v1";
-const DETAIL_MIN_SECS_KEY = "patina:destination-detail-min-secs:v1";
-const LEGACY_DETAIL_MIN_SECS_KEY = "patina:data-detail-min-secs";
+  "timekeepgui:data-destination-detail-timeline-zoom-hours:v1";
+const DETAIL_MIN_SECS_KEY = "timekeepgui:destination-detail-min-secs:v1";
+const LEGACY_DETAIL_MIN_SECS_KEY = "timekeepgui:data-detail-min-secs";
 
 const DEFAULT_DETAIL_MIN_SECS = 60;
 export const DETAIL_MIN_SECS_RANGE = {

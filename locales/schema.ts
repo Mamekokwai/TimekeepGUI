@@ -28,7 +28,7 @@ export const MESSAGE_SCHEMA = {
     "surface": "frontend"
   },
   "about.feedbackDialog.qqQrAlt": {
-    "description": "Alternative text for the QR code that joins Patina's QQ community channel.",
+    "description": "Alternative text for the QR code that joins TimekeepGUI's QQ community channel.",
     "kind": "string",
     "params": [],
     "surface": "frontend",

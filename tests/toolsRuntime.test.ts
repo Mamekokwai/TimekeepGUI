@@ -253,9 +253,9 @@ await runTest("tools preferences migrate legacy software mode once", () => {
     assert.equal(readToolsReminderMode(), "category");
     assert.equal(readToolsTimerMode(), "countdown");
     assert.equal(readToolsReminderFormMode(), "absolute");
-    window.localStorage.setItem("patina:tools-reminder-mode", "software");
+    window.localStorage.setItem("timekeepgui:tools-reminder-mode", "software");
     assert.equal(readToolsReminderMode(), "app");
-    assert.equal(window.localStorage.getItem("patina:tools-reminder-mode"), "app");
+    assert.equal(window.localStorage.getItem("timekeepgui:tools-reminder-mode"), "app");
   });
 });
 

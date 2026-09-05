@@ -483,7 +483,7 @@ mod tests {
     }
 
     #[test]
-    fn patina_widget_interaction_preserves_the_previous_tracking_session() {
+    fn timekeepgui_widget_interaction_preserves_the_previous_tracking_session() {
         tauri::async_runtime::block_on(async {
             let pool = setup_test_db().await;
             let data = data_store(&pool);
@@ -493,9 +493,12 @@ mod tests {
                 ("process_path", r"C:\Program Files\PixPin\PixPin.exe"),
             ]);
             let widget = make_window(&[
-                ("exe_name", "Patina.exe"),
+                ("exe_name", "TimekeepGUI.exe"),
                 ("title", crate::domain::widget::WIDGET_WINDOW_TITLE),
-                ("process_path", r"C:\Program Files\Patina\Patina.exe"),
+                (
+                    "process_path",
+                    r"C:\Program Files\TimekeepGUI\TimekeepGUI.exe",
+                ),
             ]);
             let codex = make_window(&[
                 ("exe_name", "ChatGPT.exe"),
@@ -573,7 +576,7 @@ mod tests {
         assert!(!crate::domain::tracking::should_track("LogonUI.exe"));
         assert!(crate::domain::tracking::should_track("time-tracker.exe"));
         assert!(crate::domain::tracking::should_track("time_tracker.exe"));
-        assert!(crate::domain::tracking::should_track("patina.exe"));
+        assert!(crate::domain::tracking::should_track("timekeepgui.exe"));
         assert!(!crate::domain::tracking::should_track("un.exe"));
         assert!(!crate::domain::tracking::should_track("SearchHost.exe"));
         assert!(!crate::domain::tracking::should_track("ShellHost.exe"));

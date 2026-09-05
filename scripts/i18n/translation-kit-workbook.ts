@@ -22,7 +22,7 @@ const TRANSLATION_COLUMNS = [
 ] as const;
 
 const GLOSSARY = [
-  ["Patina", "Do not translate", "Product name."],
+  ["TimekeepGUI", "Do not translate", "Product name."],
   ["GitHub", "Do not translate", "Service and brand name."],
   ["WebDAV", "Do not translate", "Protocol name."],
   ["CSV", "Do not translate", "File format name."],
@@ -34,7 +34,7 @@ const GLOSSARY = [
   ["Tracking", "Translate consistently", "Recording active desktop application time."],
   ["Session", "Translate consistently", "One continuous recorded activity interval."],
   ["Timeline", "Translate consistently", "Chronological activity visualization."],
-  ["Widget", "Translate consistently", "Patina's compact side widget, not a mobile widget."],
+  ["Widget", "Translate consistently", "TimekeepGUI's compact side widget, not a mobile widget."],
 ] as const;
 
 const MAX_XLSX_BYTES = 8 * 1024 * 1024;
@@ -225,7 +225,7 @@ function addInstructions(workbook: ExcelJS.Workbook, kit: TranslationKit): void 
   const sheet = workbook.addWorksheet("Instructions", { views: [{ showGridLines: false }] });
   sheet.columns = [{ width: 24 }, { width: 96 }];
   sheet.mergeCells("A1:B1");
-  sheet.getCell("A1").value = `Patina ${kit.targetLocale} Translation Kit`;
+  sheet.getCell("A1").value = `TimekeepGUI ${kit.targetLocale} Translation Kit`;
   sheet.getCell("A1").font = { bold: true, size: 20, color: { argb: "FF202321" } };
   sheet.getCell("A1").alignment = { vertical: "middle" };
   sheet.getRow(1).height = 38;
@@ -278,7 +278,7 @@ function addManifest(workbook: ExcelJS.Workbook, kit: TranslationKit): void {
 
 export async function writeTranslationWorkbook(kit: TranslationKit, path: string, initialTranslations?: ReadonlyMap<string, string>): Promise<void> {
   const workbook = new ExcelJS.Workbook();
-  workbook.creator = "Patina i18n toolchain";
+  workbook.creator = "TimekeepGUI i18n toolchain";
   workbook.created = new Date(0);
   workbook.modified = new Date(0);
   workbook.calcProperties.fullCalcOnLoad = true;

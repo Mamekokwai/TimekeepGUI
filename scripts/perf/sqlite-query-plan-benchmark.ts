@@ -1,6 +1,6 @@
 import { spawnSync } from "node:child_process";
 
-const marker = "PATINA_QUERY_PLAN_REPORT_JSON:";
+const marker = "TIMEKEEPGUI_QUERY_PLAN_REPORT_JSON:";
 
 function extractJsonAfterMarker(output: string): string | null {
   const markerIndex = output.indexOf(marker);

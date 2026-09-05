@@ -19,7 +19,7 @@ interface WidgetViewModel {
 }
 
 export function isWidgetSelfWindow(activeWindow: TrackingWindowSnapshot | null): boolean {
-  return activeWindow?.exeName.trim().toLowerCase() === "patina.exe";
+  return activeWindow?.exeName.trim().toLowerCase() === "timekeepgui.exe";
 }
 
 function resolveTrackableAppName(activeWindow: TrackingWindowSnapshot | null): string | null {

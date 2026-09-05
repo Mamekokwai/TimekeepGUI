@@ -5,7 +5,7 @@ use std::path::{Path, PathBuf};
 use tauri::{AppHandle, Runtime};
 
 const EBWEBVIEW_DIR_NAME: &str = "EBWebView";
-const PROFILE_MIGRATION_STAGING_PREFIX: &str = ".patina-webview-state-staging";
+const PROFILE_MIGRATION_STAGING_PREFIX: &str = ".timekeepgui-webview-state-staging";
 
 const PERSISTENT_PROFILE_PATHS: &[&[&str]] =
     &[&["Default", "Local Storage"], &["Default", "IndexedDB"]];
@@ -399,7 +399,7 @@ mod tests {
 
     fn temp_dir(label: &str) -> PathBuf {
         let path = std::env::temp_dir().join(format!(
-            "patina-webview-cache-{label}-{}",
+            "timekeepgui-webview-cache-{label}-{}",
             std::process::id()
         ));
         let _ = fs::remove_dir_all(&path);

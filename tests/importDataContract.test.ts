@@ -32,8 +32,8 @@ function emptyClassificationState(): ClassificationDraftState {
 
 function importPreview(overrides: Partial<ImportPreview> = {}): ImportPreview {
   return {
-    filePath: "C:\\data\\tai.patina.csv",
-    fileName: "tai.patina.csv",
+    filePath: "C:\\data\\tai.timekeepgui.csv",
+    fileName: "tai.timekeepgui.csv",
     fileFingerprint: "abc",
     validRecords: 3,
     duplicateRecords: 0,
@@ -48,8 +48,8 @@ function importPreview(overrides: Partial<ImportPreview> = {}): ImportPreview {
 
 test("import gateway accepts the canonical preview and dynamic batch payloads", () => {
   const preview = parseImportPreview({
-    filePath: "C:\\data\\tai.patina.csv",
-    fileName: "tai.patina.csv",
+    filePath: "C:\\data\\tai.timekeepgui.csv",
+    fileName: "tai.timekeepgui.csv",
     fileFingerprint: "abc",
     validRecords: 3,
     duplicateRecords: 1,
@@ -68,8 +68,8 @@ test("import gateway accepts the canonical preview and dynamic batch payloads", 
   const batches = parseImportBatches([{
     id: "internal-id",
     importedAt: 1_700_000_000_000,
-    sourceName: "tai.patina.csv",
-    sourceKind: "patina-csv",
+    sourceName: "tai.timekeepgui.csv",
+    sourceKind: "timekeepgui-csv",
     exactSessions: 0,
     hourBuckets: 2,
     totalRecords: 2,

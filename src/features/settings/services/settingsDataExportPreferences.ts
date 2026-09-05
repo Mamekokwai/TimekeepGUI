@@ -6,8 +6,8 @@ import {
 } from "../../../platform/persistence/dataExportGateway.ts";
 import { getBrowserLocalStorage } from "../../../platform/browser/browserStorageGateway.ts";
 
-const EXPORT_RANGE_MODE_KEY = "patina:export-range-mode";
-const EXPORT_FORMAT_KEY = "patina:export-format";
+const EXPORT_RANGE_MODE_KEY = "timekeepgui:export-range-mode";
+const EXPORT_FORMAT_KEY = "timekeepgui:export-format";
 
 const DEFAULT_EXPORT_RANGE_MODE: ExportRangeMode = "month";
 const DEFAULT_EXPORT_FORMAT: ExportFormat = "csv";
@@ -21,7 +21,7 @@ function isExportFormat(value: string | null): value is ExportFormat {
 }
 
 function exportFieldsKey(format: ExportFormat) {
-  return `patina:export-fields:${format}`;
+  return `timekeepgui:export-fields:${format}`;
 }
 
 export function normalizeExportFields(

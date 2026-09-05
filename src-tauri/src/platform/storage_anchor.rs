@@ -4,10 +4,15 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use tauri::{AppHandle, Runtime};
 
-pub const DATA_ANCHOR_FORMAT: &str = "patina.data-anchor.v1";
-pub const CACHE_ANCHOR_FORMAT: &str = "patina.cache-anchor.v1";
-pub const STORAGE_MIGRATION_PENDING_FORMAT: &str = "patina.storage-restart-operation.v2";
-pub const STORAGE_MAINTENANCE_STATE_FORMAT: &str = "patina.storage-maintenance-state.v1";
+pub const DATA_ANCHOR_FORMAT: &str = "timekeepgui.data-anchor.v1";
+pub const CACHE_ANCHOR_FORMAT: &str = "timekeepgui.cache-anchor.v1";
+pub const STORAGE_MIGRATION_PENDING_FORMAT: &str = "timekeepgui.storage-restart-operation.v2";
+pub const STORAGE_MAINTENANCE_STATE_FORMAT: &str = "timekeepgui.storage-maintenance-state.v1";
+
+const LEGACY_DATA_ANCHOR_FORMAT: &str = "patina.data-anchor.v1";
+const LEGACY_CACHE_ANCHOR_FORMAT: &str = "patina.cache-anchor.v1";
+const LEGACY_STORAGE_MIGRATION_PENDING_FORMAT: &str = "patina.storage-restart-operation.v2";
+const LEGACY_STORAGE_MAINTENANCE_STATE_FORMAT: &str = "patina.storage-maintenance-state.v1";
 
 const DATA_ANCHOR_FILE_NAME: &str = "data-anchor.json";
 const CACHE_ANCHOR_FILE_NAME: &str = "cache-anchor.json";
@@ -102,7 +107,10 @@ pub fn read_data_anchor_from_dir(
         return Ok(None);
     };
 
-    if anchor.format != DATA_ANCHOR_FORMAT {
+    if !matches!(
+        anchor.format.as_str(),
+        DATA_ANCHOR_FORMAT | LEGACY_DATA_ANCHOR_FORMAT
+    ) {
         return Err(format!(
             "unsupported data anchor format `{}`",
             anchor.format
@@ -128,7 +136,10 @@ pub fn read_cache_anchor_from_dir(
         return Ok(None);
     };
 
-    if anchor.format != CACHE_ANCHOR_FORMAT {
+    if !matches!(
+        anchor.format.as_str(),
+        CACHE_ANCHOR_FORMAT | LEGACY_CACHE_ANCHOR_FORMAT
+    ) {
         return Err(format!(
             "unsupported cache anchor format `{}`",
             anchor.format
@@ -180,7 +191,10 @@ pub fn read_pending_migration_from_dir(
         return Ok(None);
     };
 
-    if pending.format != STORAGE_MIGRATION_PENDING_FORMAT {
+    if !matches!(
+        pending.format.as_str(),
+        STORAGE_MIGRATION_PENDING_FORMAT | LEGACY_STORAGE_MIGRATION_PENDING_FORMAT
+    ) {
         return Err(format!(
             "unsupported storage migration format `{}`",
             pending.format
@@ -314,7 +328,10 @@ pub fn read_maintenance_state_from_dir(
         return Ok(StorageMaintenanceState::new());
     };
 
-    if state.format != STORAGE_MAINTENANCE_STATE_FORMAT {
+    if !matches!(
+        state.format.as_str(),
+        STORAGE_MAINTENANCE_STATE_FORMAT | LEGACY_STORAGE_MAINTENANCE_STATE_FORMAT
+    ) {
         return Err(format!(
             "unsupported storage maintenance format `{}`",
             state.format
@@ -445,7 +462,7 @@ mod tests {
 
     fn temp_dir(label: &str) -> PathBuf {
         let path = std::env::temp_dir().join(format!(
-            "patina-storage-anchor-{label}-{}",
+            "timekeepgui-storage-anchor-{label}-{}",
             std::process::id()
         ));
         let _ = fs::remove_dir_all(&path);

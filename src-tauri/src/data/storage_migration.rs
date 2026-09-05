@@ -253,7 +253,7 @@ async fn execute_pending_storage_migration<R: Runtime>(
 
         let staging_root = pending
             .target_data_root
-            .join(format!(".patina-migration-staging-{}", pending.id));
+            .join(format!(".timekeepgui-migration-staging-{}", pending.id));
         if staging_root.exists() {
             remove_migration_path_if_safe(&staging_root).map_err(|error| {
                 format!(
@@ -668,7 +668,7 @@ fn validate_target_data_root(
         if matches!(mode, TargetDataRootMode::Custom)
             && storage_paths::db_path_for_data_root(target).exists()
         {
-            return Err("target data directory already contains patina.db".to_string());
+            return Err("target data directory already contains timekeepgui.db".to_string());
         }
     }
 
@@ -947,7 +947,7 @@ pub(super) fn timestamp_for_file() -> String {
 }
 
 fn pre_migration_backup_file_name(migration_id: &str) -> String {
-    format!("Patina-{PRE_MIGRATION_BACKUP_PREFIX}-{migration_id}.zip")
+    format!("TimekeepGUI-{PRE_MIGRATION_BACKUP_PREFIX}-{migration_id}.zip")
 }
 
 #[cfg(test)]

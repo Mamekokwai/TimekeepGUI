@@ -13,9 +13,9 @@ export async function runToolsScenarios(context: BrowserSmokeContext) {
     assert.equal(
       await evaluate(client!, sessionId, `
         (() => {
-          localStorage.setItem("patina:last-active-view", "dashboard");
+          localStorage.setItem("timekeepgui:last-active-view", "dashboard");
           localStorage.setItem("__time_tracker_tools_snapshot_delay_ms", "900");
-          document.documentElement.dataset.patinaSmokeReload = "tools-cold";
+          document.documentElement.dataset.timekeepguiSmokeReload = "tools-cold";
           location.reload();
           return true;
         })()
@@ -25,7 +25,7 @@ export async function runToolsScenarios(context: BrowserSmokeContext) {
     await waitForExpression(
       client!,
       sessionId,
-      `document.documentElement.dataset.patinaSmokeReload !== "tools-cold"
+      `document.documentElement.dataset.timekeepguiSmokeReload !== "tools-cold"
         && Boolean(document.querySelector('[aria-label=' + ${jsonString(JSON.stringify(TOOLS_TEXT.title))} + ']'))`,
     );
     assert.equal(
@@ -74,16 +74,16 @@ export async function runToolsScenarios(context: BrowserSmokeContext) {
   await runTest("a stale Tools ensure cannot override a newer navigation request", async () => {
     await evaluate(client!, sessionId, `
       (() => {
-        localStorage.setItem("patina:last-active-view", "dashboard");
+        localStorage.setItem("timekeepgui:last-active-view", "dashboard");
         localStorage.setItem("__time_tracker_tools_snapshot_delay_ms", "900");
-        document.documentElement.dataset.patinaSmokeReload = "tools-stale-ensure";
+        document.documentElement.dataset.timekeepguiSmokeReload = "tools-stale-ensure";
         location.reload();
       })()
     `);
     await waitForExpression(
       client!,
       sessionId,
-      `document.documentElement.dataset.patinaSmokeReload !== "tools-stale-ensure"
+      `document.documentElement.dataset.timekeepguiSmokeReload !== "tools-stale-ensure"
         && Boolean(document.querySelector('[aria-label=' + ${jsonString(JSON.stringify(TOOLS_TEXT.title))} + ']'))`,
     );
     assert.equal(
@@ -113,16 +113,16 @@ export async function runToolsScenarios(context: BrowserSmokeContext) {
   await runTest("Tools cold snapshot failure is explicit and retryable", async () => {
     await evaluate(client!, sessionId, `
       (() => {
-        localStorage.setItem("patina:last-active-view", "dashboard");
+        localStorage.setItem("timekeepgui:last-active-view", "dashboard");
         localStorage.setItem("__time_tracker_reject_tools_snapshot", "1");
-        document.documentElement.dataset.patinaSmokeReload = "tools-cold-failure";
+        document.documentElement.dataset.timekeepguiSmokeReload = "tools-cold-failure";
         location.reload();
       })()
     `);
     await waitForExpression(
       client!,
       sessionId,
-      `document.documentElement.dataset.patinaSmokeReload !== "tools-cold-failure"
+      `document.documentElement.dataset.timekeepguiSmokeReload !== "tools-cold-failure"
         && Boolean(document.querySelector('[aria-label=' + ${jsonString(JSON.stringify(TOOLS_TEXT.title))} + ']'))`,
     );
     await evaluate(client!, sessionId, `

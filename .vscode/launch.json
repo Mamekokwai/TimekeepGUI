@@ -38,14 +38,14 @@
       }
     },
     {
-      "name": "Patina: Vite Dev",
+      "name": "TimekeepGUI: Vite Dev",
       "type": "node-terminal",
       "request": "launch",
       "command": "npm run dev",
       "cwd": "${workspaceFolder}"
     },
     {
-      "name": "Patina: Tauri Dev",
+      "name": "TimekeepGUI: Tauri Dev",
       "type": "node-terminal",
       "request": "launch",
       "command": "npm run tauri -- dev",

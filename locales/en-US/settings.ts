@@ -65,7 +65,7 @@ export const MESSAGES = {
   "settings.dataExportHint": "Export existing activity records. Import external time data.",
   "settings.dataExportTitle": "Export and import",
   "settings.dataImport.availableLabel": "Ready to import",
-  "settings.dataImport.batchesDescription": "Only the selected import batch is deleted. Patina's native data is unaffected.",
+  "settings.dataImport.batchesDescription": "Only the selected import batch is deleted. TimekeepGUI's native data is unaffected.",
   "settings.dataImport.batchesTitle": "Delete external imported data",
   "settings.dataImport.batchTitle": {
     "$type": "message",
@@ -296,7 +296,7 @@ export const MESSAGES = {
   "settings.save": "Save",
   "settings.saved": "Settings updated",
   "settings.saveFailed": "Could not save settings. Try again later.",
-  "settings.scheduledBackupCleanupWarning": "The latest backup is valid, but the previous automatic backup could not be removed yet. Patina will retry later.",
+  "settings.scheduledBackupCleanupWarning": "The latest backup is valid, but the previous automatic backup could not be removed yet. TimekeepGUI will retry later.",
   "settings.scheduledBackupLabels": {
     "directory": "Save to",
     "frequency": "Frequency",
@@ -331,7 +331,7 @@ export const MESSAGES = {
           "$op": "arg",
           "name": "targetWebviewRoot"
         },
-        "\n\nPatina will save the current record, restart, and use the target cache folder. Do not move or delete the target folder until this finishes."
+        "\n\nTimekeepGUI will save the current record, restart, and use the target cache folder. Do not move or delete the target folder until this finishes."
       ]
     }
   },
@@ -351,7 +351,7 @@ export const MESSAGES = {
           "$op": "arg",
           "name": "targetDataRoot"
         },
-        "\n\nPatina will save the current record, restart, and migrate the data to the target folder. Do not move or delete either folder until migration finishes."
+        "\n\nTimekeepGUI will save the current record, restart, and migrate the data to the target folder. Do not move or delete either folder until migration finishes."
       ]
     }
   },
@@ -375,7 +375,7 @@ export const MESSAGES = {
           "$op": "arg",
           "name": "defaultWebviewRoot"
         },
-        "\n\nPatina will save the current record, restart, and restore the default cache folder. Do not move or delete the default folder until this finishes."
+        "\n\nTimekeepGUI will save the current record, restart, and restore the default cache folder. Do not move or delete the default folder until this finishes."
       ]
     }
   },
@@ -394,13 +394,13 @@ export const MESSAGES = {
           "$op": "arg",
           "name": "defaultDataRoot"
         },
-        "\n\nPatina will save the current record, restart, and migrate the data to the default folder. Do not move or delete either folder until migration finishes."
+        "\n\nTimekeepGUI will save the current record, restart, and migrate the data to the default folder. Do not move or delete either folder until migration finishes."
       ]
     }
   },
   "settings.storage.storageSnapshotRefreshAction": "Check storage",
   "settings.storage.storageSnapshotRefreshFailed": "Could not check storage folders.",
-  "settings.storage.webviewCacheClearConfirmDetail": "Patina will save the current record, restart, and clear regenerable WebView cache before creating the window.",
+  "settings.storage.webviewCacheClearConfirmDetail": "TimekeepGUI will save the current record, restart, and clear regenerable WebView cache before creating the window.",
   "settings.storage.webviewCacheClearConfirmTitle": "Restart and clear cache?",
   "settings.storage.webviewCacheClearFailed": "Could not prepare cache cleanup. Try again.",
   "settings.storage.webviewCacheClearTitle": "Clear cache",
@@ -427,12 +427,12 @@ export const MESSAGES = {
   "settings.webActivityHelpCopiedAction": "Copied",
   "settings.webActivityHelpCopyPortAction": "Copy port",
   "settings.webActivityHelpCopyTokenAction": "Copy Token",
-  "settings.webActivityHelpDescription": "Patina Web Sync sends the active webpage to the local Patina desktop app.",
+  "settings.webActivityHelpDescription": "Patina Web Sync sends the active webpage to the local TimekeepGUI desktop app.",
   "settings.webActivityHelpNote": "After Patina Web Sync is enabled and connected:\n• Automatically syncs the active tab's website address, title, and website icon.\n• Does not read page body content, form values, screenshots, or clipboard contents.\n• Does not scan or import browser history.\n• Incognito windows are not written to web records.",
   "settings.webActivityHelpSteps": [
     {
       "title": "Prepare connection details",
-      "description": "The extension uses this page's port and Token to connect to the local Patina app.",
+      "description": "The extension uses this page's port and Token to connect to the local TimekeepGUI app.",
       "details": [
         "Copy the port and Token, then paste them into the extension settings later."
       ]
@@ -447,7 +447,7 @@ export const MESSAGES = {
           "links": [
             {
               "label": "Open releases",
-              "href": "https://github.com/Ceceliaee/patina-web-sync/releases/latest"
+              "href": "https://github.com/Mamekokwai/patina-web-sync/releases/latest"
             }
           ]
         }

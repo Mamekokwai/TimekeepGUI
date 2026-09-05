@@ -43,7 +43,7 @@ pub(super) fn prepare_backup_source(
     }
 
     let work_dir =
-        snapshot::create_private_work_dir(&std::env::temp_dir(), "patina-backup-source")?;
+        snapshot::create_private_work_dir(&std::env::temp_dir(), "timekeepgui-backup-source")?;
     let prepared_path = work_dir.join("backup.bin");
     let result = (|| {
         let source = File::open(source_path).map_err(|error| {
@@ -90,7 +90,7 @@ mod tests {
     #[test]
     fn changed_bytes_are_rejected_after_preview() {
         let work_dir =
-            snapshot::create_private_work_dir(&std::env::temp_dir(), "patina-binding-test")
+            snapshot::create_private_work_dir(&std::env::temp_dir(), "timekeepgui-binding-test")
                 .expect("create test directory");
         let source = work_dir.join("backup.zip");
         fs::write(&source, b"previewed bytes").expect("write previewed backup");

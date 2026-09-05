@@ -23,8 +23,8 @@ const MAIN_WINDOW_MIN_HEIGHT: f64 = 636.0;
 const MAIN_WINDOW_DESTROY_AFTER_BACKGROUND_SECS: u64 = 3 * 60;
 const MAIN_WINDOW_READY_TIMEOUT_SECS: u64 = 8;
 const MAIN_WINDOW_LIVENESS_TIMEOUT_MILLIS: u64 = 1_500;
-const MAIN_WINDOW_GENERATION_PROPERTY: &str = "__PATINA_MAIN_WINDOW_GENERATION__";
-const MAIN_WINDOW_LIVENESS_CALLBACK: &str = "__PATINA_MAIN_WINDOW_LIVENESS_REQUEST__";
+const MAIN_WINDOW_GENERATION_PROPERTY: &str = "__TIMEKEEPGUI_MAIN_WINDOW_GENERATION__";
+const MAIN_WINDOW_LIVENESS_CALLBACK: &str = "__TIMEKEEPGUI_MAIN_WINDOW_LIVENESS_REQUEST__";
 const WIDGET_SHOW_MAX_ATTEMPTS: usize = 2;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -224,7 +224,7 @@ pub(crate) fn current_main_window_render_token<R: Runtime>(
 pub(crate) fn destroy_hidden_main_window_for_e2e<R: Runtime>(
     app: &AppHandle<R>,
 ) -> Result<(), String> {
-    if !cfg!(debug_assertions) || std::env::var("PATINA_E2E").as_deref() != Ok("1") {
+    if !cfg!(debug_assertions) || std::env::var("TIMEKEEPGUI_E2E").as_deref() != Ok("1") {
         return Err("main-window destruction is available only to the isolated E2E runtime".into());
     }
 
@@ -584,11 +584,11 @@ fn ensure_main_window_once<R: Runtime + 'static>(
         });
 
     #[cfg(debug_assertions)]
-    let builder = if std::env::var("PATINA_E2E").as_deref() == Ok("1") {
-        let devtools_port = std::env::var("PATINA_E2E_DEVTOOLS_PORT")
-            .expect("PATINA_E2E_DEVTOOLS_PORT is required when PATINA_E2E=1")
+    let builder = if std::env::var("TIMEKEEPGUI_E2E").as_deref() == Ok("1") {
+        let devtools_port = std::env::var("TIMEKEEPGUI_E2E_DEVTOOLS_PORT")
+            .expect("TIMEKEEPGUI_E2E_DEVTOOLS_PORT is required when TIMEKEEPGUI_E2E=1")
             .parse::<u16>()
-            .expect("PATINA_E2E_DEVTOOLS_PORT must be a valid TCP port");
+            .expect("TIMEKEEPGUI_E2E_DEVTOOLS_PORT must be a valid TCP port");
         builder.additional_browser_args(&format!(
             "--remote-debugging-port={devtools_port} \
              --disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection"
@@ -691,17 +691,18 @@ pub(crate) fn handle_unexpected_main_window_destroyed<R: Runtime + 'static>(app:
 
 fn main_window_initialization_script(generation: u64) -> String {
     format!(
-        "(() => {{ Object.defineProperty(window, '{MAIN_WINDOW_GENERATION_PROPERTY}', {{ value: {generation}, writable: false, configurable: false }}); const applyPatinaMainWindowLabel = () => document.documentElement?.setAttribute('data-window-label', '{MAIN_WINDOW_LABEL}'); applyPatinaMainWindowLabel(); if (!document.documentElement) {{ document.addEventListener('DOMContentLoaded', applyPatinaMainWindowLabel, {{ once: true }}); }} }})();"
+        "(() => {{ Object.defineProperty(window, '{MAIN_WINDOW_GENERATION_PROPERTY}', {{ value: {generation}, writable: false, configurable: false }}); const applyTimekeepGUIMainWindowLabel = () => document.documentElement?.setAttribute('data-window-label', '{MAIN_WINDOW_LABEL}'); applyTimekeepGUIMainWindowLabel(); if (!document.documentElement) {{ document.addEventListener('DOMContentLoaded', applyTimekeepGUIMainWindowLabel, {{ once: true }}); }} }})();"
     )
 }
 
 fn main_window_url() -> WebviewUrl {
     #[cfg(debug_assertions)]
     {
-        let e2e_frontend_url = (std::env::var("PATINA_E2E").as_deref() == Ok("1")).then(|| {
-            std::env::var("PATINA_E2E_FRONTEND_URL")
-                .expect("PATINA_E2E_FRONTEND_URL is required when PATINA_E2E=1")
-        });
+        let e2e_frontend_url =
+            (std::env::var("TIMEKEEPGUI_E2E").as_deref() == Ok("1")).then(|| {
+                std::env::var("TIMEKEEPGUI_E2E_FRONTEND_URL")
+                    .expect("TIMEKEEPGUI_E2E_FRONTEND_URL is required when TIMEKEEPGUI_E2E=1")
+            });
         debug_main_window_url(e2e_frontend_url.as_deref())
     }
 
@@ -853,7 +854,7 @@ mod tests {
     fn main_window_generation_script_is_immutable_and_numeric() {
         let script = main_window_initialization_script(42);
 
-        assert!(script.contains("__PATINA_MAIN_WINDOW_GENERATION__"));
+        assert!(script.contains("__TIMEKEEPGUI_MAIN_WINDOW_GENERATION__"));
         assert!(script.contains("value: 42"));
         assert!(script.contains("writable: false"));
         assert!(script.contains("configurable: false"));

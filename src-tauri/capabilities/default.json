@@ -22,13 +22,13 @@
     {
       "identifier": "sql:allow-load",
       "args": {
-        "db": "sqlite:patina.db"
+        "db": "sqlite:timekeepgui.db"
       }
     },
     {
       "identifier": "sql:allow-select",
       "args": {
-        "db": "sqlite:patina.db"
+        "db": "sqlite:timekeepgui.db"
       }
     }
   ]

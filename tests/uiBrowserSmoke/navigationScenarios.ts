@@ -89,8 +89,8 @@ export async function runNavigationScenarios(context: BrowserSmokeContext) {
 
   await runTest("sidebar navigation labels toggle without geometry or navigation drift", async () => {
     await evaluate(client!, sessionId, `
-      localStorage.removeItem("patina:sidebar-navigation-mode");
-      localStorage.setItem("patina:last-active-view", "dashboard");
+      localStorage.removeItem("timekeepgui:sidebar-navigation-mode");
+      localStorage.setItem("timekeepgui:last-active-view", "dashboard");
     `);
     await client!.command("Emulation.setDeviceMetricsOverride", {
       width: 1100,
@@ -100,12 +100,12 @@ export async function runNavigationScenarios(context: BrowserSmokeContext) {
     }, sessionId);
     const firstModeScript = await client!.command("Page.addScriptToEvaluateOnNewDocument", {
       source: `
-        globalThis.__PATINA_FIRST_SIDEBAR_MODE = null;
+        globalThis.__TIMEKEEPGUI_FIRST_SIDEBAR_MODE = null;
         new MutationObserver(() => {
-          if (globalThis.__PATINA_FIRST_SIDEBAR_MODE !== null) return;
+          if (globalThis.__TIMEKEEPGUI_FIRST_SIDEBAR_MODE !== null) return;
           const sidebar = document.querySelector("[data-sidebar-navigation-mode]");
           if (sidebar) {
-            globalThis.__PATINA_FIRST_SIDEBAR_MODE = sidebar.getAttribute("data-sidebar-navigation-mode");
+            globalThis.__TIMEKEEPGUI_FIRST_SIDEBAR_MODE = sidebar.getAttribute("data-sidebar-navigation-mode");
           }
         }).observe(document, { childList: true, subtree: true });
       `,
@@ -180,7 +180,7 @@ export async function runNavigationScenarios(context: BrowserSmokeContext) {
       await evaluate(client!, sessionId, `
         (() => {
           const menu = document.querySelector('[aria-label="导航名称"]');
-          globalThis.__PATINA_ACTIVE_NAV_NODE = document.querySelector('[aria-current="page"]');
+          globalThis.__TIMEKEEPGUI_ACTIVE_NAV_NODE = document.querySelector('[aria-current="page"]');
           menu?.focus();
           menu?.click();
           return document.activeElement === menu;
@@ -224,7 +224,7 @@ export async function runNavigationScenarios(context: BrowserSmokeContext) {
           visuallyPressed: menu?.classList.contains("qp-icon-action-pressed") ?? false,
           focused: document.activeElement === menu,
           current: document.querySelector('[aria-current="page"]')?.getAttribute("aria-label"),
-          sameActiveNode: globalThis.__PATINA_ACTIVE_NAV_NODE === document.querySelector('[aria-current="page"]'),
+          sameActiveNode: globalThis.__TIMEKEEPGUI_ACTIVE_NAV_NODE === document.querySelector('[aria-current="page"]'),
           labelsHiddenFromName: labels.every((label) => label.getAttribute("aria-hidden") === "true"),
           iconsHiddenFromName: buttons.every((button) => button.querySelector("svg")?.getAttribute("aria-hidden") === "true"),
           overflowX: document.documentElement.scrollWidth - document.documentElement.clientWidth,
@@ -259,7 +259,7 @@ export async function runNavigationScenarios(context: BrowserSmokeContext) {
     assert.equal(labeledState.iconsHiddenFromName, true);
     assert.ok(labeledState.overflowX <= 1);
     assert.equal(
-      await evaluate(client!, sessionId, `localStorage.getItem("patina:sidebar-navigation-mode")`),
+      await evaluate(client!, sessionId, `localStorage.getItem("timekeepgui:sidebar-navigation-mode")`),
       "labeled",
     );
 
@@ -312,7 +312,7 @@ export async function runNavigationScenarios(context: BrowserSmokeContext) {
           },
           labels: Array.from(document.querySelectorAll("[data-sidebar-nav-label]")).length,
           pressed: menu?.getAttribute("aria-pressed"),
-          storedMode: localStorage.getItem("patina:sidebar-navigation-mode"),
+          storedMode: localStorage.getItem("timekeepgui:sidebar-navigation-mode"),
         };
       })()
     `) as {
@@ -335,7 +335,7 @@ export async function runNavigationScenarios(context: BrowserSmokeContext) {
       "Icons mode should restore on reload without a labeled-first frame",
     );
     assert.equal(
-      await evaluate(client!, sessionId, `globalThis.__PATINA_FIRST_SIDEBAR_MODE`),
+      await evaluate(client!, sessionId, `globalThis.__TIMEKEEPGUI_FIRST_SIDEBAR_MODE`),
       "icons",
     );
     await evaluate(client!, sessionId, `document.querySelector('[aria-label="导航名称"]')?.focus()`);
@@ -375,7 +375,7 @@ export async function runNavigationScenarios(context: BrowserSmokeContext) {
       "Sidebar mode should restore on reload without an icons-first frame",
     );
     assert.equal(
-      await evaluate(client!, sessionId, `globalThis.__PATINA_FIRST_SIDEBAR_MODE`),
+      await evaluate(client!, sessionId, `globalThis.__TIMEKEEPGUI_FIRST_SIDEBAR_MODE`),
       "labeled",
     );
     await client!.command("Page.removeScriptToEvaluateOnNewDocument", {
@@ -387,8 +387,8 @@ export async function runNavigationScenarios(context: BrowserSmokeContext) {
     );
 
     await evaluate(client!, sessionId, `
-      localStorage.setItem("patina:sidebar-navigation-mode", "expanded");
-      localStorage.setItem("patina:last-active-view", "dashboard");
+      localStorage.setItem("timekeepgui:sidebar-navigation-mode", "expanded");
+      localStorage.setItem("timekeepgui:last-active-view", "dashboard");
     `);
     await client!.command("Page.navigate", { url: context.appUrl }, sessionId);
     await waitForExpression(
@@ -398,7 +398,7 @@ export async function runNavigationScenarios(context: BrowserSmokeContext) {
       undefined,
       "Invalid sidebar mode should fall back to icons",
     );
-    await evaluate(client!, sessionId, `localStorage.removeItem("patina:sidebar-navigation-mode")`);
+    await evaluate(client!, sessionId, `localStorage.removeItem("timekeepgui:sidebar-navigation-mode")`);
   });
 
   await runTest("title bar hosts Tools and update while the sidebar footer stays Menu-only", async () => {
@@ -411,7 +411,7 @@ export async function runNavigationScenarios(context: BrowserSmokeContext) {
     await evaluate(client!, sessionId, `
       (() => {
         const now = Date.now();
-        localStorage.setItem("patina:sidebar-navigation-mode", "labeled");
+        localStorage.setItem("timekeepgui:sidebar-navigation-mode", "labeled");
         localStorage.setItem("__time_tracker_tools_snapshot_override", JSON.stringify({
           settings: {
             default_countdown_minutes: 25,
@@ -641,7 +641,7 @@ export async function runNavigationScenarios(context: BrowserSmokeContext) {
     await evaluate(client!, sessionId, `
       localStorage.removeItem("__time_tracker_tools_snapshot_override");
       localStorage.removeItem("__time_tracker_update_snapshot_override");
-      localStorage.removeItem("patina:sidebar-navigation-mode");
+      localStorage.removeItem("timekeepgui:sidebar-navigation-mode");
     `);
     await client!.command("Emulation.setDeviceMetricsOverride", {
       width: 1280,
@@ -736,7 +736,7 @@ export async function runNavigationScenarios(context: BrowserSmokeContext) {
     const activeValues = samples.map((sample) => sample.activeMs);
     const structureValues = samples.map((sample) => sample.structureMs);
     const maxBlankFrames = Math.max(...samples.map((sample) => sample.blankFrames));
-    console.log(`PATINA_NAVIGATION_EXPERIENCE_REPORT:${JSON.stringify({
+    console.log(`TIMEKEEPGUI_NAVIGATION_EXPERIENCE_REPORT:${JSON.stringify({
       environment: "Vite browser smoke with Tauri stubs; recommendation evidence, not a release hard gate",
       sampleCount: samples.length,
       activeP50Ms: percentile(activeValues, 0.5),
@@ -1031,7 +1031,7 @@ export async function runNavigationScenarios(context: BrowserSmokeContext) {
     await waitForExpression(
       client!,
       sessionId,
-      `localStorage.getItem("patina:last-active-view") === "dashboard"`,
+      `localStorage.getItem("timekeepgui:last-active-view") === "dashboard"`,
       undefined,
       "Dashboard navigation should persist before the simulated WebView reload",
     );
@@ -1219,14 +1219,14 @@ export async function runNavigationScenarios(context: BrowserSmokeContext) {
     await waitForExpression(
       client!,
       sessionId,
-      `Boolean(globalThis.__PATINA_MAIN_WINDOW_READY_EVIDENCE)`,
+      `Boolean(globalThis.__TIMEKEEPGUI_MAIN_WINDOW_READY_EVIDENCE)`,
       15_000,
       "rebuilt dark Data window readiness",
     );
     const evidence = await evaluate(
       client!,
       sessionId,
-      `globalThis.__PATINA_MAIN_WINDOW_READY_EVIDENCE`,
+      `globalThis.__TIMEKEEPGUI_MAIN_WINDOW_READY_EVIDENCE`,
     ) as {
       themeMode: string | null;
       theme: string | null;
@@ -1242,15 +1242,15 @@ export async function runNavigationScenarios(context: BrowserSmokeContext) {
         const settings = JSON.parse(localStorage.getItem(key) ?? "{}");
         settings.theme_mode = "light";
         localStorage.setItem(key, JSON.stringify(settings));
-        localStorage.setItem("patina:last-active-view", "dashboard");
+        localStorage.setItem("timekeepgui:last-active-view", "dashboard");
       })()
     `);
     await client!.command("Page.navigate", { url: context.appUrl }, sessionId);
     await waitForExpression(
       client!,
       sessionId,
-      `globalThis.__PATINA_MAIN_WINDOW_READY_EVIDENCE?.theme === "light"
-        && globalThis.__PATINA_MAIN_WINDOW_READY_EVIDENCE?.presentedView === "dashboard"`,
+      `globalThis.__TIMEKEEPGUI_MAIN_WINDOW_READY_EVIDENCE?.theme === "light"
+        && globalThis.__TIMEKEEPGUI_MAIN_WINDOW_READY_EVIDENCE?.presentedView === "dashboard"`,
       15_000,
       "restore browser smoke appearance and destination",
     );

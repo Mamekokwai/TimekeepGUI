@@ -94,7 +94,7 @@ pub async fn handle_http_request<R: Runtime>(
                 "ok": false,
                 "enabled": false,
                 "code": "web-recording-disabled",
-                "message": "Patina web recording is off.",
+                "message": "TimekeepGUI web recording is off.",
                 "serverTimeMs": now_ms,
             }),
         );

@@ -7,7 +7,7 @@ pub const WEBDAV_BACKUP_URL_KEY: &str = "webdav_backup_url";
 pub const WEBDAV_BACKUP_USERNAME_KEY: &str = "webdav_backup_username";
 pub const WEBDAV_BACKUP_REMOTE_DIR_KEY: &str = "webdav_backup_remote_dir";
 pub const WEBDAV_BACKUP_LAST_BACKUP_AT_MS_KEY: &str = "webdav_backup_last_backup_at_ms";
-pub const DEFAULT_WEBDAV_REMOTE_DIR: &str = "/Patina";
+pub const DEFAULT_WEBDAV_REMOTE_DIR: &str = "/TimekeepGUI";
 
 pub async fn load_config(pool: &Pool<Sqlite>) -> Result<Option<WebDavConfig>, String> {
     let url = load_setting_value(pool, WEBDAV_BACKUP_URL_KEY)
@@ -71,10 +71,10 @@ mod tests {
 
     #[test]
     fn target_identity_changes_only_with_non_secret_target_fields() {
-        let first = normalize_config("https://example.com/dav", "alice", "/Patina").unwrap();
+        let first = normalize_config("https://example.com/dav", "alice", "/TimekeepGUI").unwrap();
         let same =
-            normalize_config("https://example.com/dav#ignored", " alice ", "Patina/").unwrap();
-        let other = normalize_config("https://example.com/dav", "bob", "/Patina").unwrap();
+            normalize_config("https://example.com/dav#ignored", " alice ", "TimekeepGUI/").unwrap();
+        let other = normalize_config("https://example.com/dav", "bob", "/TimekeepGUI").unwrap();
         assert_eq!(target_identity(&first), target_identity(&same));
         assert_ne!(target_identity(&first), target_identity(&other));
         assert_eq!(target_identity(&first).len(), 64);
@@ -82,9 +82,10 @@ mod tests {
 
     #[test]
     fn persisted_config_rejects_cleartext_non_loopback_transport() {
-        let error = normalize_config("http://example.com/dav", "alice", "/Patina").unwrap_err();
+        let error =
+            normalize_config("http://example.com/dav", "alice", "/TimekeepGUI").unwrap_err();
         assert!(error.contains("must use HTTPS"));
-        assert!(normalize_config("http://127.0.0.1:8080/dav", "alice", "/Patina").is_ok());
+        assert!(normalize_config("http://127.0.0.1:8080/dav", "alice", "/TimekeepGUI").is_ok());
     }
 
     #[tokio::test]
@@ -94,7 +95,7 @@ mod tests {
         for (key, value) in [
             (WEBDAV_BACKUP_URL_KEY, "https://example.com/dav"),
             (WEBDAV_BACKUP_USERNAME_KEY, "alice"),
-            (WEBDAV_BACKUP_REMOTE_DIR_KEY, "/Patina"),
+            (WEBDAV_BACKUP_REMOTE_DIR_KEY, "/TimekeepGUI"),
         ] {
             sqlx::query("INSERT INTO settings(key, value) VALUES (?, ?)")
                 .bind(key)
@@ -105,6 +106,6 @@ mod tests {
         }
         let loaded = load_config(&pool).await.unwrap().unwrap();
         assert_eq!(loaded.username, "alice");
-        assert_eq!(loaded.remote_dir, "/Patina");
+        assert_eq!(loaded.remote_dir, "/TimekeepGUI");
     }
 }

@@ -35,7 +35,7 @@ export const MESSAGES = {
           "$op": "arg",
           "name": "label"
         },
-        ", including Patina and imported records, will be deleted. Other apps and imported records are unaffected."
+        ", including TimekeepGUI and imported records, will be deleted. Other apps and imported records are unaffected."
       ]
     }
   },

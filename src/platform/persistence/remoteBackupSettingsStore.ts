@@ -6,7 +6,7 @@ import {
   saveRemoteBackupSettings,
 } from "./persistenceWriteRuntimeGateway.ts";
 
-export const DEFAULT_WEBDAV_REMOTE_DIR = "/Patina";
+export const DEFAULT_WEBDAV_REMOTE_DIR = "/TimekeepGUI";
 
 const WEBDAV_BACKUP_URL_KEY = "webdav_backup_url";
 const WEBDAV_BACKUP_USERNAME_KEY = "webdav_backup_username";

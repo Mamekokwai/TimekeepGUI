@@ -9,7 +9,7 @@ export async function runAboutScenarios(context: BrowserSmokeContext) {
     assert.equal(
       await evaluate(client!, sessionId, `
         (() => {
-          localStorage.setItem("patina:last-active-view", "dashboard");
+          localStorage.setItem("timekeepgui:last-active-view", "dashboard");
           localStorage.setItem("__time_tracker_settings_query_delay_ms", "900");
           location.reload();
           return true;

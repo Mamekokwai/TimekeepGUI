@@ -1,14 +1,23 @@
 use crate::platform::app_paths::AppProfile;
 
 const WEBDAV_BACKUP_LEGACY_CREDENTIAL_TARGET: &str = "com.ceceliaee.patina.backup.webdav.default";
-const WEBDAV_BACKUP_CREDENTIAL_TARGET_PREFIX: &str = "com.ceceliaee.patina.backup.webdav";
+const LEGACY_WEBDAV_BACKUP_CREDENTIAL_TARGET_PREFIX: &str = "com.ceceliaee.patina.backup.webdav";
+const WEBDAV_BACKUP_CREDENTIAL_TARGET_PREFIX: &str = "com.mamekokwai.timekeepgui.backup.webdav";
 
 fn webdav_backup_credential_target(profile: AppProfile) -> String {
     format!("{WEBDAV_BACKUP_CREDENTIAL_TARGET_PREFIX}.{}", profile.key())
 }
 
+fn legacy_webdav_backup_credential_target(profile: AppProfile) -> String {
+    format!(
+        "{LEGACY_WEBDAV_BACKUP_CREDENTIAL_TARGET_PREFIX}.{}",
+        profile.key()
+    )
+}
+
 fn credential_lookup_targets(profile: AppProfile) -> Vec<String> {
     let mut targets = vec![webdav_backup_credential_target(profile)];
+    targets.push(legacy_webdav_backup_credential_target(profile));
     if profile == AppProfile::Production {
         targets.push(WEBDAV_BACKUP_LEGACY_CREDENTIAL_TARGET.to_string());
     }
@@ -81,7 +90,7 @@ mod windows_credentials {
         password: &str,
     ) -> Result<(), String> {
         let mut target = wide_null(credential_target);
-        let mut comment = wide_null("Patina WebDAV backup credential");
+        let mut comment = wide_null("TimekeepGUI WebDAV backup credential");
         let mut username = wide_null(username);
         let mut password_bytes = SensitiveBytes(password.as_bytes().to_vec());
 
@@ -218,7 +227,7 @@ pub fn read_webdav_backup_password(profile: AppProfile) -> Result<Option<String>
         };
         if index > 0 {
             let scoped_target = &targets[0];
-            windows_credentials::save_webdav_password(scoped_target, "Patina", &password)?;
+            windows_credentials::save_webdav_password(scoped_target, "TimekeepGUI", &password)?;
             let verified = windows_credentials::read_webdav_password(scoped_target)?;
             if verified.as_deref() != Some(password.as_str()) {
                 return Err("failed to verify migrated WebDAV credential".to_string());
@@ -261,11 +270,11 @@ mod tests {
 
     #[test]
     fn only_production_reads_the_legacy_unscoped_target_for_migration() {
-        assert_eq!(credential_lookup_targets(AppProfile::Production).len(), 2);
-        assert_eq!(credential_lookup_targets(AppProfile::Local).len(), 1);
-        assert_eq!(credential_lookup_targets(AppProfile::Dev).len(), 1);
+        assert_eq!(credential_lookup_targets(AppProfile::Production).len(), 3);
+        assert_eq!(credential_lookup_targets(AppProfile::Local).len(), 2);
+        assert_eq!(credential_lookup_targets(AppProfile::Dev).len(), 2);
         assert_eq!(
-            credential_lookup_targets(AppProfile::Production)[1],
+            credential_lookup_targets(AppProfile::Production)[2],
             WEBDAV_BACKUP_LEGACY_CREDENTIAL_TARGET
         );
     }

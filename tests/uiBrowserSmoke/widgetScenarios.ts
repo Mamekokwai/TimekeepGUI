@@ -55,7 +55,7 @@ interface WidgetVisibilityResult {
 
 function widgetUrl(appUrl: string, side: WidgetSide, toolSlotCount: number, pinned = false) {
   const url = new URL(appUrl);
-  url.searchParams.set("__patinaWindow", "widget");
+  url.searchParams.set("__timekeepguiWindow", "widget");
   url.searchParams.set("widgetSide", side);
   url.searchParams.set("widgetTools", String(toolSlotCount));
   url.searchParams.set("widgetTracking", "1");
@@ -251,22 +251,22 @@ async function verifyScaleEventRelayout(
   toolSlotCount: number,
 ) {
   const commandCount = await evaluate(context.client, context.sessionId, `
-    globalThis.__PATINA_INVOKED_COMMANDS.filter(
+    globalThis.__TIMEKEEPGUI_INVOKED_COMMANDS.filter(
       (entry) => entry.command === "cmd_set_widget_expanded"
     ).length
   `) as number;
-  await evaluate(context.client, context.sessionId, `globalThis.__PATINA_EMIT_SCALE_FACTOR_CHANGED(1.5)`);
+  await evaluate(context.client, context.sessionId, `globalThis.__TIMEKEEPGUI_EMIT_SCALE_FACTOR_CHANGED(1.5)`);
   await waitForExpression(
     context.client,
     context.sessionId,
-    `globalThis.__PATINA_INVOKED_COMMANDS.filter(
+    `globalThis.__TIMEKEEPGUI_INVOKED_COMMANDS.filter(
       (entry) => entry.command === "cmd_set_widget_expanded"
     ).length > ${commandCount}`,
     15_000,
     `expanded ${side} widget DPI relayout`,
   );
   const lastLayout = await evaluate(context.client, context.sessionId, `
-    globalThis.__PATINA_INVOKED_COMMANDS.filter(
+    globalThis.__TIMEKEEPGUI_INVOKED_COMMANDS.filter(
       (entry) => entry.command === "cmd_set_widget_expanded"
     ).at(-1)?.payload
   `);
@@ -342,7 +342,7 @@ export async function runWidgetScenarios(context: BrowserSmokeContext) {
       }
     }
 
-    console.log(`PATINA_WIDGET_DPI_MATRIX_REPORT:${JSON.stringify({
+    console.log(`TIMEKEEPGUI_WIDGET_DPI_MATRIX_REPORT:${JSON.stringify({
       resolutions: WIDGET_RESOLUTIONS.length,
       scales: WIDGET_SCALES.length,
       expandedToolStates: 3,
@@ -377,7 +377,7 @@ export async function runWidgetScenarios(context: BrowserSmokeContext) {
       15_000, "widget pin save");
     const pinnedEvidence = await evaluate(client, sessionId, `
       (() => ({
-        payload: globalThis.__PATINA_INVOKED_COMMANDS.filter(
+        payload: globalThis.__TIMEKEEPGUI_INVOKED_COMMANDS.filter(
           (entry) => entry.command === "cmd_set_widget_pinned"
         ).at(-1)?.payload,
         pressedClass: document.querySelector(".widget-pill-pin-action")?.classList.contains("qp-icon-action-pressed"),
@@ -407,7 +407,7 @@ export async function runWidgetScenarios(context: BrowserSmokeContext) {
     await navigateToWidget(context, "right", 0);
     await expandWidget(context, "right", 0);
     await evaluate(client, sessionId, `(() => {
-      globalThis.__PATINA_SET_WIDGET_APP = (appName, exeName, elapsedMs, responseDelayMs = 0) => {
+      globalThis.__TIMEKEEPGUI_SET_WIDGET_APP = (appName, exeName, elapsedMs, responseDelayMs = 0) => {
         const unavailableSignal = {
           signal: {
             is_available: false,
@@ -430,7 +430,7 @@ export async function runWidgetScenarios(context: BrowserSmokeContext) {
           is_afk: false,
           idle_time_ms: 0,
         };
-        globalThis.__PATINA_WIDGET_TRACKING_OVERRIDE = {
+        globalThis.__TIMEKEEPGUI_WIDGET_TRACKING_OVERRIDE = {
           responseDelayMs,
           currentTrackingSnapshot: {
             window: windowSnapshot,
@@ -467,9 +467,9 @@ export async function runWidgetScenarios(context: BrowserSmokeContext) {
             sampled_at_ms: Date.now(),
           },
         };
-        globalThis.__PATINA_EMIT_TAURI_EVENT('active-window-changed', windowSnapshot);
+        globalThis.__TIMEKEEPGUI_EMIT_TAURI_EVENT('active-window-changed', windowSnapshot);
       };
-      globalThis.__PATINA_SET_WIDGET_APP('PixPin', 'PixPin.exe', 62_000);
+      globalThis.__TIMEKEEPGUI_SET_WIDGET_APP('PixPin', 'PixPin.exe', 62_000);
     })()`);
     await waitForExpression(client, sessionId, `
       document.querySelector('.widget-pill-tracking-core')?.getAttribute('aria-label')?.toLowerCase().includes('pixpin')
@@ -477,7 +477,7 @@ export async function runWidgetScenarios(context: BrowserSmokeContext) {
     await evaluate(
       client,
       sessionId,
-      `globalThis.__PATINA_SET_WIDGET_APP('Codex', 'ChatGPT.exe', 122_000)`,
+      `globalThis.__TIMEKEEPGUI_SET_WIDGET_APP('Codex', 'ChatGPT.exe', 122_000)`,
     );
     await waitForExpression(client, sessionId, `
       /codex|chatgpt/i.test(document.querySelector('.widget-pill-tracking-core')?.getAttribute('aria-label') ?? '')
@@ -485,13 +485,13 @@ export async function runWidgetScenarios(context: BrowserSmokeContext) {
     await evaluate(
       client,
       sessionId,
-      `globalThis.__PATINA_SET_WIDGET_APP('PixPin', 'PixPin.exe', 62_000, 180)`,
+      `globalThis.__TIMEKEEPGUI_SET_WIDGET_APP('PixPin', 'PixPin.exe', 62_000, 180)`,
     );
     await delay(20);
     await evaluate(
       client,
       sessionId,
-      `globalThis.__PATINA_SET_WIDGET_APP('Codex', 'ChatGPT.exe', 122_000, 0)`,
+      `globalThis.__TIMEKEEPGUI_SET_WIDGET_APP('Codex', 'ChatGPT.exe', 122_000, 0)`,
     );
     await waitForExpression(client, sessionId, `
       /codex|chatgpt/i.test(document.querySelector('.widget-pill-tracking-core')?.getAttribute('aria-label') ?? '')
@@ -506,7 +506,7 @@ export async function runWidgetScenarios(context: BrowserSmokeContext) {
     const before = await evaluate(client, sessionId, `(() => ({
       label: document.querySelector('.widget-pill-tracking-core')?.getAttribute('aria-label'),
       time: document.querySelector('.widget-pill-tracking-time')?.textContent?.trim(),
-      statusRequests: globalThis.__PATINA_INVOKED_COMMANDS.filter(
+      statusRequests: globalThis.__TIMEKEEPGUI_INVOKED_COMMANDS.filter(
         (entry) => entry.command === 'cmd_get_widget_status_snapshot'
       ).length,
     }))()`) as { label: string; time: string; statusRequests: number };
@@ -528,13 +528,13 @@ export async function runWidgetScenarios(context: BrowserSmokeContext) {
         root_owner_hwnd: '2',
         process_id: 8,
         window_class: 'Chrome_WidgetWin_1',
-        title: 'Patina',
-        exe_name: 'patina.exe',
-        process_path: 'C:/Program Files/Patina/patina.exe',
+        title: 'TimekeepGUI',
+        exe_name: 'timekeepgui.exe',
+        process_path: 'C:/Program Files/TimekeepGUI/timekeepgui.exe',
         is_afk: false,
         idle_time_ms: 0,
       };
-      globalThis.__PATINA_WIDGET_TRACKING_OVERRIDE = {
+      globalThis.__TIMEKEEPGUI_WIDGET_TRACKING_OVERRIDE = {
         currentTrackingSnapshot: {
           window: windowSnapshot,
           status: {
@@ -561,8 +561,8 @@ export async function runWidgetScenarios(context: BrowserSmokeContext) {
         },
         widgetStatus: {
           tracking: {
-            app_name: 'Patina',
-            exe_name: 'patina.exe',
+            app_name: 'TimekeepGUI',
+            exe_name: 'timekeepgui.exe',
             elapsed_ms: 0,
             running: true,
           },
@@ -570,10 +570,10 @@ export async function runWidgetScenarios(context: BrowserSmokeContext) {
           sampled_at_ms: Date.now(),
         },
       };
-      globalThis.__PATINA_EMIT_TAURI_EVENT('active-window-changed', windowSnapshot);
+      globalThis.__TIMEKEEPGUI_EMIT_TAURI_EVENT('active-window-changed', windowSnapshot);
     })()`);
     await waitForExpression(client, sessionId, `
-      globalThis.__PATINA_INVOKED_COMMANDS.filter(
+      globalThis.__TIMEKEEPGUI_INVOKED_COMMANDS.filter(
         (entry) => entry.command === 'cmd_get_widget_status_snapshot'
       ).length > ${before.statusRequests}
     `, 15_000, "widget self-interaction status refresh");
@@ -607,7 +607,7 @@ export async function runWidgetScenarios(context: BrowserSmokeContext) {
 
     await waitForExpression(client, sessionId, `
       (() => {
-        const commands = globalThis.__PATINA_INVOKED_COMMANDS.filter(
+        const commands = globalThis.__TIMEKEEPGUI_INVOKED_COMMANDS.filter(
           (entry) => entry.command === "cmd_set_widget_pinned"
         );
         const lastTwo = commands.slice(-2).map((entry) => entry.payload?.pinned);

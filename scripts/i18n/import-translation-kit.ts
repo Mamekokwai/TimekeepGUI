@@ -135,7 +135,7 @@ export async function importTranslationKit(options: ImportOptions): Promise<stri
   validateLocaleBundle(target, messages);
 
   if (options.apply) {
-    const temporaryRoot = mkdtempSync(join(tmpdir(), `patina-i18n-${target}-`));
+    const temporaryRoot = mkdtempSync(join(tmpdir(), `timekeepgui-i18n-${target}-`));
     const generatedRoot = join(temporaryRoot, target);
     try {
       await writeLocaleDirectory(target, source, messages, generatedRoot);

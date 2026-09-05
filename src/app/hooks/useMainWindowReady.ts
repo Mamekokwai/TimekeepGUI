@@ -25,7 +25,7 @@ interface UseMainWindowReadyOptions {
 
 declare global {
   interface Window {
-    __PATINA_MAIN_WINDOW_LIVENESS_REQUEST__?: () => void;
+    __TIMEKEEPGUI_MAIN_WINDOW_LIVENESS_REQUEST__?: () => void;
   }
 }
 
@@ -179,14 +179,14 @@ export function useMainWindowReady({
     const handleLivenessRequest = () => {
       void verifyAndReportReady();
     };
-    window.__PATINA_MAIN_WINDOW_LIVENESS_REQUEST__ = handleLivenessRequest;
+    window.__TIMEKEEPGUI_MAIN_WINDOW_LIVENESS_REQUEST__ = handleLivenessRequest;
     void verifyAndReportReady();
 
     return () => {
       active = false;
       pendingTokenRef.current = null;
-      if (window.__PATINA_MAIN_WINDOW_LIVENESS_REQUEST__ === handleLivenessRequest) {
-        delete window.__PATINA_MAIN_WINDOW_LIVENESS_REQUEST__;
+      if (window.__TIMEKEEPGUI_MAIN_WINDOW_LIVENESS_REQUEST__ === handleLivenessRequest) {
+        delete window.__TIMEKEEPGUI_MAIN_WINDOW_LIVENESS_REQUEST__;
       }
       if (retryTimerId !== null) {
         window.clearTimeout(retryTimerId);

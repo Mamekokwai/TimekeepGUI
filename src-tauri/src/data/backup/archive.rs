@@ -19,7 +19,8 @@ const MAX_LEGACY_ENTRY_BYTES: u64 = 64 * 1024 * 1024;
 #[cfg(test)]
 use zip::{CompressionMethod, ZipWriter};
 
-pub(super) const BACKUP_FORMAT: &str = "PatinaBackup";
+pub(super) const BACKUP_FORMAT: &str = "TimekeepGUIBackup";
+const LEGACY_BACKUP_FORMAT: &str = "PatinaBackup";
 pub(super) const BACKUP_MANIFEST_ENTRY_NAME: &str = "manifest.json";
 pub(super) const BACKUP_CHECKSUMS_ENTRY_NAME: &str = "checksums.json";
 pub(super) const BACKUP_SESSIONS_ENTRY_NAME: &str = "data/sessions.json";
@@ -420,7 +421,7 @@ pub(super) fn decode_structured_backup_archive(
     let checksums =
         parse_json::<BackupArchiveChecksums>(&checksums_json, backup_path, "checksums")?;
     let manifest = parse_json::<BackupArchiveManifest>(&manifest_json, backup_path, "manifest")?;
-    if manifest.format != BACKUP_FORMAT {
+    if manifest.format != BACKUP_FORMAT && manifest.format != LEGACY_BACKUP_FORMAT {
         return Err(format!(
             "backup archive `{}` has unsupported format `{}`",
             backup_path.display(),
@@ -602,13 +603,13 @@ pub(super) fn read_backup_payload(backup_path: &Path) -> Result<BackupPayload, S
         }
 
         return Err(format!(
-            "backup archive `{}` is not a supported structured Patina backup",
+            "backup archive `{}` is not a supported structured TimekeepGUI backup",
             backup_path.display()
         ));
     }
 
     Err(format!(
-        "backup file `{}` is not a supported structured Patina backup",
+        "backup file `{}` is not a supported structured TimekeepGUI backup",
         backup_path.display()
     ))
 }

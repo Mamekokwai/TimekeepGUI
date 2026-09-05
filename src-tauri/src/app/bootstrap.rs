@@ -45,7 +45,7 @@ fn register_single_instance_plugin(
     #[cfg(desktop)]
     {
         let enabled = !cfg!(debug_assertions)
-            || std::env::var("PATINA_E2E_SINGLE_INSTANCE").as_deref() == Ok("1");
+            || std::env::var("TIMEKEEPGUI_E2E_SINGLE_INSTANCE").as_deref() == Ok("1");
         if enabled {
             return builder.plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
                 let app = app.clone();

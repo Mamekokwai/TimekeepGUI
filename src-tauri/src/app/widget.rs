@@ -639,11 +639,11 @@ fn show_widget_window_instance<R: Runtime>(
 
 #[cfg(debug_assertions)]
 fn fail_widget_show_for_e2e_if_requested() -> Result<(), String> {
-    if std::env::var("PATINA_E2E").as_deref() != Ok("1") {
+    if std::env::var("TIMEKEEPGUI_E2E").as_deref() != Ok("1") {
         return Ok(());
     }
 
-    let requested_failures = std::env::var("PATINA_E2E_WIDGET_SHOW_FAILURES")
+    let requested_failures = std::env::var("TIMEKEEPGUI_E2E_WIDGET_SHOW_FAILURES")
         .ok()
         .and_then(|raw| raw.parse::<usize>().ok())
         .unwrap_or(0);
@@ -668,14 +668,14 @@ fn fail_widget_show_for_e2e_if_requested() -> Result<(), String> {
 fn apply_e2e_widget_browser_args<R: Runtime>(
     builder: WebviewWindowBuilder<'_, R, AppHandle<R>>,
 ) -> WebviewWindowBuilder<'_, R, AppHandle<R>> {
-    if std::env::var("PATINA_E2E").as_deref() != Ok("1") {
+    if std::env::var("TIMEKEEPGUI_E2E").as_deref() != Ok("1") {
         return builder;
     }
 
-    let devtools_port = std::env::var("PATINA_E2E_DEVTOOLS_PORT")
-        .expect("PATINA_E2E_DEVTOOLS_PORT is required when PATINA_E2E=1")
+    let devtools_port = std::env::var("TIMEKEEPGUI_E2E_DEVTOOLS_PORT")
+        .expect("TIMEKEEPGUI_E2E_DEVTOOLS_PORT is required when TIMEKEEPGUI_E2E=1")
         .parse::<u16>()
-        .expect("PATINA_E2E_DEVTOOLS_PORT must be a valid TCP port");
+        .expect("TIMEKEEPGUI_E2E_DEVTOOLS_PORT must be a valid TCP port");
     builder.additional_browser_args(&format!(
         "--remote-debugging-port={devtools_port} \
          --disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection"

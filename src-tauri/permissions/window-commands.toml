@@ -2,7 +2,7 @@
 
 [[permission]]
 identifier = "main-window-commands"
-description = "Allows the main application window to invoke the complete Patina application command surface."
+description = "Allows the main application window to invoke the complete TimekeepGUI application command surface."
 commands.allow = [
   "cmd_get_recorded_app_catalog_page",
   "cmd_get_activity_aggregate_range",

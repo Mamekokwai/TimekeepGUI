@@ -1,10 +1,10 @@
 # 本地化契约与贡献指南
 
-本文是 Patina 多语言系统的长期操作指南与参考。目标读者是新增或修改用户可见文案、维护原生表面、贡献新语言的开发者。
+本文是 TimekeepGUI 多语言系统的长期操作指南与参考。目标读者是新增或修改用户可见文案、维护原生表面、贡献新语言的开发者。
 
 ## 1. 方案结论
 
-Patina 使用仓库级、语言无关的消息契约，而不是让某个前端对象成为规范源：
+TimekeepGUI 使用仓库级、语言无关的消息契约，而不是让某个前端对象成为规范源：
 
 - `locales/schema.ts` 定义 key、参数、消息种类和消费表面；
 - `locales/registry.ts` 是唯一生产语言注册表；
@@ -147,7 +147,7 @@ npm run i18n:export-kit -- ru-RU Русский --from en-US
 收到文件后先生成可审查资源，不注册生产语言：
 
 ```powershell
-npm run i18n:import-kit -- artifacts/i18n/patina-ru-RU-from-en-US-translation-kit.xlsx --target ru-RU --label Русский --direction ltr --from en-US
+npm run i18n:import-kit -- artifacts/i18n/timekeepgui-ru-RU-from-en-US-translation-kit.xlsx --target ru-RU --label Русский --direction ltr --from en-US
 ```
 
 可用 `--output <directory>` 指定审查目录。导入器会拒绝过期 fingerprint、缺失或额外行、被修改的参考列、漏译、占位符错误、意外公式、富文本、外部关系或嵌入对象、异常或过大的 XLSX 容器和不符合目标 locale CLDR 规则的结果。返回工作簿仍应按不可信输入处理：先用导入器验证并生成干净的可审查资源，不把直接打开陌生 XLSX 当作审查前置步骤。
@@ -161,7 +161,7 @@ npm run i18n:generate
 npm run check:full
 ```
 
-导入命令要求维护者在命令行再次明确目标 locale、原生名称、方向和参考 locale；导入器逐项对照工作簿，不能让回传文件自行决定将注册哪个语言。`--apply` 使用与 `i18n:new` 相同的原子事务，首次创建资源目录、注册 locale，并把 review 状态保留为 `PENDING`。它拒绝覆盖已注册或已存在的 locale。XLSX 与 `exceljs` 都只属于开发工具链，不进入 Patina 前端、Rust 二进制或安装包。
+导入命令要求维护者在命令行再次明确目标 locale、原生名称、方向和参考 locale；导入器逐项对照工作簿，不能让回传文件自行决定将注册哪个语言。`--apply` 使用与 `i18n:new` 相同的原子事务，首次创建资源目录、注册 locale，并把 review 状态保留为 `PENDING`。它拒绝覆盖已注册或已存在的 locale。XLSX 与 `exceljs` 都只属于开发工具链，不进入 TimekeepGUI 前端、Rust 二进制或安装包。
 
 ### 5.3 前端资源装载与 locale 激活
 

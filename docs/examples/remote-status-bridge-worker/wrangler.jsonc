@@ -1,6 +1,6 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "patina-remote-status-bridge",
+  "name": "timekeepgui-remote-status-bridge",
   "main": "src/index.js",
   "compatibility_date": "2026-06-17",
   "durable_objects": {

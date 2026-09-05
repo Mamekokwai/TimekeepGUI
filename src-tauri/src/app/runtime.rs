@@ -5,7 +5,7 @@ use crate::app::tray::setup_tray;
 use crate::domain::settings::{DesktopBehaviorSettings, StartupSource};
 use crate::engine::tracking::watchdog::RuntimeHealthState;
 use crate::platform::windows::{audio, media, power};
-#[cfg(any(test, all(not(debug_assertions), not(patina_local_build))))]
+#[cfg(any(test, all(not(debug_assertions), not(timekeepgui_local_build))))]
 use std::path::Path;
 use std::sync::Arc;
 
@@ -27,7 +27,7 @@ pub fn was_launched_by_autostart() -> bool {
     std::env::args().any(|arg| arg == AUTOSTART_ARG)
 }
 
-#[cfg(any(test, all(not(debug_assertions), not(patina_local_build))))]
+#[cfg(any(test, all(not(debug_assertions), not(timekeepgui_local_build))))]
 #[cfg_attr(debug_assertions, allow(dead_code))]
 pub fn should_use_local_build_context() -> bool {
     match std::env::current_exe() {
@@ -36,7 +36,7 @@ pub fn should_use_local_build_context() -> bool {
     }
 }
 
-#[cfg(any(test, all(not(debug_assertions), not(patina_local_build))))]
+#[cfg(any(test, all(not(debug_assertions), not(timekeepgui_local_build))))]
 fn is_workspace_target_binary(path: &Path) -> bool {
     let components = path
         .components()
@@ -105,21 +105,21 @@ mod tests {
     #[test]
     fn detects_workspace_target_binary_on_windows_path() {
         assert!(is_workspace_target_binary(Path::new(
-            r"C:\Users\SYBao\Documents\Code\Patina\src-tauri\target\release\patina.exe"
+            r"C:\Users\SYBao\Documents\Code\TimekeepGUI\src-tauri\target\release\timekeepgui.exe"
         )));
     }
 
     #[test]
     fn detects_workspace_target_binary_on_unix_path() {
         assert!(is_workspace_target_binary(Path::new(
-            "/home/user/project/src-tauri/target/debug/patina"
+            "/home/user/project/src-tauri/target/debug/timekeepgui"
         )));
     }
 
     #[test]
     fn ignores_installed_binary_path() {
         assert!(!is_workspace_target_binary(Path::new(
-            r"C:\Users\SYBao\AppData\Local\Patina\patina.exe"
+            r"C:\Users\SYBao\AppData\Local\TimekeepGUI\timekeepgui.exe"
         )));
     }
 }

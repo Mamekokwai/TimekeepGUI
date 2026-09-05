@@ -53,13 +53,13 @@
 
 - 代码版本号使用不带前缀的 `SemVer` 字符串，例如 `1.0.1`
 - Git tag 使用带 `v` 前缀的形式，例如 `v1.0.1`
-- GitHub Release 标题使用 `Patina vX.Y.Z`
+- GitHub Release 标题使用 `TimekeepGUI vX.Y.Z`
 
 示例：
 
 - 代码版本：`1.0.1`
 - Git tag：`v1.0.1`
-- GitHub Release 标题：`Patina v1.0.1`
+- GitHub Release 标题：`TimekeepGUI v1.0.1`
 
 ---
 
@@ -85,7 +85,7 @@
 - `1.1.0-beta.2`
 - `1.1.0-rc.1`
 
-当前 `Patina` 默认不维护复杂的 `beta / rc` 预发布线。除非用户明确要求测试版、候选版或灰度验证，否则准备完成后直接按稳定版本发布。
+当前 `TimekeepGUI` 默认不维护复杂的 `beta / rc` 预发布线。除非用户明确要求测试版、候选版或灰度验证，否则准备完成后直接按稳定版本发布。
 
 不应为了“先放着以后再改成 Latest”而默认把稳定 tag 做成预发布。GitHub Release 界面允许修改 `Pre-release / Latest` 标记，但本项目的长期默认是：稳定版本成熟后再发布稳定版本；如果确实需要预发布，就使用带语义后缀的版本号，例如 `1.6.0-rc.1`，正式发布再使用 `1.6.0`。
 
@@ -246,9 +246,9 @@ App note: 一句话概括应用内更新提示要显示的变化。
 - 只写“相对上一个已发布版本”的真实变化，不写本轮开发中出现过、但最终没有进入发布结果的中间尝试或回退
 - 准备正式版本时，必须先对比最近一个已发布 tag 或 release 提交之后的完整范围，例如 `git log vX.Y.Z..HEAD` 与 `git diff --stat vX.Y.Z..HEAD`；changelog 应总结这一整段时间的最终结果，而不是只总结最后一轮局部改动
 - 优先写用户能感知到的结果，不先写实现手段、模块名或重构过程
-- 如果条目修复了 GitHub issue，必须在对应 `Fixed` 条目中带上 issue 编号或链接，例如 `[#1](https://github.com/Ceceliaee/patina/issues/1)`，方便从发布说明追溯到问题上下文
+- 如果条目修复了 GitHub issue，必须在对应 `Fixed` 条目中带上 issue 编号或链接，例如 `[#1](https://github.com/Mamekokwai/TimekeepGUI)`，方便从发布说明追溯到问题上下文
 - changelog 的追踪引用只关联具体 GitHub issue 或 pull request，不关联 GitHub Project、项目看板或 Project item；如果没有对应 issue 或 pull request，则不为凑引用而误链、补建或关联看板
-- 当引用适用于整条 changelog 条目时，沿用 `1.9.3` 的格式：正文结束后另写 `Refs ...`，不加括号，例如 `- 修复……。Refs [#1](https://github.com/Ceceliaee/patina/issues/1)`
+- 当引用适用于整条 changelog 条目时，沿用 `1.9.3` 的格式：正文结束后另写 `Refs ...`，不加括号，例如 `- 修复……。Refs [#1](https://github.com/Mamekokwai/TimekeepGUI)`
 - 只有当条目继续描述另一个独立结果、而引用必须明确限定在前一段结果时，才在对应句末使用括号形式 `(Refs ...)`；遇到这种情况应优先拆成两条，避免引用范围含混
 - 上述引用格式适用于 `Unreleased` 和后续版本；不得仅为统一格式改写已经发布的历史版本
 - 一条尽量只表达一个结果，避免把多个层次不同的变化揉成一条长句
@@ -302,8 +302,8 @@ App note: 一句话概括应用内更新提示要显示的变化。
 
 统一使用：
 
-- `Patina v1.0.1`
-- `Patina v1.1.0-beta.1`
+- `TimekeepGUI v1.0.1`
+- `TimekeepGUI v1.1.0-beta.1`
 
 ## 9.2 正文来源
 
@@ -329,31 +329,31 @@ GitHub Release 正文必须来自 `CHANGELOG.md` 对应版本节，但不是机�
 
 ## 9.4 附件命名
 
-对外显示名称保持 `Patina`。
+对外显示名称保持 `TimekeepGUI`。
 
 GitHub Release 中的 Windows 安装包附件统一使用无空格文件名，例如：
 
-- `Patina_1.0.1_x64-setup.exe`
+- `TimekeepGUI_1.0.1_x64-setup.exe`
 
 每次正式发布还必须携带根级 `SHA256SUMS.txt`：
 
-- 校验文件只记录最终公开的 `Patina_<version>_x64-setup.exe`，不记录 Tauri bundle 中间路径或 `latest.json`。
+- 校验文件只记录最终公开的 `TimekeepGUI_<version>_x64-setup.exe`，不记录 Tauri bundle 中间路径或 `latest.json`。
 - 记录格式固定为 64 位小写 SHA-256、两个空格和无路径前缀的安装包文件名，并以单个 LF 换行结束。
-- SHA-256 必须在公开文件完成复制与重命名后，从 `dist-release/Patina_<version>_x64-setup.exe` 重新读取计算。
+- SHA-256 必须在公开文件完成复制与重命名后，从 `dist-release/TimekeepGUI_<version>_x64-setup.exe` 重新读取计算。
 - 发布工作流必须同时比较 Tauri 输入安装包与最终公开安装包的摘要；字节不一致时不得发布。
 - `SHA256SUMS.txt` 只证明文件字节一致性，不单独证明发布者身份或软件绝对安全。
 
 最终公开安装包还必须生成 GitHub Artifact Attestation：
 
-- attestation subject 必须是最终公开的 `dist-release/Patina_<version>_x64-setup.exe`，不能是原始 bundle 路径或目录 glob。
+- attestation subject 必须是最终公开的 `dist-release/TimekeepGUI_<version>_x64-setup.exe`，不能是原始 bundle 路径或目录 glob。
 - attestation 必须在独立发布资产校验通过后、GitHub Release 对外发布前生成；生成失败必须阻断 Release。
-- attestation 用于把安装包摘要与 Patina 仓库、源码引用和发布工作流关联，不替代 Tauri updater 签名或 Windows Authenticode。
+- attestation 用于把安装包摘要与 TimekeepGUI 仓库、源码引用和发布工作流关联，不替代 Tauri updater 签名或 Windows Authenticode。
 
-Patina Web Sync 浏览器扩展由独立公开仓库 [`patina-web-sync`](https://github.com/Ceceliaee/patina-web-sync) 发布，不再作为 Patina Release 的必备附件。
+Patina Web Sync 浏览器扩展由独立公开仓库 [`patina-web-sync`](https://github.com/Mamekokwai/patina-web-sync) 发布，不再作为 TimekeepGUI Release 的必备附件。
 
-Patina Release 只发布主应用安装包、`SHA256SUMS.txt`、`latest.json` 与更新通道所需资产。浏览器扩展的安装来源、版本号、商店素材、三店提交、AMO 公开 listed XPI 与扩展 release asset 由 `patina-web-sync` 仓库负责。
+TimekeepGUI Release 只发布主应用安装包、`SHA256SUMS.txt`、`latest.json` 与更新通道所需资产。浏览器扩展的安装来源、版本号、商店素材、三店提交、AMO 公开 listed XPI 与扩展 release asset 由 `patina-web-sync` 仓库负责。
 
-浏览器扩展的用户配置说明由 Patina README 与 Patina 设置页承载。Patina 设置页应指向 `patina-web-sync` 的发布页或商店入口，并继续说明本机端口与 token 配置步骤。
+浏览器扩展的用户配置说明由 TimekeepGUI README 与 TimekeepGUI 设置页承载。TimekeepGUI 设置页应指向 `patina-web-sync` 的发布页或商店入口，并继续说明本机端口与 token 配置步骤。
 
 ### Patina Web Sync 跨仓签收契约
 
@@ -365,9 +365,9 @@ Patina Release 只发布主应用安装包、`SHA256SUMS.txt`、`latest.json` �
 4. Tag 自动工作流已经发布完整的 Patina Web Sync GitHub Release，tag、Release 标题与附件版本一致。
 5. Firefox Release 附件来自 AMO 的同版本公开 listed XPI，并已校验 AMO SHA-256、manifest version 与稳定 Gecko id。
 6. Chromium ZIP 与 Firefox XPI 已由 `SHA256SUMS` 和 GitHub Artifact Attestation 绑定；同 tag 重跑只可复用字节相同的既有资产或补齐缺失资产，同名哈希冲突必须失败，发布后必须回读远端资产验证。
-7. 若版本改变 Web Activity 协议，Patina 接收端兼容必须先落地，两仓的 `docs/web-activity-protocol.md` 必须保持一致。
+7. 若版本改变 Web Activity 协议，TimekeepGUI 接收端兼容必须先落地，两仓的 `docs/web-activity-protocol.md` 必须保持一致。
 
-完成签收不绑定两个项目的版本号，也不要求 Patina 与 Patina Web Sync 同日发布。Patina Release 不携带扩展附件；Patina 只消费稳定商店入口、扩展 Release 和双方已对齐的本机协议。普通扩展发布不得依赖尚未发布的 Patina 接收端行为。
+完成签收不绑定两个项目的版本号，也不要求 TimekeepGUI 与 Patina Web Sync 同日发布。TimekeepGUI Release 不携带扩展附件；TimekeepGUI 只消费稳定商店入口、扩展 Release 和双方已对齐的本机协议。普通扩展发布不得依赖尚未发布的 TimekeepGUI 接收端行为。
 
 ## 9.5 更新源与镜像规则
 
@@ -410,7 +410,7 @@ GitHub Actions 生成正式发布资产后、发布 GitHub Release 前，还必�
 `write-release-notes`、`npm run tauri build -- --bundles nsis` 与 `npm run release:prepare-assets`
 默认属于 GitHub Actions 工作流 [`prepare-release.yml`](../.github/workflows/prepare-release.yml)
 中的 `Publish Release` 流程，只有在明确需要排查发布流水线问题时才例外。
-浏览器商店提交、AMO 公开 listed XPI 获取与扩展 GitHub Release 不属于 Patina 主应用发布流程；它们由 `patina-web-sync` 仓库负责。
+浏览器商店提交、AMO 公开 listed XPI 获取与扩展 GitHub Release 不属于 TimekeepGUI 主应用发布流程；它们由 `patina-web-sync` 仓库负责。
 
 如果改动触及 [`architecture.md`](./architecture.md) 中的高风险区、tracking 主链、读模型边界或运行时契约，不应跳过这些最低门槛。
 

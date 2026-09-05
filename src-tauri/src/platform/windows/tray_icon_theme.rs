@@ -112,7 +112,7 @@ impl TaskbarThemeWatcher {
         let change_event_raw = change_event.0 as isize;
         let stop_event_raw = stop_event.0 as isize;
         let thread = std::thread::Builder::new()
-            .name("patina-taskbar-theme".into())
+            .name("timekeepgui-taskbar-theme".into())
             .spawn(move || {
                 let key = windows::Win32::System::Registry::HKEY(key_raw as *mut _);
                 let change_event = HANDLE(change_event_raw as *mut _);

@@ -201,12 +201,12 @@ runTest("detail timeline zoom preference persists custom values after the 24-hou
     rememberDestinationDetailTimelineZoomHours(6.375);
     assert.equal(readDestinationDetailTimelineZoomHours(), 6.375);
     assert.equal(
-      storage.getItem("patina:destination-detail-timeline-zoom-hours:v1"),
+      storage.getItem("timekeepgui:destination-detail-timeline-zoom-hours:v1"),
       "6.375",
     );
 
     storage.setItem(
-      "patina:destination-detail-timeline-zoom-hours:v1",
+      "timekeepgui:destination-detail-timeline-zoom-hours:v1",
       "invalid",
     );
     assert.equal(readDestinationDetailTimelineZoomHours(), 24);
@@ -234,19 +234,19 @@ runTest("detail minimum duration owns an independent preference", () => {
     saveDetailMinSecs(300);
     assert.equal(readDetailMinSecs(), 300);
     assert.equal(
-      storage.getItem("patina:destination-detail-min-secs:v1"),
+      storage.getItem("timekeepgui:destination-detail-min-secs:v1"),
       "300",
     );
-    assert.equal(storage.getItem("patina:data-detail-min-secs"), null);
+    assert.equal(storage.getItem("timekeepgui:data-detail-min-secs"), null);
 
     storage.setItem(
-      "patina:destination-detail-min-secs:v1",
+      "timekeepgui:destination-detail-min-secs:v1",
       "invalid",
     );
-    storage.setItem("patina:data-detail-min-secs", "240");
+    storage.setItem("timekeepgui:data-detail-min-secs", "240");
     assert.equal(readDetailMinSecs(), 240);
 
-    storage.setItem("patina:data-detail-min-secs", "invalid");
+    storage.setItem("timekeepgui:data-detail-min-secs", "invalid");
     assert.equal(readDetailMinSecs(), 60);
   });
 

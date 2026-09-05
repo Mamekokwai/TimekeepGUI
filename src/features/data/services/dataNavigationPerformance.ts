@@ -1,10 +1,10 @@
 export const DATA_NAVIGATION_PERFORMANCE_MARKS = {
-  intent: "patina:data-navigation:intent",
-  chunkReady: "patina:data-navigation:chunk-ready",
-  rootMounted: "patina:data-navigation:root-mounted",
-  structureActive: "patina:data-navigation:structure-active",
-  readModelReady: "patina:data-navigation:read-model-ready",
-  complete: "patina:data-navigation:complete",
+  intent: "timekeepgui:data-navigation:intent",
+  chunkReady: "timekeepgui:data-navigation:chunk-ready",
+  rootMounted: "timekeepgui:data-navigation:root-mounted",
+  structureActive: "timekeepgui:data-navigation:structure-active",
+  readModelReady: "timekeepgui:data-navigation:read-model-ready",
+  complete: "timekeepgui:data-navigation:complete",
 } as const;
 
 type DataNavigationPerformanceStage =

@@ -350,9 +350,9 @@ await runTest("classification object mode preference persists apps and web", () 
     assert.equal(readClassificationObjectMode(), "app");
     rememberClassificationObjectMode("web");
     assert.equal(readClassificationObjectMode(), "web");
-    assert.equal(storage.getItem("patina:classification-object-mode"), "web");
+    assert.equal(storage.getItem("timekeepgui:classification-object-mode"), "web");
 
-    storage.setItem("patina:classification-object-mode", "category");
+    storage.setItem("timekeepgui:classification-object-mode", "category");
     assert.equal(readClassificationObjectMode(), "app");
   });
 });
@@ -364,13 +364,13 @@ await runTest("sidebar navigation mode preference is strict and failure-safe", (
 
     rememberSidebarNavigationMode("labeled");
     assert.equal(readSidebarNavigationMode(), "labeled");
-    assert.equal(storage.getItem("patina:sidebar-navigation-mode"), "labeled");
+    assert.equal(storage.getItem("timekeepgui:sidebar-navigation-mode"), "labeled");
 
     rememberSidebarNavigationMode("icons");
     assert.equal(readSidebarNavigationMode(), "icons");
-    assert.equal(storage.getItem("patina:sidebar-navigation-mode"), "icons");
+    assert.equal(storage.getItem("timekeepgui:sidebar-navigation-mode"), "icons");
 
-    storage.setItem("patina:sidebar-navigation-mode", "expanded");
+    storage.setItem("timekeepgui:sidebar-navigation-mode", "expanded");
     assert.equal(readSidebarNavigationMode(), "icons");
   });
 

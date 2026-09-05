@@ -120,7 +120,7 @@ mod tests {
         assert!(should_track("wallpaper32.exe"));
         assert!(should_track("wallpaper64.exe"));
         assert!(should_track("wallpaperengine.exe"));
-        assert!(should_track("patina.exe"));
+        assert!(should_track("timekeepgui.exe"));
         assert!(should_track("time_tracker.exe"));
         assert!(should_track("time-tracker.exe"));
         assert!(should_track("geek.exe"));
@@ -429,16 +429,16 @@ mod tests {
     }
 
     #[test]
-    fn trackable_window_rejects_only_the_owned_patina_widget_window() {
+    fn trackable_window_rejects_only_the_owned_timekeepgui_widget_window() {
         let widget = WindowTrackingCandidate::from_window_fields(
-            "Patina.exe",
+            "TimekeepGUI.exe",
             crate::domain::widget::WIDGET_WINDOW_TITLE,
             "Chrome_WidgetWin_1",
             false,
         );
         let main_window = WindowTrackingCandidate::from_window_fields(
-            "Patina.exe",
-            "Patina",
+            "TimekeepGUI.exe",
+            "TimekeepGUI",
             "Chrome_WidgetWin_1",
             false,
         );

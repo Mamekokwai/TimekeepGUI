@@ -21,7 +21,7 @@ function useDirectLucideIconModules() {
     /import\s*\{\s*([^}]+)\s*\}\s*from\s*["']lucide-react["'];/g;
 
   return {
-    name: "patina-direct-lucide-icon-modules",
+    name: "timekeepgui-direct-lucide-icon-modules",
     enforce: "pre" as const,
     transform(code: string, id: string) {
       if (!id.includes("/src/") && !id.includes("\\src\\")) return null;

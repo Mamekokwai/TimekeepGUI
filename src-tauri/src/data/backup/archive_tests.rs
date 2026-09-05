@@ -100,7 +100,7 @@ fn structured_backup_archive_recompressed_with_deflate_still_decodes() {
     }
 
     let backup_path = std::env::temp_dir().join(format!(
-        "patina-deflated-backup-{}-{}.zip",
+        "timekeepgui-deflated-backup-{}-{}.zip",
         std::process::id(),
         payload.meta.exported_at_ms
     ));

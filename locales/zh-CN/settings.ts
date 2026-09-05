@@ -65,7 +65,7 @@ export const MESSAGES = {
   "settings.dataExportHint": "导出已有活动记录；导入外部时间数据。",
   "settings.dataExportTitle": "导出与导入",
   "settings.dataImport.availableLabel": "可导入记录",
-  "settings.dataImport.batchesDescription": "仅删除所选导入批次；Patina 原生数据不受影响。",
+  "settings.dataImport.batchesDescription": "仅删除所选导入批次；TimekeepGUI 原生数据不受影响。",
   "settings.dataImport.batchesTitle": "删除外部导入数据",
   "settings.dataImport.batchTitle": {
     "$type": "message",
@@ -287,7 +287,7 @@ export const MESSAGES = {
   "settings.save": "保存",
   "settings.saved": "配置已更新",
   "settings.saveFailed": "配置保存失败，请稍后重试。",
-  "settings.scheduledBackupCleanupWarning": "最新备份有效，但上一份自动备份暂未清理；Patina 将稍后重试。",
+  "settings.scheduledBackupCleanupWarning": "最新备份有效，但上一份自动备份暂未清理；TimekeepGUI 将稍后重试。",
   "settings.scheduledBackupLabels": {
     "directory": "保存到",
     "frequency": "频率",
@@ -322,7 +322,7 @@ export const MESSAGES = {
           "$op": "arg",
           "name": "targetWebviewRoot"
         },
-        "\n\nPatina 将保存当前记录并重新启动，然后使用目标缓存目录。完成前，请不要删除或移动目标目录。"
+        "\n\nTimekeepGUI 将保存当前记录并重新启动，然后使用目标缓存目录。完成前，请不要删除或移动目标目录。"
       ]
     }
   },
@@ -342,7 +342,7 @@ export const MESSAGES = {
           "$op": "arg",
           "name": "targetDataRoot"
         },
-        "\n\nPatina 将保存当前记录并重新启动，然后把数据迁移到目标目录。迁移完成前，请不要删除或移动当前目录和目标目录。"
+        "\n\nTimekeepGUI 将保存当前记录并重新启动，然后把数据迁移到目标目录。迁移完成前，请不要删除或移动当前目录和目标目录。"
       ]
     }
   },
@@ -366,7 +366,7 @@ export const MESSAGES = {
           "$op": "arg",
           "name": "defaultWebviewRoot"
         },
-        "\n\nPatina 将保存当前记录并重新启动，然后恢复默认缓存目录。完成前，请不要删除或移动默认目录。"
+        "\n\nTimekeepGUI 将保存当前记录并重新启动，然后恢复默认缓存目录。完成前，请不要删除或移动默认目录。"
       ]
     }
   },
@@ -385,13 +385,13 @@ export const MESSAGES = {
           "$op": "arg",
           "name": "defaultDataRoot"
         },
-        "\n\nPatina 将保存当前记录并重新启动，然后把数据迁移到默认目录。迁移完成前，请不要删除或移动当前目录和默认目录。"
+        "\n\nTimekeepGUI 将保存当前记录并重新启动，然后把数据迁移到默认目录。迁移完成前，请不要删除或移动当前目录和默认目录。"
       ]
     }
   },
   "settings.storage.storageSnapshotRefreshAction": "检查存储",
   "settings.storage.storageSnapshotRefreshFailed": "无法检查存储目录。",
-  "settings.storage.webviewCacheClearConfirmDetail": "Patina 将保存当前记录并重新启动，在创建窗口前清理可重新生成的 WebView 缓存。",
+  "settings.storage.webviewCacheClearConfirmDetail": "TimekeepGUI 将保存当前记录并重新启动，在创建窗口前清理可重新生成的 WebView 缓存。",
   "settings.storage.webviewCacheClearConfirmTitle": "重启并清理缓存？",
   "settings.storage.webviewCacheClearFailed": "无法准备缓存清理，请重试。",
   "settings.storage.webviewCacheClearTitle": "清理缓存",
@@ -418,12 +418,12 @@ export const MESSAGES = {
   "settings.webActivityHelpCopiedAction": "已复制",
   "settings.webActivityHelpCopyPortAction": "复制端口",
   "settings.webActivityHelpCopyTokenAction": "复制 Token",
-  "settings.webActivityHelpDescription": "Patina Web Sync 会把当前活动网页同步到本机 Patina。",
+  "settings.webActivityHelpDescription": "Patina Web Sync 会把当前活动网页同步到本机 TimekeepGUI。",
   "settings.webActivityHelpNote": "Patina Web Sync 启用并连接成功后：\n• 自动同步当前活动标签页的网站地址、标题和网站图标。\n• 不读取网页正文、表单内容、截图或剪贴板。\n• 不扫描或导入浏览器历史记录。\n• 无痕模式窗口不会写入网页记录。",
   "settings.webActivityHelpSteps": [
     {
       "title": "准备连接信息",
-      "description": "扩展需要使用本页的端口和 Token 连接本机 Patina。",
+      "description": "扩展需要使用本页的端口和 Token 连接本机 TimekeepGUI。",
       "details": [
         "复制端口和 Token，稍后粘贴到扩展设置中。"
       ]
@@ -438,7 +438,7 @@ export const MESSAGES = {
           "links": [
             {
               "label": "打开发布页",
-              "href": "https://github.com/Ceceliaee/patina-web-sync/releases/latest"
+              "href": "https://github.com/Mamekokwai/patina-web-sync/releases/latest"
             }
           ]
         }

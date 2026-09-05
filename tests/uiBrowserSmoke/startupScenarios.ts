@@ -27,14 +27,14 @@ export async function runStartupScenarios(context: BrowserSmokeContext) {
     await waitForExpression(
       client!,
       sessionId,
-      `Boolean(globalThis.__PATINA_MAIN_WINDOW_READY_EVIDENCE)`,
+      `Boolean(globalThis.__TIMEKEEPGUI_MAIN_WINDOW_READY_EVIDENCE)`,
       FIRST_RENDER_TIMEOUT_MS,
       "main-window ready handshake",
     );
 
     const evidence = await evaluate(client!, sessionId, `({
-      ready: globalThis.__PATINA_MAIN_WINDOW_READY_EVIDENCE,
-      readyCalls: globalThis.__PATINA_INVOKED_COMMANDS.filter(
+      ready: globalThis.__TIMEKEEPGUI_MAIN_WINDOW_READY_EVIDENCE,
+      readyCalls: globalThis.__TIMEKEEPGUI_INVOKED_COMMANDS.filter(
         (entry) => entry.command === "cmd_mark_main_window_ready"
       ).length,
     })`) as {
@@ -69,11 +69,11 @@ export async function runStartupScenarios(context: BrowserSmokeContext) {
   await runTest("hidden main window proves frontend liveness before being revealed again", async () => {
     const probeStarted = await evaluate(client!, sessionId, `
       (() => {
-        const callback = globalThis.__PATINA_MAIN_WINDOW_LIVENESS_REQUEST__;
+        const callback = globalThis.__TIMEKEEPGUI_MAIN_WINDOW_LIVENESS_REQUEST__;
         const frame = document.querySelector(".qp-app-frame");
         if (typeof callback !== "function" || !frame) return false;
-        globalThis.__PATINA_READY_FRAME_REFERENCE__ = frame;
-        globalThis.__PATINA_MAIN_WINDOW_LOAD_EPOCH__ = 2;
+        globalThis.__TIMEKEEPGUI_READY_FRAME_REFERENCE__ = frame;
+        globalThis.__TIMEKEEPGUI_MAIN_WINDOW_LOAD_EPOCH__ = 2;
         callback();
         return true;
       })()
@@ -83,17 +83,17 @@ export async function runStartupScenarios(context: BrowserSmokeContext) {
     await waitForExpression(
       client!,
       sessionId,
-      `globalThis.__PATINA_MAIN_WINDOW_READY_EVIDENCE?.loadEpoch === 2`,
+      `globalThis.__TIMEKEEPGUI_MAIN_WINDOW_READY_EVIDENCE?.loadEpoch === 2`,
       FIRST_RENDER_TIMEOUT_MS,
       "hidden main-window liveness handshake",
     );
 
     const evidence = await evaluate(client!, sessionId, `({
-      ready: globalThis.__PATINA_MAIN_WINDOW_READY_EVIDENCE,
-      readyCalls: globalThis.__PATINA_INVOKED_COMMANDS.filter(
+      ready: globalThis.__TIMEKEEPGUI_MAIN_WINDOW_READY_EVIDENCE,
+      readyCalls: globalThis.__TIMEKEEPGUI_INVOKED_COMMANDS.filter(
         (entry) => entry.command === "cmd_mark_main_window_ready"
       ).length,
-      sameFrame: globalThis.__PATINA_READY_FRAME_REFERENCE__
+      sameFrame: globalThis.__TIMEKEEPGUI_READY_FRAME_REFERENCE__
         === document.querySelector(".qp-app-frame"),
       frameConnected: Boolean(document.querySelector(".qp-app-frame")?.isConnected),
     })`) as {
@@ -128,7 +128,7 @@ export async function runStartupScenarios(context: BrowserSmokeContext) {
       frameConnected: true,
     });
 
-    await evaluate(client!, sessionId, `delete globalThis.__PATINA_READY_FRAME_REFERENCE__`);
+    await evaluate(client!, sessionId, `delete globalThis.__TIMEKEEPGUI_READY_FRAME_REFERENCE__`);
   });
 
   await runTest("main window ready frame stays stable across supported DPI scales", async () => {

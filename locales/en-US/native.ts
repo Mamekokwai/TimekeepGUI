@@ -117,7 +117,7 @@ export const MESSAGES = {
       }
     }
   },
-  "native.export.title": "Patina Activity Records",
+  "native.export.title": "TimekeepGUI Activity Records",
   "native.export.totalDuration": {
     "$type": "message",
     "body": {

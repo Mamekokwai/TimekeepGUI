@@ -194,12 +194,12 @@ export async function stopBrowser(browser: ChildProcess) {
       const fallback = spawnSync("powershell.exe", [
         "-NoProfile",
         "-Command",
-        "Stop-Process -Id $env:PATINA_BROWSER_SMOKE_PID -Force",
+        "Stop-Process -Id $env:TIMEKEEPGUI_BROWSER_SMOKE_PID -Force",
       ], {
         encoding: "utf8",
         env: {
           ...process.env,
-          PATINA_BROWSER_SMOKE_PID: String(browser.pid),
+          TIMEKEEPGUI_BROWSER_SMOKE_PID: String(browser.pid),
         },
       });
       if ((fallback.error || fallback.status !== 0) && isProcessRunning(browser.pid)) {

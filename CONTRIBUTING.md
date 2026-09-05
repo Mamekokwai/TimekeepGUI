@@ -1,4 +1,4 @@
-# Contributing To Patina
+# Contributing To TimekeepGUI
 
 [English](#english) · [简体中文](#zh-cn)
 
@@ -8,7 +8,7 @@
 
 Thank you for taking the time to contribute.
 
-Patina is a personal, local-first Windows desktop time tracker. The project
+TimekeepGUI is a personal, local-first Windows desktop time tracker. The project
 values trustworthy records, clear ownership boundaries, readable UI, and
 changes that remain easy to maintain over time.
 
@@ -42,7 +42,7 @@ When several implementation options are possible, use this order of priority:
 4. Prefer the smallest change that fully solves the problem.
 5. Add new surface area only when it fits the current product scope.
 
-Patina is intentionally focused on personal, local-first Windows desktop
+TimekeepGUI is intentionally focused on personal, local-first Windows desktop
 use. Team SaaS features, account systems, cloud-first workflows, mobile-first
 features, and decorative complexity are not current priorities unless the
 project direction is explicitly changed first.
@@ -88,7 +88,7 @@ For larger work, discuss the direction first when the change:
 A pull request is ready for maintainer review only after it passes the project
 intake gate.
 
-For Patina, pull request scope means:
+For TimekeepGUI, pull request scope means:
 
 ```text
 one accepted problem
@@ -213,7 +213,7 @@ If you contribute from a fork, add the main repository as `upstream` and use
 `upstream/main` as the source branch:
 
 ```bash
-git remote add upstream https://github.com/Ceceliaee/patina.git
+git remote add upstream https://github.com/Mamekokwai/TimekeepGUI.git
 git fetch upstream main
 git rebase upstream/main
 ```
@@ -752,9 +752,9 @@ Before merging:
 
 ## 简体中文
 
-感谢你愿意为 Patina 做出贡献。
+感谢你愿意为 TimekeepGUI 做出贡献。
 
-Patina 是一个面向个人使用、本地优先的 Windows 桌面时间追踪工具。
+TimekeepGUI 是一个面向个人使用、本地优先的 Windows 桌面时间追踪工具。
 项目重视可信的记录、清晰的职责边界、可读的界面，以及能够长期维护的改动。
 
 本文说明如何准备改动、提交 Pull Request、响应 review 意见，以及判断一项改动是否可以合并。
@@ -784,7 +784,7 @@ Patina 是一个面向个人使用、本地优先的 Windows 桌面时间追踪�
 4. 优先采用能够完整解决问题的最小改动。
 5. 只有符合当前产品范围时，才增加新的功能表面。
 
-Patina 有意聚焦个人、本地优先的 Windows 桌面使用场景。除非先明确调整项目方向，
+TimekeepGUI 有意聚焦个人、本地优先的 Windows 桌面使用场景。除非先明确调整项目方向，
 否则团队 SaaS、账号体系、云优先工作流、移动端优先功能和装饰性复杂度都不是当前重点。
 
 ### 3. 开始一项改动之前
@@ -824,7 +824,7 @@ Patina 有意聚焦个人、本地优先的 Windows 桌面使用场景。除非�
 
 Pull Request 只有先通过项目准入门禁，才算准备好进入维护者 review。
 
-在 Patina 中，Pull Request 的范围定义为：
+在 TimekeepGUI 中，Pull Request 的范围定义为：
 
 ```text
 一个已接受的问题
@@ -927,7 +927,7 @@ docs/contribution-guide
 如果你从 fork 贡献，请把主仓库添加为 `upstream`，并以 `upstream/main` 为基准：
 
 ```bash
-git remote add upstream https://github.com/Ceceliaee/patina.git
+git remote add upstream https://github.com/Mamekokwai/TimekeepGUI.git
 git fetch upstream main
 git rebase upstream/main
 ```

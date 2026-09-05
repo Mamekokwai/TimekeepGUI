@@ -1629,10 +1629,10 @@
           "markdownDescription": "Denies the get_current_tracking_snapshot command without any pre-configured scope."
         },
         {
-          "description": "Allows the main application window to invoke the complete Patina application command surface.",
+          "description": "Allows the main application window to invoke the complete TimekeepGUI application command surface.",
           "type": "string",
           "const": "main-window-commands",
-          "markdownDescription": "Allows the main application window to invoke the complete Patina application command surface."
+          "markdownDescription": "Allows the main application window to invoke the complete TimekeepGUI application command surface."
         },
         {
           "description": "Allows the compact widget window to read tracking state and use widget-only controls.",

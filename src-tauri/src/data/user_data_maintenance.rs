@@ -421,7 +421,7 @@ mod tests {
                 "INSERT INTO import_batches (
                     id, imported_at, source_name, source_kind, file_fingerprint,
                     exact_session_count, hour_bucket_count
-                 ) VALUES ('batch-1', 1000, 'external.csv', 'patina-csv', 'batch-1', 1, 1)",
+                 ) VALUES ('batch-1', 1000, 'external.csv', 'timekeepgui-csv', 'batch-1', 1, 1)",
             )
             .execute(&pool)
             .await
@@ -548,7 +548,7 @@ mod tests {
                 "INSERT INTO import_batches (
                     id, imported_at, source_name, source_kind, file_fingerprint,
                     exact_session_count, hour_bucket_count
-                 ) VALUES ('batch-1', 1000, 'external.csv', 'patina-csv', 'batch-cleanup', 2, 2)",
+                 ) VALUES ('batch-1', 1000, 'external.csv', 'timekeepgui-csv', 'batch-cleanup', 2, 2)",
             )
             .execute(&pool)
             .await

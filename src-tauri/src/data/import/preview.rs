@@ -103,7 +103,7 @@ fn build_preview_dto(
         file_name: path
             .file_name()
             .and_then(|value| value.to_str())
-            .unwrap_or("Patina CSV")
+            .unwrap_or("TimekeepGUI CSV")
             .to_string(),
         file_fingerprint,
         valid_records: parsed.records.len(),

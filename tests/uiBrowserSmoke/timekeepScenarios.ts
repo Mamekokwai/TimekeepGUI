@@ -7,8 +7,8 @@ export async function runTimekeepScenarios(context: BrowserSmokeContext) {
 
   await runTest("Timekeep page renders Service data through the IPC gateway", async () => {
     await evaluate(client!, sessionId, `
-      localStorage.setItem("patina:last-active-view", "dashboard");
-      globalThis.__PATINA_TIMEKEEP_REQUESTS = [];
+      localStorage.setItem("timekeepgui:last-active-view", "dashboard");
+      globalThis.__TIMEKEEPGUI_TIMEKEEP_REQUESTS = [];
       document.querySelector('[data-sidebar-nav-item="timekeep"]')?.click();
     `);
     await waitForExpression(
@@ -22,7 +22,7 @@ export async function runTimekeepScenarios(context: BrowserSmokeContext) {
     );
 
     const result = await evaluate(client!, sessionId, `({
-      requests: globalThis.__PATINA_TIMEKEEP_REQUESTS.map((request) => request.action),
+      requests: globalThis.__TIMEKEEPGUI_TIMEKEEP_REQUESTS.map((request) => request.action),
       program: Array.from(document.querySelectorAll("body *")).find((node) => node.textContent?.trim() === "code.exe")?.textContent,
       activeSession: document.body.innerText.includes("当前会话") || document.body.innerText.includes("Active sessions"),
       history: document.body.innerText.includes("最近记录") || document.body.innerText.includes("Recent history"),

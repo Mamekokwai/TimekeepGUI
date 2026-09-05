@@ -1,6 +1,6 @@
 import Database from "@tauri-apps/plugin-sql";
 
-const DB_URL = "sqlite:patina.db";
+const DB_URL = "sqlite:timekeepgui.db";
 
 // Low-level DB adapter only.
 // Read-model queries should live in shared read repositories.

@@ -49,7 +49,7 @@ function versionFileFixture(version = "1.6.0") {
     tauriLocalConfig: JSON.stringify({ version }),
     cargoToml: [
       "[package]",
-      'name = "patina"',
+      'name = "timekeepgui"',
       `version = "${version}"`,
       "",
       "[dependencies]",
@@ -62,7 +62,7 @@ function versionFileFixture(version = "1.6.0") {
       'version = "0.1.0"',
       "",
       "[[package]]",
-      'name = "patina"',
+      'name = "timekeepgui"',
       `version = "${version}"`,
       "dependencies = []",
     ].join("\n"),
@@ -139,25 +139,25 @@ function testUpdaterNotesFallsBackToAppNote() {
 function testUpdaterEndpointsKeepGithubFirstAndPreserveMirrors() {
   const endpoints = buildUpdaterEndpoints([
     "https://pub-example.r2.dev/latest.json",
-    "https://github.com/Ceceliaee/patina/releases/latest/download/latest.json",
+    "https://github.com/Mamekokwai/TimekeepGUI",
     "https://pub-example.r2.dev/latest.json",
   ]);
 
   assert.deepEqual(endpoints, [
-    "https://github.com/Ceceliaee/patina/releases/latest/download/latest.json",
+    "https://github.com/Mamekokwai/TimekeepGUI",
     "https://pub-example.r2.dev/latest.json",
   ]);
 }
 
 function testReleaseInstallerNamesStayStable() {
-  assert.equal(buildReleaseInstallerName("1.9.3"), "Patina_1.9.3_x64-setup.exe");
-  assert.equal(buildReleaseInstallerName("2.0.0-rc.1"), "Patina_2.0.0-rc.1_x64-setup.exe");
+  assert.equal(buildReleaseInstallerName("1.9.3"), "TimekeepGUI_1.9.3_x64-setup.exe");
+  assert.equal(buildReleaseInstallerName("2.0.0-rc.1"), "TimekeepGUI_2.0.0-rc.1_x64-setup.exe");
   assert.throws(() => buildReleaseInstallerName("1.9"), /invalid SemVer/);
 }
 
 function testSha256SumsRoundTripUsesCanonicalFormat() {
   const digest = "a".repeat(64);
-  const fileName = "Patina_1.9.3_x64-setup.exe";
+  const fileName = "TimekeepGUI_1.9.3_x64-setup.exe";
   const rendered = renderSha256Sums(digest, fileName);
 
   assert.equal(rendered, `${digest}  ${fileName}\n`);
@@ -167,20 +167,20 @@ function testSha256SumsRoundTripUsesCanonicalFormat() {
 function testSha256SumsRejectInvalidContent() {
   const digest = "a".repeat(64);
 
-  assert.throws(() => renderSha256Sums("A".repeat(64), "Patina_1.9.3_x64-setup.exe"), /lowercase/);
-  assert.throws(() => renderSha256Sums(digest.slice(1), "Patina_1.9.3_x64-setup.exe"), /64/);
-  assert.throws(() => renderSha256Sums(digest, "../Patina_1.9.3_x64-setup.exe"), /unsafe/);
-  assert.throws(() => parseSha256SumsText(`\uFEFF${digest}  Patina_1.9.3_x64-setup.exe\n`), /BOM/);
-  assert.throws(() => parseSha256SumsText(`${digest}  Patina_1.9.3_x64-setup.exe\r\n`), /LF/);
-  assert.throws(() => parseSha256SumsText(`${digest} Patina_1.9.3_x64-setup.exe\n`), /two spaces/);
+  assert.throws(() => renderSha256Sums("A".repeat(64), "TimekeepGUI_1.9.3_x64-setup.exe"), /lowercase/);
+  assert.throws(() => renderSha256Sums(digest.slice(1), "TimekeepGUI_1.9.3_x64-setup.exe"), /64/);
+  assert.throws(() => renderSha256Sums(digest, "../TimekeepGUI_1.9.3_x64-setup.exe"), /unsafe/);
+  assert.throws(() => parseSha256SumsText(`\uFEFF${digest}  TimekeepGUI_1.9.3_x64-setup.exe\n`), /BOM/);
+  assert.throws(() => parseSha256SumsText(`${digest}  TimekeepGUI_1.9.3_x64-setup.exe\r\n`), /LF/);
+  assert.throws(() => parseSha256SumsText(`${digest} TimekeepGUI_1.9.3_x64-setup.exe\n`), /two spaces/);
   assert.throws(
-    () => parseSha256SumsText(`${digest}  Patina_1.9.3_x64-setup.exe\n${digest}  extra.exe\n`),
+    () => parseSha256SumsText(`${digest}  TimekeepGUI_1.9.3_x64-setup.exe\n${digest}  extra.exe\n`),
     /exactly one record/,
   );
 }
 
 function testSignedInstallerSelectionRequiresOnePair() {
-  const installer = path.join("bundle", "Patina.exe");
+  const installer = path.join("bundle", "TimekeepGUI.exe");
   assert.deepEqual(
     selectSignedInstallerCandidates([`${installer}.sig`, installer]),
     { installerFilePath: installer, signatureFilePath: `${installer}.sig` },
@@ -202,7 +202,7 @@ function preparedReleaseValues(overrides = {}) {
 
   return {
     version,
-    repository: "Ceceliaee/patina",
+    repository: "Mamekokwai/TimekeepGUI",
     target: "windows-x86_64",
     sourceDigest: digest,
     finalDigest: digest,
@@ -213,7 +213,7 @@ function preparedReleaseValues(overrides = {}) {
       platforms: {
         "windows-x86_64": {
           signature,
-          url: `https://github.com/Ceceliaee/patina/releases/download/v${version}/${installerName}`,
+          url: `https://github.com/Mamekokwai/TimekeepGUI/releases/download/v${version}/${installerName}`,
         },
       },
     },
@@ -277,7 +277,7 @@ function testReleaseNotesKeepVisibleSectionsAndSkipInternal() {
   assert.doesNotMatch(notes, /Internal item/);
 }
 
-function testReleaseNotesOnlyMentionPatinaInstaller() {
+function testReleaseNotesOnlyMentionTimekeepGUIInstaller() {
   const notes = renderReleaseNotes({
     version: "1.9.3",
     release: "Ready.",
@@ -286,10 +286,10 @@ function testReleaseNotesOnlyMentionPatinaInstaller() {
 
   assert.match(notes, /Windows 安装包/);
   assert.match(notes, /SHA256SUMS\.txt/);
-  assert.match(notes, /Get-FileHash \.\\Patina_1\.9\.3_x64-setup\.exe -Algorithm SHA256/);
-  assert.match(notes, /gh attestation verify \.\\Patina_1\.9\.3_x64-setup\.exe --repo Ceceliaee\/patina/);
-  assert.doesNotMatch(notes, /patina-chromium-extension/);
-  assert.doesNotMatch(notes, /patina-firefox-extension/);
+  assert.match(notes, /Get-FileHash \.\\TimekeepGUI_1\.9\.3_x64-setup\.exe -Algorithm SHA256/);
+  assert.match(notes, /gh attestation verify \.\\TimekeepGUI_1\.9\.3_x64-setup\.exe --repo Mamekokwai\/TimekeepGUI/);
+  assert.doesNotMatch(notes, /timekeepgui-chromium-extension/);
+  assert.doesNotMatch(notes, /timekeepgui-firefox-extension/);
 }
 
 function testReleaseVisibleChangeCountIgnoresInternal() {
@@ -323,8 +323,8 @@ function testReleaseWorkflowDoesNotPublishBrowserExtensionAssets() {
   assert.doesNotMatch(workflow, /npm run extension:chromium:package/);
   assert.doesNotMatch(workflow, /npm run extension:firefox:sign/);
   assert.doesNotMatch(workflow, /CHROMIUM_EXTENSION_ASSET|FIREFOX_EXTENSION_ASSET/);
-  assert.doesNotMatch(workflow, /patina-chromium-extension|patina-firefox-extension/);
-  assert.match(workflow, /dist-release\/Patina_\$\{\{ needs\.resolve\.outputs\.version \}\}_x64-setup\.exe/);
+  assert.doesNotMatch(workflow, /timekeepgui-chromium-extension|timekeepgui-firefox-extension/);
+  assert.match(workflow, /dist-release\/TimekeepGUI_\$\{\{ needs\.resolve\.outputs\.version \}\}_x64-setup\.exe/);
   assert.equal(workflow.match(/dist-release\/SHA256SUMS\.txt/g)?.length, 2);
   assert.match(workflow, /dist-release\/latest\.json/);
   assert.doesNotMatch(workflow.slice(workflow.indexOf("\n  r2:")), /SHA256SUMS\.txt/);
@@ -392,7 +392,7 @@ function testReleaseWorkflowAttestsVerifiedFinalInstallerWithMinimumPermissions(
   assert.match(publishJob, /uses: actions\/attest@[0-9a-f]{40} # v4/);
   assert.match(
     publishJob,
-    /subject-path: dist-release\/Patina_\$\{\{ needs\.resolve\.outputs\.version \}\}_x64-setup\.exe/,
+    /subject-path: dist-release\/TimekeepGUI_\$\{\{ needs\.resolve\.outputs\.version \}\}_x64-setup\.exe/,
   );
   assert.doesNotMatch(publishJob, /subject-path:.*\*|subject-path:.*bundle/);
   assert.match(publishJob, /overwrite_files: false/);
@@ -585,18 +585,18 @@ function testVersionFilesValidationCatchesCargoMismatch() {
   const files = versionFileFixture();
   files.cargoToml = [
     "[package]",
-    'name = "patina"',
+    'name = "timekeepgui"',
     'version = "1.5.9"',
   ].join("\n");
   files.cargoLock = [
     "[[package]]",
-    'name = "patina"',
+    'name = "timekeepgui"',
     'version = "1.5.8"',
   ].join("\n");
 
   assert.deepEqual(validateReleaseVersionFilesText(files, "1.6.0"), [
     "src-tauri/Cargo.toml [package].version is 1.5.9, expected 1.6.0",
-    "src-tauri/Cargo.lock package patina version is 1.5.8, expected 1.6.0",
+    "src-tauri/Cargo.lock package timekeepgui version is 1.5.8, expected 1.6.0",
   ]);
 }
 
@@ -626,17 +626,17 @@ function testVersionFilesValidationRejectsInvalidVersion() {
 
 function testDependencyAuditKeepsOfflineModeExplicitAndNetworkFree() {
   const source = readFileSync("scripts/audit-dependencies.ts", "utf8");
-  assert.match(source, /PATINA_DEPENDENCY_AUDIT_OFFLINE === "1"/);
+  assert.match(source, /TIMEKEEPGUI_DEPENDENCY_AUDIT_OFFLINE === "1"/);
   assert.match(source, /if \(OFFLINE\) rustAuditArgs\.push\("--no-fetch"\)/);
   assert.match(source, /if \(OFFLINE\) npmAuditArgs\.push\("--offline"\)/);
 }
 
 async function testPrepareAndVerifyReleaseAssetsDetectTampering() {
   const version = JSON.parse(readFileSync("package.json", "utf8")).version;
-  const testRoot = await mkdtemp(path.join(os.tmpdir(), "patina-release-assets-"));
+  const testRoot = await mkdtemp(path.join(os.tmpdir(), "timekeepgui-release-assets-"));
   const bundleDir = path.join(testRoot, "bundle", "nsis");
   const outputDir = path.join(testRoot, "dist-release");
-  const sourceInstaller = path.join(bundleDir, "Patina-test-setup.exe");
+  const sourceInstaller = path.join(bundleDir, "TimekeepGUI-test-setup.exe");
   const sourceSignature = `${sourceInstaller}.sig`;
 
   try {
@@ -648,14 +648,14 @@ async function testPrepareAndVerifyReleaseAssetsDetectTampering() {
       version,
       path.join(testRoot, "bundle"),
       outputDir,
-      "Ceceliaee/patina",
+      "Mamekokwai/TimekeepGUI",
       "windows-x86_64",
     );
     await verifyReleaseAssets(
       version,
       path.join(testRoot, "bundle"),
       outputDir,
-      "Ceceliaee/patina",
+      "Mamekokwai/TimekeepGUI",
       "windows-x86_64",
     );
 
@@ -672,7 +672,7 @@ async function testPrepareAndVerifyReleaseAssetsDetectTampering() {
         version,
         path.join(testRoot, "bundle"),
         outputDir,
-        "Ceceliaee/patina",
+        "Mamekokwai/TimekeepGUI",
         "windows-x86_64",
       ),
       /does not match source installer/,
@@ -682,7 +682,7 @@ async function testPrepareAndVerifyReleaseAssetsDetectTampering() {
       version,
       path.join(testRoot, "bundle"),
       outputDir,
-      "Ceceliaee/patina",
+      "Mamekokwai/TimekeepGUI",
       "windows-x86_64",
     );
     await writeFile(path.join(outputDir, "SHA256SUMS.txt"), `${"0".repeat(64)}  wrong.exe\n`, "utf8");
@@ -691,7 +691,7 @@ async function testPrepareAndVerifyReleaseAssetsDetectTampering() {
         version,
         path.join(testRoot, "bundle"),
         outputDir,
-        "Ceceliaee/patina",
+        "Mamekokwai/TimekeepGUI",
         "windows-x86_64",
       ),
       /records wrong\.exe/,
@@ -701,7 +701,7 @@ async function testPrepareAndVerifyReleaseAssetsDetectTampering() {
       version,
       path.join(testRoot, "bundle"),
       outputDir,
-      "Ceceliaee/patina",
+      "Mamekokwai/TimekeepGUI",
       "windows-x86_64",
     );
     const latestPath = path.join(outputDir, "latest.json");
@@ -713,7 +713,7 @@ async function testPrepareAndVerifyReleaseAssetsDetectTampering() {
         version,
         path.join(testRoot, "bundle"),
         outputDir,
-        "Ceceliaee/patina",
+        "Mamekokwai/TimekeepGUI",
         "windows-x86_64",
       ),
       /expected https:\/\/github\.com/,
@@ -741,7 +741,7 @@ testPreparedReleaseValuesPassWhenAligned();
 testPreparedReleaseValuesReportDrift();
 testReleaseNotesIncludeAllVisibleBullets();
 testReleaseNotesKeepVisibleSectionsAndSkipInternal();
-testReleaseNotesOnlyMentionPatinaInstaller();
+testReleaseNotesOnlyMentionTimekeepGUIInstaller();
 testReleaseVisibleChangeCountIgnoresInternal();
 testReleaseVisibleChangeCountRejectsTooManyUserFacingItems();
 testReleaseWorkflowDoesNotPublishBrowserExtensionAssets();

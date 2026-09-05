@@ -21,7 +21,7 @@ async function expectFailure(label: string, run: () => Promise<unknown> | unknow
   throw new Error(`Expected failure: ${label}`);
 }
 
-const root = mkdtempSync(join(tmpdir(), "patina-i18n-kit-test-"));
+const root = mkdtempSync(join(tmpdir(), "timekeepgui-i18n-kit-test-"));
 try {
   const source = await loadLocaleMessages("en-US");
   const kit = buildTranslationKit("en-US", "ru-RU", "Русский", "ltr", source);

@@ -844,7 +844,7 @@ mod tests {
         )
         .await
         .unwrap();
-        update_target_path(&pool, &run.run_key, "/Patina/automatic.zip", 301)
+        update_target_path(&pool, &run.run_key, "/TimekeepGUI/automatic.zip", 301)
             .await
             .unwrap();
         mark_uploaded(&pool, &run.run_key, Some("etag"), 302)
@@ -858,7 +858,7 @@ mod tests {
             .unwrap());
         let resumed = load_run(&pool, &run.run_key).await.unwrap().unwrap();
         assert_eq!(resumed.phase, "uploaded");
-        assert_eq!(resumed.target_path, "/Patina/automatic.zip");
+        assert_eq!(resumed.target_path, "/TimekeepGUI/automatic.zip");
         assert_eq!(resumed.archive_sha256, Some("a".repeat(64)));
     }
 

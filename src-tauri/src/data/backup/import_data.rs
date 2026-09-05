@@ -241,7 +241,7 @@ fn available_batch_id(batch: &ExternalImportBatch, known: &HashSet<String>) -> S
     }
     for attempt in 0_u64.. {
         let mut digest = Sha256::new();
-        digest.update(b"patina-external-restore-batch");
+        digest.update(b"timekeepgui-external-restore-batch");
         digest.update(batch.id.as_bytes());
         digest.update(batch.source_fingerprint.as_bytes());
         digest.update(attempt.to_le_bytes());
@@ -303,7 +303,7 @@ mod tests {
             "INSERT INTO import_batches (
                 id, imported_at, source_name, source_kind, source_fingerprint,
                 exact_session_count, hour_bucket_count
-             ) VALUES (?, 100, 'external.csv', 'patina-csv', ?, 1, 1)",
+             ) VALUES (?, 100, 'external.csv', 'timekeepgui-csv', ?, 1, 1)",
         )
         .bind(id)
         .bind(format!("source-{fingerprint_suffix}"))

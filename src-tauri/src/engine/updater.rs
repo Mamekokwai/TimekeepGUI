@@ -17,7 +17,7 @@ const UPDATE_SNAPSHOT_CHANGED_EVENT: &str = "update-snapshot-changed";
 const RELEASES_BASE_URL: &str = "https://github.com/Mamekokwai/TimekeepGUI/releases";
 const LATEST_RELEASE_URL: &str = "https://github.com/Mamekokwai/TimekeepGUI/releases/latest";
 const UPDATE_PACKAGE_DIR_NAME: &str = "update-packages";
-const UPDATE_PACKAGE_FILE_PREFIX: &str = "patina-update-";
+const UPDATE_PACKAGE_FILE_PREFIX: &str = "timekeepgui-update-";
 
 pub type UpdateStoreFuture<'a, T> = Pin<Box<dyn Future<Output = Result<T, String>> + Send + 'a>>;
 
@@ -451,7 +451,7 @@ pub async fn install_downloaded<R: Runtime>(
         state.set_downloaded_package(downloaded_package);
         let snapshot = state.set_error(
             UpdateErrorStage::Install,
-            "Patina is already preparing another restart".to_string(),
+            "TimekeepGUI is already preparing another restart".to_string(),
         );
         emit_update_snapshot_changed(app, &snapshot);
         return Ok(snapshot);
@@ -615,7 +615,7 @@ mod tests {
 
     fn temp_dir(label: &str) -> PathBuf {
         let path = std::env::temp_dir().join(format!(
-            "patina-updater-test-{}-{label}",
+            "timekeepgui-updater-test-{}-{label}",
             std::process::id()
         ));
         let _ = fs::remove_dir_all(&path);

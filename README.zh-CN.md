@@ -1,6 +1,6 @@
 <div align="center">
 
-# Patina
+# TimekeepGUI
 
 面向 Windows 桌面工作的本地优先时间追踪工具。
 
@@ -10,22 +10,22 @@
 ![Built with Tauri](https://img.shields.io/badge/built%20with-Tauri%20v2-4f7f8f)
 ![Local first](https://img.shields.io/badge/data-local--first-5f7f68)
 [![License](https://img.shields.io/badge/license-MIT-6f647a)](LICENSE)
-[![Downloads](https://img.shields.io/github/downloads/Ceceliaee/patina/total?label=downloads&color=b07a3a)](https://github.com/Ceceliaee/patina/releases)
-[![Latest downloads](https://img.shields.io/github/downloads/Ceceliaee/patina/latest/total?label=latest&color=8f6f4f)](https://github.com/Ceceliaee/patina/releases/latest)
-[![GitHub stars](https://img.shields.io/github/stars/Ceceliaee/patina?style=social)](https://github.com/Ceceliaee/patina/stargazers)
+[![Downloads](https://img.shields.io/github/downloads/Mamekokwai/TimekeepGUI/total?label=downloads&color=b07a3a)](https://github.com/Mamekokwai/TimekeepGUI)
+[![Latest downloads](https://img.shields.io/github/downloads/Mamekokwai/TimekeepGUI/latest/total?label=latest&color=8f6f4f)](https://github.com/Mamekokwai/TimekeepGUI)
+[![GitHub stars](https://img.shields.io/github/stars/Mamekokwai/TimekeepGUI?style=social)](https://github.com/Mamekokwai/TimekeepGUI)
 
 </div>
 
 
 <p align="center">
-Patina 自动记录前台应用，整理成本地、安静、可信的个人桌面时间记录。
+TimekeepGUI 自动记录前台应用，整理成本地、安静、可信的个人桌面时间记录。
 </p>
 
 <p align="center">
-  <img src=".github/assets/readme.zh-CN/hero.png" alt="Patina 今日概览">
+  <img src=".github/assets/readme.zh-CN/hero.png" alt="TimekeepGUI 今日概览">
 </p>
 
-## 为什么选择 Patina
+## 为什么选择 TimekeepGUI
 
 - 自动记录前台应用，不需要手动开始或停止计时。
 - 处理无操作、锁屏、睡眠、异常退出等边界，让记录更可信。
@@ -36,18 +36,18 @@ Patina 自动记录前台应用，整理成本地、安静、可信的个人桌�
 
 ## 下载
 
-下载并安装最新版 Patina：
+下载并安装最新版 TimekeepGUI：
 
 <p align="center">
-  <a href="https://github.com/Ceceliaee/patina/releases/latest">
+  <a href="https://github.com/Mamekokwai/TimekeepGUI">
     <picture>
-      <source media="(prefers-color-scheme: dark)" srcset=".github/assets/download/patina-download-dark.svg">
-      <img src=".github/assets/download/patina-download-light.svg" height="36" alt="下载 Patina 最新版">
+      <source media="(prefers-color-scheme: dark)" srcset=".github/assets/download/timekeepgui-download-dark.svg">
+      <img src=".github/assets/download/timekeepgui-download-light.svg" height="36" alt="下载 TimekeepGUI 最新版">
     </picture>
   </a>
 </p>
 
-[Patina Web Sync](https://github.com/Ceceliaee/patina-web-sync) 可为浏览器活动补充具体网页信息，按需安装：
+[Patina Web Sync](https://github.com/Mamekokwai/patina-web-sync) 可为浏览器活动补充具体网页信息，按需安装：
 
 <p align="center">
   <a href="https://chromewebstore.google.com/detail/patina-web-sync/gimdckblhckibmeklhemgccabmbnoemd"><img src=".github/assets/store-badges/chrome-web-store.png" height="36" alt="前往 Chrome 应用商店安装 Patina Web Sync"></a>
@@ -113,7 +113,7 @@ Patina 自动记录前台应用，整理成本地、安静、可信的个人桌�
 
 ## 可靠性与隐私
 
-时间追踪只有在结果可信时才有长期价值。Patina 重点保护这些边界：
+时间追踪只有在结果可信时才有长期价值。TimekeepGUI 重点保护这些边界：
 
 - **前台应用识别**：记录真实位于前台的窗口和应用，减少临时窗口与系统噪音干扰。
 - **无操作处理**：无操作时间不会继续被算作有效活动。
@@ -124,7 +124,7 @@ Patina 自动记录前台应用，整理成本地、安静、可信的个人桌�
 
 ## 当前范围
 
-Patina 目前专注于个人本地时间记录：
+TimekeepGUI 目前专注于个人本地时间记录：
 
 - Windows 10/11 桌面使用
 - 个人本地数据存储与控制
@@ -143,8 +143,8 @@ Patina 目前专注于个人本地时间记录：
 ### 安装依赖
 
 ```bash
-git clone https://github.com/Ceceliaee/patina.git
-cd patina
+git clone https://github.com/Mamekokwai/TimekeepGUI.git
+cd timekeepgui
 npm install
 ```
 
@@ -186,7 +186,7 @@ src-tauri/target/release/bundle/
 需要持续跟进的问题请使用 GitHub Issues；日常交流可扫码加入 QQ 频道：
 
 <div align="center">
-  <a href="https://github.com/Ceceliaee/patina/issues/new/choose">
+  <a href="https://github.com/Mamekokwai/TimekeepGUI">
     <picture>
       <source media="(prefers-color-scheme: dark)" srcset=".github/assets/feedback/github-issues-button-dark.svg">
       <img src=".github/assets/feedback/github-issues-button-light.svg" height="36" alt="GitHub Issues">
@@ -195,16 +195,15 @@ src-tauri/target/release/bundle/
   <br><br>
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset=".github/assets/feedback/qq-channel-dark.jpg">
-    <img src=".github/assets/feedback/qq-channel-light.jpg" width="200" alt="Patina QQ 频道二维码">
+    <img src=".github/assets/feedback/qq-channel-light.jpg" width="200" alt="TimekeepGUI QQ 频道二维码">
   </picture>
 </div>
 
 ## 支持项目
 
-Patina 是一个个人维护的、本地优先开源项目。如果它对你的日常生活或工作有帮助，也欢迎选择方便的方式支持后续维护：
+TimekeepGUI 是一个个人维护的、本地优先开源项目。如果它对你的日常生活或工作有帮助，也欢迎选择方便的方式支持后续维护：
 
 <div align="center">
-  <a href="https://ko-fi.com/ceceliaee"><img src="https://storage.ko-fi.com/cdn/kofi2.png?v=3" height="36" alt="Buy me a coffee"></a>
   <br><br>
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset=".github/assets/support/wechat-reward-dark.png">
@@ -216,11 +215,11 @@ Patina 是一个个人维护的、本地优先开源项目。如果它对你的�
 
 ## Star History
 
-<a href="https://www.star-history.com/?repos=Ceceliaee%2Fpatina">
+<a href="https://www.star-history.com/?repos=Mamekokwai%2Ftimekeepgui">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=Ceceliaee/patina&type=date&theme=dark&legend=top-left&sealed_token=TkOqzStKb8XlqP6BGjPQemnL7ZceKzqtuxfJf7xf_DrzNfgZeW2TjJDSbHigf23UNcY-30x56ZaebW5RV1tbcW2Q_5UczdmmdB2ndfELHsoLcpYL5hIHvw" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=Ceceliaee/patina&type=date&legend=top-left&sealed_token=TkOqzStKb8XlqP6BGjPQemnL7ZceKzqtuxfJf7xf_DrzNfgZeW2TjJDSbHigf23UNcY-30x56ZaebW5RV1tbcW2Q_5UczdmmdB2ndfELHsoLcpYL5hIHvw" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=Ceceliaee/patina&type=date&legend=top-left&sealed_token=TkOqzStKb8XlqP6BGjPQemnL7ZceKzqtuxfJf7xf_DrzNfgZeW2TjJDSbHigf23UNcY-30x56ZaebW5RV1tbcW2Q_5UczdmmdB2ndfELHsoLcpYL5hIHvw" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=Mamekokwai/TimekeepGUI&type=date&theme=dark&legend=top-left&sealed_token=TkOqzStKb8XlqP6BGjPQemnL7ZceKzqtuxfJf7xf_DrzNfgZeW2TjJDSbHigf23UNcY-30x56ZaebW5RV1tbcW2Q_5UczdmmdB2ndfELHsoLcpYL5hIHvw" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=Mamekokwai/TimekeepGUI&type=date&legend=top-left&sealed_token=TkOqzStKb8XlqP6BGjPQemnL7ZceKzqtuxfJf7xf_DrzNfgZeW2TjJDSbHigf23UNcY-30x56ZaebW5RV1tbcW2Q_5UczdmmdB2ndfELHsoLcpYL5hIHvw" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=Mamekokwai/TimekeepGUI&type=date&legend=top-left&sealed_token=TkOqzStKb8XlqP6BGjPQemnL7ZceKzqtuxfJf7xf_DrzNfgZeW2TjJDSbHigf23UNcY-30x56ZaebW5RV1tbcW2Q_5UczdmmdB2ndfELHsoLcpYL5hIHvw" />
  </picture>
 </a>
 

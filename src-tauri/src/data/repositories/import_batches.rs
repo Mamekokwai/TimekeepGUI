@@ -388,7 +388,7 @@ mod tests {
             let first = commit_records(
                 &pool,
                 "one.csv",
-                "patina-csv",
+                "timekeepgui-csv",
                 "one",
                 &first_records,
                 0,
@@ -422,7 +422,7 @@ mod tests {
             let duplicate = commit_records(
                 &pool,
                 "one.csv",
-                "patina-csv",
+                "timekeepgui-csv",
                 "one",
                 &first_records,
                 0,
@@ -499,7 +499,7 @@ mod tests {
             let first = commit_records(
                 &pool,
                 "one.csv",
-                "patina-csv",
+                "timekeepgui-csv",
                 "source-one",
                 &[record(ImportRecordType::ExactSession, 1_000)],
                 0,
@@ -513,7 +513,7 @@ mod tests {
             let second = commit_records(
                 &pool,
                 "two.csv",
-                "patina-csv",
+                "timekeepgui-csv",
                 "source-two",
                 &[record(ImportRecordType::ExactSession, 3_000)],
                 0,
@@ -560,7 +560,7 @@ mod tests {
             let report = commit_records(
                 &pool,
                 "one.csv",
-                "patina-csv",
+                "timekeepgui-csv",
                 "import-only-source",
                 &[record(ImportRecordType::ExactSession, 1_000)],
                 0,
@@ -618,7 +618,7 @@ mod tests {
             let report = commit_records(
                 &pool,
                 "one.csv",
-                "patina-csv",
+                "timekeepgui-csv",
                 "mixed-source",
                 &[record(ImportRecordType::ExactSession, 1_000)],
                 0,
@@ -661,7 +661,7 @@ mod tests {
             let result = commit_records(
                 &pool,
                 "one.csv",
-                "patina-csv",
+                "timekeepgui-csv",
                 "atomic-source",
                 &[record(ImportRecordType::ExactSession, 1_000)],
                 0,
@@ -703,7 +703,7 @@ mod tests {
             let report = commit_records(
                 &pool,
                 "one.csv",
-                "patina-csv",
+                "timekeepgui-csv",
                 "category-source",
                 &[record(ImportRecordType::ExactSession, 1_000)],
                 0,

@@ -75,8 +75,8 @@ test("production and development configs declare distinct identities", () => {
     fs.readFileSync("src-tauri/tauri.dev.conf.json", "utf8"),
   ) as { identifier?: string; productName?: string; mainBinaryName?: string };
 
-  assert.equal(production.identifier, "com.ceceliaee.patina");
-  assert.equal(development.identifier, "com.ceceliaee.patina.dev");
+  assert.equal(production.identifier, "com.mamekokwai.timekeepgui");
+  assert.equal(development.identifier, "com.mamekokwai.timekeepgui.dev");
   assert.notEqual(development.identifier, production.identifier);
   assert.notEqual(development.productName, production.productName);
   assert.notEqual(development.mainBinaryName, production.mainBinaryName);

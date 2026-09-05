@@ -114,7 +114,7 @@ export const MESSAGES = {
       }
     }
   },
-  "native.export.title": "Patina 活动记录",
+  "native.export.title": "TimekeepGUI 活动记录",
   "native.export.totalDuration": {
     "$type": "message",
     "body": {

@@ -1,5 +1,5 @@
 {
-  "name": "patina-remote-status-bridge-worker",
+  "name": "timekeepgui-remote-status-bridge-worker",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -14,7 +14,7 @@
   "cloudflare": {
     "bindings": {
       "REMOTE_STATUS_BRIDGE_TOKEN": {
-        "description": "Set this to the same access token configured in Patina Settings -> Services -> Remote push."
+        "description": "Set this to the same access token configured in TimekeepGUI Settings -> Services -> Remote push."
       }
     }
   }

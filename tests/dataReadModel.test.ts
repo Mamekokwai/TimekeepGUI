@@ -388,11 +388,11 @@ await runTest("app trend merges duplicate display options", () => {
 });
 
 await runTest("display name scoring prefers readable localized names over tray aliases", () => {
-  assert.equal(scoreDisplayNameForStats("Patina Tray"), 1);
+  assert.equal(scoreDisplayNameForStats("TimekeepGUI Tray"), 1);
   assert.equal(scoreDisplayNameForStats("foo_bar"), 2);
   assert.equal(scoreDisplayNameForStats("Visual Studio Code"), 3);
   assert.equal(scoreDisplayNameForStats("微信"), 4);
-  assert.equal(pickPreferredAppName("Patina Widget", "微信"), "微信");
+  assert.equal(pickPreferredAppName("TimekeepGUI Widget", "微信"), "微信");
   assert.equal(pickPreferredAppName("Visual Studio Code", "code-helper"), "Visual Studio Code");
 });
 
@@ -456,14 +456,14 @@ await runTest("all-time app trend follows the selected apps' widest activity bou
       endTime: new Date(2026, 3, 10, 10, 0, 0).getTime(),
     }),
     makeSession({
-      appName: "Patina",
-      exeName: "patina.exe",
+      appName: "TimekeepGUI",
+      exeName: "timekeepgui.exe",
       startTime: new Date(2026, 5, 3, 9, 0, 0).getTime(),
       endTime: new Date(2026, 5, 3, 10, 0, 0).getTime(),
     }),
     makeSession({
-      appName: "Patina",
-      exeName: "patina.exe",
+      appName: "TimekeepGUI",
+      exeName: "timekeepgui.exe",
       startTime: new Date(2026, 6, 20, 9, 0, 0).getTime(),
       endTime: new Date(2026, 6, 20, 11, 0, 0).getTime(),
     }),
@@ -475,18 +475,18 @@ await runTest("all-time app trend follows the selected apps' widest activity bou
     }),
   ];
 
-  const patina = buildDataAppTrendViewModel(sessions, range, nowMs, ["patina.exe"]);
+  const timekeepgui = buildDataAppTrendViewModel(sessions, range, nowMs, ["timekeepgui.exe"]);
   assert.deepEqual(
-    [patina.range.startDateKey, patina.range.endDateKey],
+    [timekeepgui.range.startDateKey, timekeepgui.range.endDateKey],
     ["2026-06-01", "2026-07-31"],
   );
   assert.deepEqual(
-    patina.chartRows.map((row) => row.date),
+    timekeepgui.chartRows.map((row) => row.date),
     ["2026-06-01", "2026-07-01"],
   );
-  assert.equal(patina.summary.totalDuration, 3 * 60 * 60_000);
+  assert.equal(timekeepgui.summary.totalDuration, 3 * 60 * 60_000);
   assert.equal(
-    patina.appOptions.find((app) => app.appKey === "archive.exe")?.totalDuration,
+    timekeepgui.appOptions.find((app) => app.appKey === "archive.exe")?.totalDuration,
     4 * 60 * 60_000,
   );
 
@@ -494,7 +494,7 @@ await runTest("all-time app trend follows the selected apps' widest activity bou
     sessions,
     range,
     nowMs,
-    ["patina.exe", "chrome.exe"],
+    ["timekeepgui.exe", "chrome.exe"],
   );
   assert.deepEqual(
     [comparison.range.startDateKey, comparison.range.endDateKey],

@@ -307,7 +307,7 @@ function verifyWebBridgeRetryContract(source: string) {
 
 function verifyStorageProbeContract(source: string) {
   assert.match(source, /WRITE_PROBE_SEQUENCE\.fetch_add\(1, Ordering::Relaxed\)/);
-  assert.match(source, /\.patina-write-probe-\{\}-\{sequence\}/);
+  assert.match(source, /\.timekeepgui-write-probe-\{\}-\{sequence\}/);
   assert.match(source, /\.create_new\(true\)/);
   assert.match(source, /WriteProbeGuard::new\(probe\.clone\(\)\)/);
 }

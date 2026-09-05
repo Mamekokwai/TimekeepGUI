@@ -545,7 +545,7 @@ mod tests {
     }
 
     #[test]
-    fn patina_widget_is_inactive_without_disabling_patina_app_tracking() {
+    fn timekeepgui_widget_is_inactive_without_disabling_timekeepgui_app_tracking() {
         tauri::async_runtime::block_on(async {
             let pool = setup_test_db().await;
             let data = TrackingRuntimeDataStore::new(pool);
@@ -558,8 +558,8 @@ mod tests {
                 process_id: 456,
                 window_class: "Chrome_WidgetWin_1".into(),
                 title: crate::domain::widget::WIDGET_WINDOW_TITLE.into(),
-                exe_name: "Patina.exe".into(),
-                process_path: r"C:\Program Files\Patina\Patina.exe".into(),
+                exe_name: "TimekeepGUI.exe".into(),
+                process_path: r"C:\Program Files\TimekeepGUI\TimekeepGUI.exe".into(),
                 is_afk: false,
                 idle_time_ms: 0,
             };

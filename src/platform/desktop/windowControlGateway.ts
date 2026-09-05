@@ -22,7 +22,7 @@ interface MainWindowRenderToken {
 
 declare global {
   interface Window {
-    __PATINA_MAIN_WINDOW_GENERATION__?: number;
+    __TIMEKEEPGUI_MAIN_WINDOW_GENERATION__?: number;
   }
 }
 
@@ -92,7 +92,7 @@ export function readCurrentMainWindowGeneration(): number | null {
     return null;
   }
 
-  const generation = window.__PATINA_MAIN_WINDOW_GENERATION__;
+  const generation = window.__TIMEKEEPGUI_MAIN_WINDOW_GENERATION__;
   return typeof generation === "number"
     && Number.isSafeInteger(generation)
     && generation >= 1

@@ -77,7 +77,7 @@
       "problemMatcher": []
     },
     {
-      "label": "Patina: Install dependencies",
+      "label": "TimekeepGUI: Install dependencies",
       "type": "shell",
       "command": "npm ci",
       "options": {
@@ -86,7 +86,7 @@
       "problemMatcher": []
     },
     {
-      "label": "Patina: Dev (Vite)",
+      "label": "TimekeepGUI: Dev (Vite)",
       "type": "shell",
       "command": "npm run dev",
       "options": {
@@ -95,7 +95,7 @@
       "problemMatcher": []
     },
     {
-      "label": "Patina: Tauri Dev",
+      "label": "TimekeepGUI: Tauri Dev",
       "type": "shell",
       "command": "npm run tauri -- dev",
       "options": {
@@ -104,16 +104,16 @@
       "problemMatcher": []
     },
     {
-      "label": "Patina: Tauri Dev + Timekeep Service",
+      "label": "TimekeepGUI: Tauri Dev + Timekeep Service",
       "dependsOrder": "parallel",
       "dependsOn": [
         "Timekeep: Service Dev",
-        "Patina: Tauri Dev"
+        "TimekeepGUI: Tauri Dev"
       ],
       "problemMatcher": []
     },
     {
-      "label": "Patina: Typecheck",
+      "label": "TimekeepGUI: Typecheck",
       "type": "shell",
       "command": "npm run check:types",
       "options": {
@@ -122,7 +122,7 @@
       "problemMatcher": []
     },
     {
-      "label": "Patina: Lint",
+      "label": "TimekeepGUI: Lint",
       "type": "shell",
       "command": "npm run check:lint",
       "options": {
@@ -131,7 +131,7 @@
       "problemMatcher": []
     },
     {
-      "label": "Patina: Test",
+      "label": "TimekeepGUI: Test",
       "type": "shell",
       "command": "npm test",
       "options": {
@@ -146,7 +146,7 @@
       }
     },
     {
-      "label": "Patina: Build",
+      "label": "TimekeepGUI: Build",
       "type": "shell",
       "command": "npm run build",
       "options": {
@@ -158,7 +158,7 @@
       "group": "build"
     },
     {
-      "label": "Patina: Browser Smoke",
+      "label": "TimekeepGUI: Browser Smoke",
       "type": "shell",
       "command": "npm run test:ui-browser-smoke",
       "options": {

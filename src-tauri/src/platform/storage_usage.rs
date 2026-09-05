@@ -169,7 +169,7 @@ mod tests {
 
     fn temp_dir(label: &str) -> PathBuf {
         let path = std::env::temp_dir().join(format!(
-            "patina-storage-usage-{label}-{}",
+            "timekeepgui-storage-usage-{label}-{}",
             std::process::id()
         ));
         let _ = fs::remove_dir_all(&path);
@@ -202,11 +202,11 @@ mod tests {
     #[test]
     fn install_size_excludes_webview_cache_when_cache_root_is_install_dir() {
         let root = temp_dir("install-cache");
-        let install_dir = root.join("Patina");
+        let install_dir = root.join("TimekeepGUI");
         let data_root = root.join("Data");
         let paths = storage_paths(data_root.clone(), install_dir.clone());
 
-        write_file(&install_dir.join("Patina.exe"), 10);
+        write_file(&install_dir.join("TimekeepGUI.exe"), 10);
         write_file(
             &install_dir
                 .join(EBWEBVIEW_DIR_NAME)
@@ -227,12 +227,12 @@ mod tests {
     #[test]
     fn install_size_excludes_nested_custom_data_root() {
         let root = temp_dir("nested-data");
-        let install_dir = root.join("Patina");
+        let install_dir = root.join("TimekeepGUI");
         let data_root = install_dir.join("Data");
         let webview_root = data_root.clone();
         let paths = storage_paths(data_root.clone(), webview_root.clone());
 
-        write_file(&install_dir.join("Patina.exe"), 10);
+        write_file(&install_dir.join("TimekeepGUI.exe"), 10);
         write_file(&data_root.join(SQLITE_DB_FILE_NAME), 7);
         write_file(&data_root.join("notes"), 5);
         write_file(&data_root.join("backups").join("backup.zip"), 9);
@@ -249,11 +249,11 @@ mod tests {
     #[test]
     fn data_size_counts_sqlite_family_files_only() {
         let root = temp_dir("sqlite-family");
-        let install_dir = root.join("Patina");
+        let install_dir = root.join("TimekeepGUI");
         let data_root = install_dir.clone();
         let paths = storage_paths(data_root.clone(), data_root.clone());
 
-        write_file(&install_dir.join("Patina.exe"), 10);
+        write_file(&install_dir.join("TimekeepGUI.exe"), 10);
         write_file(&data_root.join(SQLITE_DB_FILE_NAME), 5);
         write_file(&data_root.join(format!("{SQLITE_DB_FILE_NAME}-wal")), 6);
         write_file(&data_root.join(format!("{SQLITE_DB_FILE_NAME}-shm")), 7);

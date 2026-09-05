@@ -13,7 +13,7 @@ import {
 export async function runDashboardScenarios(context: BrowserSmokeContext) {
   const { client, sessionId, runTest } = context;
   const captureDashboardScreenshot = async (fileName: string) => {
-    const captureDir = process.env.PATINA_DASHBOARD_SCREENSHOT_DIR?.trim();
+    const captureDir = process.env.TIMEKEEPGUI_DASHBOARD_SCREENSHOT_DIR?.trim();
     if (!captureDir) return;
     const result = await client!.command("Page.captureScreenshot", {
       format: "png",

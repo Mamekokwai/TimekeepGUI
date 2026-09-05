@@ -1711,7 +1711,7 @@ mod query_plan_diagnostics {
             },
         };
         println!(
-            "PATINA_QUERY_PLAN_REPORT_JSON:{}",
+            "TIMEKEEPGUI_QUERY_PLAN_REPORT_JSON:{}",
             serde_json::to_string_pretty(&report).unwrap()
         );
     }

@@ -8,7 +8,7 @@ function tauriStubFor(path: string) {
       const foregroundListeners = new Set();
       const resizeListeners = new Set();
       const scaleListeners = new Set();
-      const currentWindowLabel = new URL(globalThis.location.href).searchParams.get("__patinaWindow") === "widget"
+      const currentWindowLabel = new URL(globalThis.location.href).searchParams.get("__timekeepguiWindow") === "widget"
         ? "widget"
         : "main";
       let foregroundState = { visible: true, focused: false };
@@ -17,7 +17,7 @@ function tauriStubFor(path: string) {
         for (const listener of foregroundListeners) listener({ payload: foregroundState.focused });
         for (const listener of resizeListeners) listener();
       };
-      globalThis.__PATINA_EMIT_SCALE_FACTOR_CHANGED = (scaleFactor) => {
+      globalThis.__TIMEKEEPGUI_EMIT_SCALE_FACTOR_CHANGED = (scaleFactor) => {
         const payload = {
           scaleFactor,
           size: {
@@ -64,7 +64,7 @@ function tauriStubFor(path: string) {
 
   if (path === "@tauri-apps/api/webviewWindow") {
     return `
-      const currentWindowLabel = new URL(globalThis.location.href).searchParams.get("__patinaWindow") === "widget"
+      const currentWindowLabel = new URL(globalThis.location.href).searchParams.get("__timekeepguiWindow") === "widget"
         ? "widget"
         : "main";
       export function getCurrentWebviewWindow() {
@@ -77,11 +77,11 @@ function tauriStubFor(path: string) {
     return `
       const SETTINGS_STORAGE_KEY = "__time_tracker_smoke_settings";
       globalThis.__TIME_TRACKER_CLASSIFICATION_MUTATIONS ??= [];
-      globalThis.__PATINA_IMPORT_BATCHES ??= [];
-      globalThis.__PATINA_INVOKED_COMMANDS ??= [];
-      globalThis.__PATINA_MAIN_WINDOW_GENERATION__ ??= 1;
-      globalThis.__PATINA_MAIN_WINDOW_LOAD_EPOCH__ ??= 1;
-      globalThis.__PATINA_WEBDAV_SECRET ??= null;
+      globalThis.__TIMEKEEPGUI_IMPORT_BATCHES ??= [];
+      globalThis.__TIMEKEEPGUI_INVOKED_COMMANDS ??= [];
+      globalThis.__TIMEKEEPGUI_MAIN_WINDOW_GENERATION__ ??= 1;
+      globalThis.__TIMEKEEPGUI_MAIN_WINDOW_LOAD_EPOCH__ ??= 1;
+      globalThis.__TIMEKEEPGUI_WEBDAV_SECRET ??= null;
 
       function loadStoredSettings() {
         try {
@@ -102,9 +102,9 @@ function tauriStubFor(path: string) {
       }
 
       export async function invoke(command, payload = {}) {
-        globalThis.__PATINA_INVOKED_COMMANDS.push({ command, payload });
+        globalThis.__TIMEKEEPGUI_INVOKED_COMMANDS.push({ command, payload });
         const widgetParams = new URL(globalThis.location.href).searchParams;
-        const isWidgetSmoke = widgetParams.get("__patinaWindow") === "widget";
+        const isWidgetSmoke = widgetParams.get("__timekeepguiWindow") === "widget";
         if (isWidgetSmoke && command === "cmd_get_widget_bootstrap_snapshot") {
           const settings = loadStoredSettings();
           return {
@@ -152,7 +152,7 @@ function tauriStubFor(path: string) {
               visible_until_ms: null,
             },
           ].slice(0, toolCount);
-          const override = globalThis.__PATINA_WIDGET_TRACKING_OVERRIDE;
+          const override = globalThis.__TIMEKEEPGUI_WIDGET_TRACKING_OVERRIDE;
           const responseDelayMs = Number(override?.responseDelayMs ?? 0);
           const status = override?.widgetStatus ?? {
             tracking: widgetParams.get("widgetTracking") === "0" ? null : {
@@ -251,8 +251,8 @@ function tauriStubFor(path: string) {
           };
         }
         if (isWidgetSmoke && command === "get_current_tracking_snapshot") {
-          if (globalThis.__PATINA_WIDGET_TRACKING_OVERRIDE) {
-            return globalThis.__PATINA_WIDGET_TRACKING_OVERRIDE.currentTrackingSnapshot;
+          if (globalThis.__TIMEKEEPGUI_WIDGET_TRACKING_OVERRIDE) {
+            return globalThis.__TIMEKEEPGUI_WIDGET_TRACKING_OVERRIDE.currentTrackingSnapshot;
           }
           const unavailableSignal = {
             signal: {
@@ -271,7 +271,7 @@ function tauriStubFor(path: string) {
               root_owner_hwnd: "1",
               process_id: 7,
               window_class: "Chrome_WidgetWin_1",
-              title: "Patina browser smoke",
+              title: "TimekeepGUI browser smoke",
               exe_name: "chrome.exe",
               process_path: "C:/Program Files/Google/Chrome/Application/chrome.exe",
               is_afk: false,
@@ -302,8 +302,8 @@ function tauriStubFor(path: string) {
         }
         if (command === "cmd_get_main_window_render_token") {
           return {
-            generation: Number(globalThis.__PATINA_MAIN_WINDOW_GENERATION__),
-            loadEpoch: Number(globalThis.__PATINA_MAIN_WINDOW_LOAD_EPOCH__),
+            generation: Number(globalThis.__TIMEKEEPGUI_MAIN_WINDOW_GENERATION__),
+            loadEpoch: Number(globalThis.__TIMEKEEPGUI_MAIN_WINDOW_LOAD_EPOCH__),
           };
         }
         if (command === "cmd_get_system_runtime_snapshot") {
@@ -314,8 +314,8 @@ function tauriStubFor(path: string) {
         }
         if (command === "cmd_timekeep_request") {
           const request = payload.request ?? {};
-          globalThis.__PATINA_TIMEKEEP_REQUESTS ??= [];
-          globalThis.__PATINA_TIMEKEEP_REQUESTS.push(request);
+          globalThis.__TIMEKEEPGUI_TIMEKEEP_REQUESTS ??= [];
+          globalThis.__TIMEKEEPGUI_TIMEKEEP_REQUESTS.push(request);
           const action = String(request.action ?? "");
           const dataByAction = {
             service_status: { running: true, version: "smoke-service" },
@@ -394,7 +394,7 @@ function tauriStubFor(path: string) {
           };
         }
         if (command === "cmd_mark_main_window_ready") {
-          globalThis.__PATINA_MAIN_WINDOW_READY_EVIDENCE = {
+          globalThis.__TIMEKEEPGUI_MAIN_WINDOW_READY_EVIDENCE = {
             generation: Number(payload.generation),
             loadEpoch: Number(payload.loadEpoch),
             themeMode: document.documentElement.dataset.themeMode ?? null,
@@ -411,19 +411,19 @@ function tauriStubFor(path: string) {
           };
         }
         if (command === "cmd_save_webdav_backup_secret") {
-          globalThis.__PATINA_WEBDAV_SECRET = String(payload.password ?? "");
+          globalThis.__TIMEKEEPGUI_WEBDAV_SECRET = String(payload.password ?? "");
           return null;
         }
         if (command === "cmd_delete_webdav_backup_secret") {
-          globalThis.__PATINA_WEBDAV_SECRET = null;
+          globalThis.__TIMEKEEPGUI_WEBDAV_SECRET = null;
           return null;
         }
         if (command === "cmd_has_webdav_backup_secret") {
-          return typeof globalThis.__PATINA_WEBDAV_SECRET === "string"
-            && globalThis.__PATINA_WEBDAV_SECRET.length > 0;
+          return typeof globalThis.__TIMEKEEPGUI_WEBDAV_SECRET === "string"
+            && globalThis.__TIMEKEEPGUI_WEBDAV_SECRET.length > 0;
         }
         if (command === "cmd_reveal_webdav_backup_secret") {
-          return globalThis.__PATINA_WEBDAV_SECRET;
+          return globalThis.__TIMEKEEPGUI_WEBDAV_SECRET;
         }
         if (command === "cmd_test_webdav_backup_target") {
           return { ok: true };
@@ -599,11 +599,11 @@ function tauriStubFor(path: string) {
           };
         }
         if (command === "cmd_get_web_activity_aggregate_range") {
-          const delayMs = Number(globalThis.__PATINA_WEB_ACTIVITY_QUERY_DELAY_MS ?? 0);
+          const delayMs = Number(globalThis.__TIMEKEEPGUI_WEB_ACTIVITY_QUERY_DELAY_MS ?? 0);
           if (Number.isFinite(delayMs) && delayMs > 0) {
             await new Promise((resolve) => setTimeout(resolve, delayMs));
           }
-          if (globalThis.__PATINA_WEB_ACTIVITY_QUERY_FAILURE === true) {
+          if (globalThis.__TIMEKEEPGUI_WEB_ACTIVITY_QUERY_FAILURE === true) {
             throw new Error("Injected web activity aggregate failure");
           }
           const boundaries = Array.isArray(payload.bucketBoundariesMs)
@@ -638,15 +638,15 @@ function tauriStubFor(path: string) {
           };
         }
         if (command === "cmd_list_import_batches") {
-          return [...globalThis.__PATINA_IMPORT_BATCHES];
+          return [...globalThis.__TIMEKEEPGUI_IMPORT_BATCHES];
         }
         if (command === "cmd_pick_canonical_import_file") {
-          return "C:\\Smoke\\tai.patina.csv";
+          return "C:\\Smoke\\tai.timekeepgui.csv";
         }
         if (command === "cmd_preview_canonical_import") {
           return {
             filePath: payload.filePath,
-            fileName: "tai.patina.csv",
+            fileName: "tai.timekeepgui.csv",
             fileFingerprint: "smoke-fingerprint",
             validRecords: 3,
             duplicateRecords: 1,
@@ -661,12 +661,12 @@ function tauriStubFor(path: string) {
           };
         }
         if (command === "cmd_commit_canonical_import") {
-          globalThis.__PATINA_LAST_IMPORT_PAYLOAD = payload;
-          globalThis.__PATINA_IMPORT_BATCHES = [{
+          globalThis.__TIMEKEEPGUI_LAST_IMPORT_PAYLOAD = payload;
+          globalThis.__TIMEKEEPGUI_IMPORT_BATCHES = [{
             id: "smoke-batch",
             importedAt: 1767225600000,
-            sourceName: "tai.patina.csv",
-            sourceKind: "patina-csv",
+            sourceName: "tai.timekeepgui.csv",
+            sourceKind: "timekeepgui-csv",
             exactSessions: 0,
             hourBuckets: 2,
             totalRecords: 2,
@@ -681,7 +681,7 @@ function tauriStubFor(path: string) {
           };
         }
         if (command === "cmd_delete_import_batch") {
-          globalThis.__PATINA_IMPORT_BATCHES = globalThis.__PATINA_IMPORT_BATCHES
+          globalThis.__TIMEKEEPGUI_IMPORT_BATCHES = globalThis.__TIMEKEEPGUI_IMPORT_BATCHES
             .filter((batch) => batch.id !== payload.batchId);
           return { deletedExactSessions: 0, deletedHourBuckets: 2 };
         }
@@ -696,31 +696,31 @@ function tauriStubFor(path: string) {
           };
         }
         if (command === "cmd_get_scheduled_backup_snapshot") {
-          globalThis.__PATINA_SCHEDULED_BACKUP_SNAPSHOT ??= {
+          globalThis.__TIMEKEEPGUI_SCHEDULED_BACKUP_SNAPSHOT ??= {
             config: {
               enabled: false,
               cadence: "weekly",
               weekday: 5,
               localTimeMinutes: 1260,
-              target: { kind: "local", targetDir: "C:\\Smoke\\Patina\\backups" },
+              target: { kind: "local", targetDir: "C:\\Smoke\\TimekeepGUI\\backups" },
               targetGeneration: "0123456789abcdef0123456789abcdef",
               scheduleAnchorAtMs: Date.now(),
               updatedAtMs: Date.now(),
             },
-            defaultLocalTargetDir: "C:\\\\Smoke\\\\Patina\\\\backups",
+            defaultLocalTargetDir: "C:\\\\Smoke\\\\TimekeepGUI\\\\backups",
             nextExecutionAtMs: null,
             recentSuccess: null,
             recentFailure: null,
             activeRun: null,
           };
-          return structuredClone(globalThis.__PATINA_SCHEDULED_BACKUP_SNAPSHOT);
+          return structuredClone(globalThis.__TIMEKEEPGUI_SCHEDULED_BACKUP_SNAPSHOT);
         }
         if (command === "cmd_save_scheduled_backup_config") {
-          const current = globalThis.__PATINA_SCHEDULED_BACKUP_SNAPSHOT;
+          const current = globalThis.__TIMEKEEPGUI_SCHEDULED_BACKUP_SNAPSHOT;
           const nextTarget = payload.input.target?.kind === "webdav"
             ? { kind: "webdav", targetIdentity: "fedcba9876543210fedcba9876543210" }
             : payload.input.target;
-          globalThis.__PATINA_SCHEDULED_BACKUP_SNAPSHOT = {
+          globalThis.__TIMEKEEPGUI_SCHEDULED_BACKUP_SNAPSHOT = {
             ...current,
             config: {
               ...current.config,
@@ -730,19 +730,19 @@ function tauriStubFor(path: string) {
             },
             nextExecutionAtMs: payload.input.enabled ? Date.now() + 86400000 : null,
           };
-          return structuredClone(globalThis.__PATINA_SCHEDULED_BACKUP_SNAPSHOT);
+          return structuredClone(globalThis.__TIMEKEEPGUI_SCHEDULED_BACKUP_SNAPSHOT);
         }
         if (command === "cmd_pick_scheduled_backup_directory") {
           return "C:\\Smoke\\Scheduled Backups";
         }
         if (command === "cmd_get_scheduled_export_snapshot") {
-          globalThis.__PATINA_SCHEDULED_EXPORT_SNAPSHOT ??= {
+          globalThis.__TIMEKEEPGUI_SCHEDULED_EXPORT_SNAPSHOT ??= {
             config: {
               enabled: false,
               cadence: "daily",
               weekday: null,
               localTimeMinutes: 1260,
-              targetDir: "C:\\Smoke\\Patina\\exports",
+              targetDir: "C:\\Smoke\\TimekeepGUI\\exports",
               format: "csv",
               selectedFields: ["record_type", "start_time", "end_time", "duration_ms"],
               planGeneration: "0123456789abcdef0123456789abcdef",
@@ -754,11 +754,11 @@ function tauriStubFor(path: string) {
             recentFailure: null,
             activeRun: null,
           };
-          return structuredClone(globalThis.__PATINA_SCHEDULED_EXPORT_SNAPSHOT);
+          return structuredClone(globalThis.__TIMEKEEPGUI_SCHEDULED_EXPORT_SNAPSHOT);
         }
         if (command === "cmd_save_scheduled_export_config") {
-          const current = globalThis.__PATINA_SCHEDULED_EXPORT_SNAPSHOT;
-          globalThis.__PATINA_SCHEDULED_EXPORT_SNAPSHOT = {
+          const current = globalThis.__TIMEKEEPGUI_SCHEDULED_EXPORT_SNAPSHOT;
+          globalThis.__TIMEKEEPGUI_SCHEDULED_EXPORT_SNAPSHOT = {
             ...current,
             config: {
               ...current.config,
@@ -768,8 +768,8 @@ function tauriStubFor(path: string) {
             },
             nextExecutionAtMs: payload.input.enabled ? Date.now() + 86400000 : null,
           };
-          globalThis.__PATINA_EMIT_TAURI_EVENT?.("scheduled-export-changed", null);
-          return structuredClone(globalThis.__PATINA_SCHEDULED_EXPORT_SNAPSHOT);
+          globalThis.__TIMEKEEPGUI_EMIT_TAURI_EVENT?.("scheduled-export-changed", null);
+          return structuredClone(globalThis.__TIMEKEEPGUI_SCHEDULED_EXPORT_SNAPSHOT);
         }
         if (command === "cmd_pick_scheduled_export_directory") {
           return "C:\\Smoke\\Scheduled Exports";
@@ -777,13 +777,13 @@ function tauriStubFor(path: string) {
         if (command === "cmd_get_storage_snapshot") {
           return {
             paths: {
-              installDir: "C:\\\\Smoke\\\\Patina Install",
-              anchorDir: "C:\\\\Smoke\\\\Patina Anchor",
-              dataRoot: "C:\\\\Smoke\\\\Patina",
-              databasePath: "C:\\\\Smoke\\\\Patina\\\\patina.db",
-              backupDir: "C:\\\\Smoke\\\\Patina\\\\backups",
-              remoteBackupTempDir: "C:\\\\Smoke\\\\Patina\\\\remote-backup-temp",
-              webviewRoot: "C:\\\\Smoke\\\\PatinaWebView",
+              installDir: "C:\\\\Smoke\\\\TimekeepGUI Install",
+              anchorDir: "C:\\\\Smoke\\\\TimekeepGUI Anchor",
+              dataRoot: "C:\\\\Smoke\\\\TimekeepGUI",
+              databasePath: "C:\\\\Smoke\\\\TimekeepGUI\\\\timekeepgui.db",
+              backupDir: "C:\\\\Smoke\\\\TimekeepGUI\\\\backups",
+              remoteBackupTempDir: "C:\\\\Smoke\\\\TimekeepGUI\\\\remote-backup-temp",
+              webviewRoot: "C:\\\\Smoke\\\\TimekeepGUIWebView",
               isCustomDataRoot: false,
               isCustomWebviewRoot: false,
             },
@@ -793,8 +793,8 @@ function tauriStubFor(path: string) {
               backupDirSizeBytes: 0,
             },
             webviewCache: {
-              webviewRoot: "C:\\\\Smoke\\\\PatinaWebView",
-              ebwebviewPath: "C:\\\\Smoke\\\\PatinaWebView\\\\EBWebView",
+              webviewRoot: "C:\\\\Smoke\\\\TimekeepGUIWebView",
+              ebwebviewPath: "C:\\\\Smoke\\\\TimekeepGUIWebView\\\\EBWebView",
               totalSizeBytes: 0,
               reclaimableSizeBytes: 0,
               lastTrimAtMs: null,
@@ -846,7 +846,7 @@ function tauriStubFor(path: string) {
   if (path === "@tauri-apps/api/event") {
     return `
       const listenersByEvent = new Map();
-      globalThis.__PATINA_EMIT_TAURI_EVENT = (eventName, payload) => {
+      globalThis.__TIMEKEEPGUI_EMIT_TAURI_EVENT = (eventName, payload) => {
         for (const listener of listenersByEvent.get(eventName) ?? []) {
           listener({ event: eventName, id: 0, payload });
         }
@@ -984,8 +984,8 @@ function tauriStubFor(path: string) {
               browser_exe_name: "chrome.exe",
               domain: "research.example",
               normalized_domain: "research.example",
-              url: "https://research.example/patina/detail",
-              title: "Patina research workspace",
+              url: "https://research.example/timekeepgui/detail",
+              title: "TimekeepGUI research workspace",
               favicon_url: null,
               start_time: timing.start,
               end_time: timing.start + firstDuration,
@@ -998,8 +998,8 @@ function tauriStubFor(path: string) {
               browser_exe_name: "chrome.exe",
               domain: "docs.example.com",
               normalized_domain: "docs.example.com",
-              url: "https://docs.example.com/patina/guide",
-              title: "Patina documentation guide",
+              url: "https://docs.example.com/timekeepgui/guide",
+              title: "TimekeepGUI documentation guide",
               favicon_url: null,
               start_time: timing.start + firstDuration,
               end_time: timing.end,

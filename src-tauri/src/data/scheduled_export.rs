@@ -408,7 +408,7 @@ fn new_run(
         config.format.extension(),
     )?;
     let staging_name = format!(
-        ".patina-scheduled-export-{}.{}.part",
+        ".timekeepgui-scheduled-export-{}.{}.part",
         Uuid::new_v4().simple(),
         config.format.extension()
     );
@@ -482,7 +482,7 @@ pub fn normalize_target_directory(path: &str, verify_writable: bool) -> Result<P
     }
     if verify_writable {
         let probe = canonical.join(format!(
-            ".patina-export-write-test-{}",
+            ".timekeepgui-export-write-test-{}",
             Uuid::new_v4().simple()
         ));
         let mut file = OpenOptions::new()
@@ -551,7 +551,7 @@ fn remove_owned_staging_path(run: &ScheduledExportRun, path: &Path) -> Result<()
         .file_name()
         .and_then(|value| value.to_str())
         .unwrap_or("");
-    if parent != expected_parent || !name.starts_with(".patina-scheduled-export-") {
+    if parent != expected_parent || !name.starts_with(".timekeepgui-scheduled-export-") {
         return Err("scheduled export refused to remove an unowned staging file".to_string());
     }
     match fs::remove_file(path) {
@@ -897,7 +897,7 @@ fn safe_error_message(error_code: &str) -> String {
         "target_conflict" => "A different file already uses this export name.",
         "target_missing" => "The export folder is no longer available.",
         "target_not_directory" => "The export destination is not a folder.",
-        "permission_denied" => "Patina cannot write to the export folder.",
+        "permission_denied" => "TimekeepGUI cannot write to the export folder.",
         "disk_full" => "The export destination does not have enough free space.",
         "database_busy" | "database_unavailable" => "Activity data is temporarily unavailable.",
         "format_validation_failed" => "The generated export did not pass validation.",
@@ -922,7 +922,7 @@ mod tests {
 
     fn temp_dir(label: &str) -> PathBuf {
         let path = std::env::temp_dir().join(format!(
-            "patina-scheduled-export-{label}-{}-{}",
+            "timekeepgui-scheduled-export-{label}-{}-{}",
             std::process::id(),
             Uuid::new_v4().simple()
         ));
@@ -965,7 +965,7 @@ mod tests {
     #[test]
     fn publish_never_overwrites_an_existing_file() {
         let dir = temp_dir("publish");
-        let staging = dir.join(".patina-scheduled-export-owned.csv.part");
+        let staging = dir.join(".timekeepgui-scheduled-export-owned.csv.part");
         let target = dir.join("target.csv");
         fs::write(&staging, b"new").unwrap();
         fs::write(&target, b"original").unwrap();
@@ -988,19 +988,19 @@ mod tests {
     #[test]
     fn scheduled_export_only_adds_a_suffix_when_the_normal_name_exists() {
         let dir = temp_dir("name-collision");
-        let stem = "Patina-scheduled-export-20260808";
+        let stem = "TimekeepGUI-scheduled-export-20260808";
         assert_eq!(
             first_available_export_target_path(&dir, stem, "csv").unwrap(),
-            dir.join("Patina-scheduled-export-20260808.csv")
+            dir.join("TimekeepGUI-scheduled-export-20260808.csv")
         );
         fs::write(
-            dir.join("Patina-scheduled-export-20260808.csv"),
+            dir.join("TimekeepGUI-scheduled-export-20260808.csv"),
             b"existing",
         )
         .unwrap();
         assert_eq!(
             first_available_export_target_path(&dir, stem, "csv").unwrap(),
-            dir.join("Patina-scheduled-export-20260808-02.csv")
+            dir.join("TimekeepGUI-scheduled-export-20260808-02.csv")
         );
         fs::remove_dir_all(dir).unwrap();
     }
@@ -1022,7 +1022,7 @@ mod tests {
         let path = dir.join("export.md");
         fs::write(
             &path,
-            "# Patina Activity Records\n\n- Range: 2026-08-08\n- Exported: now\n- Records: 1\n- Total: 1m\n\n## 2026-08-08\n\n| Type |\n| --- |\n| session |\n",
+            "# TimekeepGUI Activity Records\n\n- Range: 2026-08-08\n- Exported: now\n- Records: 1\n- Total: 1m\n\n## 2026-08-08\n\n| Type |\n| --- |\n| session |\n",
         )
         .unwrap();
         let fields = vec!["record_type".to_string()];
@@ -1036,7 +1036,7 @@ mod tests {
         .is_err());
         fs::write(
             &path,
-            "# Patina Activity Records\n\n- Range: 2026-08-08\n- Exported: now\n- Records: 1\n- Total: 1m\n",
+            "# TimekeepGUI Activity Records\n\n- Range: 2026-08-08\n- Exported: now\n- Records: 1\n- Total: 1m\n",
         )
         .unwrap();
         assert!(validate_markdown(&path, &fields, 1).is_err());

@@ -278,11 +278,11 @@ async function selfTest(): Promise<void> {
   `);
   if (!branched.some((item) => item.value === "Save")) throw new Error("hardcoded checker missed a conditional let definition");
   const exceptionMask = scanFrontendSource(join(REPO_ROOT, "src", "fixture.tsx"), `
-    let label = "Patina";
+    let label = "TimekeepGUI";
     if (condition) { label = "Save"; }
     const model = { label };
   `);
-  for (const expected of ["Patina", "Save"]) {
+  for (const expected of ["TimekeepGUI", "Save"]) {
     if (!exceptionMask.some((item) => item.value === expected)) throw new Error(`hardcoded checker let ${expected} mask another reaching definition`);
   }
   if (scanFrontendSource(join(REPO_ROOT, "src", "fixture.tsx"), `const ok = <button title={copy.save}>{copy.open}</button>`).length) throw new Error("localized JSX was rejected");

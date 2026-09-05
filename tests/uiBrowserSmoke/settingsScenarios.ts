@@ -49,7 +49,7 @@ export async function runSettingsScenarios(context: BrowserSmokeContext) {
     assert.equal(
       await evaluate(client!, sessionId, `
         (() => {
-          localStorage.setItem("patina:last-active-view", "dashboard");
+          localStorage.setItem("timekeepgui:last-active-view", "dashboard");
           localStorage.setItem("__time_tracker_settings_query_delay_ms", "900");
           location.reload();
           return true;
@@ -643,7 +643,7 @@ export async function runSettingsScenarios(context: BrowserSmokeContext) {
         },
       );
     }
-    await evaluate(client!, sessionId, `localStorage.setItem("patina:last-active-view", "settings")`);
+    await evaluate(client!, sessionId, `localStorage.setItem("timekeepgui:last-active-view", "settings")`);
     await client!.command("Page.navigate", { url: appUrl }, sessionId);
     await waitForExpression(
       client!,
@@ -791,7 +791,7 @@ export async function runSettingsScenarios(context: BrowserSmokeContext) {
     await waitForExpression(client!, sessionId, `document.body.innerText.includes(${jsonString("静默启动")})`);
 
     const launchBehaviorSyncs = await evaluate(client!, sessionId, `
-        globalThis.__PATINA_INVOKED_COMMANDS
+        globalThis.__TIMEKEEPGUI_INVOKED_COMMANDS
           .filter((entry) => entry.command === "cmd_set_launch_behavior")
           .map((entry) => entry.payload)
       `) as Array<{ launchAtLogin?: boolean; startMinimized?: boolean }>;
@@ -930,11 +930,11 @@ export async function runSettingsScenarios(context: BrowserSmokeContext) {
     );
     await waitForExpression(client!, sessionId, `document.body.innerText.includes(${jsonString("网页同步使用说明")})`);
     assert.equal(
-      await evaluate(client!, sessionId, `document.body.innerText.includes(${jsonString("Patina 收到当前配置的网页活动后，使用说明入口会自动隐藏。")})`),
+      await evaluate(client!, sessionId, `document.body.innerText.includes(${jsonString("TimekeepGUI 收到当前配置的网页活动后，使用说明入口会自动隐藏。")})`),
       false,
     );
     assert.equal(
-      await evaluate(client!, sessionId, `Boolean(document.querySelector('a[href="https://github.com/Ceceliaee/patina-web-sync/releases/latest"]'))`),
+      await evaluate(client!, sessionId, `Boolean(document.querySelector('a[href="https://github.com/Mamekokwai/patina-web-sync/releases/latest"]'))`),
       true,
     );
     assert.equal(
@@ -966,11 +966,11 @@ export async function runSettingsScenarios(context: BrowserSmokeContext) {
       false,
     );
     assert.equal(
-      await evaluate(client!, sessionId, `document.body.innerText.includes(${jsonString("安装并运行 Patina 桌面端")})`),
+      await evaluate(client!, sessionId, `document.body.innerText.includes(${jsonString("安装并运行 TimekeepGUI 桌面端")})`),
       false,
     );
     assert.equal(
-      await evaluate(client!, sessionId, `document.body.innerText.includes(${jsonString("在 Patina 设置中开启网页同步")})`),
+      await evaluate(client!, sessionId, `document.body.innerText.includes(${jsonString("在 TimekeepGUI 设置中开启网页同步")})`),
       false,
     );
     assert.equal(
@@ -982,15 +982,15 @@ export async function runSettingsScenarios(context: BrowserSmokeContext) {
       true,
     );
     assert.equal(
-      await evaluate(client!, sessionId, `document.body.innerText.includes(${jsonString("patina-chromium-extension-v...zip")})`),
+      await evaluate(client!, sessionId, `document.body.innerText.includes(${jsonString("timekeepgui-chromium-extension-v...zip")})`),
       false,
     );
     assert.equal(
-      await evaluate(client!, sessionId, `document.body.innerText.includes(${jsonString("patina-firefox-extension-v...zip")})`),
+      await evaluate(client!, sessionId, `document.body.innerText.includes(${jsonString("timekeepgui-firefox-extension-v...zip")})`),
       false,
     );
     assert.equal(
-      await evaluate(client!, sessionId, `document.body.innerText.includes(${jsonString("patina-firefox-extension-v...xpi")})`),
+      await evaluate(client!, sessionId, `document.body.innerText.includes(${jsonString("timekeepgui-firefox-extension-v...xpi")})`),
       false,
     );
     assert.equal(
@@ -1176,7 +1176,7 @@ export async function runSettingsScenarios(context: BrowserSmokeContext) {
           const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set;
           for (const [input, value] of inputs.map((input, index) => [
             input,
-            ["https://dav.jianguoyun.com/dav/", "patina-smoke", "app-password"][index],
+            ["https://dav.jianguoyun.com/dav/", "timekeepgui-smoke", "app-password"][index],
           ])) {
             setter?.call(input, value);
             input.dispatchEvent(new InputEvent("input", { bubbles: true, data: value, inputType: "insertText" }));
@@ -1214,7 +1214,7 @@ export async function runSettingsScenarios(context: BrowserSmokeContext) {
         (() => {
           const dialog = document.querySelector('[role="dialog"]');
           const password = dialog?.querySelectorAll('input')[2];
-          const revealCalls = globalThis.__PATINA_INVOKED_COMMANDS
+          const revealCalls = globalThis.__TIMEKEEPGUI_INVOKED_COMMANDS
             .filter((entry) => entry.command === "cmd_reveal_webdav_backup_secret");
           return password?.value === ""
             && password?.getAttribute("placeholder") === "••••••••"
@@ -1245,7 +1245,7 @@ export async function runSettingsScenarios(context: BrowserSmokeContext) {
     `);
     assert.equal(
       await evaluate(client!, sessionId, `
-        globalThis.__PATINA_INVOKED_COMMANDS
+        globalThis.__TIMEKEEPGUI_INVOKED_COMMANDS
           .filter((entry) => entry.command === "cmd_reveal_webdav_backup_secret").length
       `),
       1,
@@ -1441,7 +1441,7 @@ export async function runSettingsScenarios(context: BrowserSmokeContext) {
         .find((node) => node.textContent?.trim() === "保存")?.click()
     `);
     await waitForExpression(client!, sessionId, `
-      globalThis.__PATINA_INVOKED_COMMANDS.some((entry) =>
+      globalThis.__TIMEKEEPGUI_INVOKED_COMMANDS.some((entry) =>
         entry.command === "cmd_save_scheduled_backup_config"
         && entry.payload?.input?.enabled === true
         && !("retentionCount" in entry.payload.input)
@@ -1535,7 +1535,7 @@ export async function runSettingsScenarios(context: BrowserSmokeContext) {
           const value = document.querySelector('.settings-scheduled-backup-directory-value');
           return value?.tagName === 'SPAN'
             && Boolean(value.querySelector('svg'))
-            && value.textContent?.trim() === 'https://dav.jianguoyun.com/dav/Patina'
+            && value.textContent?.trim() === 'https://dav.jianguoyun.com/dav/TimekeepGUI'
             && !document.querySelector('.settings-scheduled-backup-directory-field input')
             && !document.body.innerText.includes('更改目录');
         })()
@@ -1561,7 +1561,7 @@ export async function runSettingsScenarios(context: BrowserSmokeContext) {
         .find((node) => node.textContent?.trim() === "保存")?.click()
     `);
     await waitForExpression(client!, sessionId, `
-      globalThis.__PATINA_INVOKED_COMMANDS.some((entry) =>
+      globalThis.__TIMEKEEPGUI_INVOKED_COMMANDS.some((entry) =>
         entry.command === "cmd_save_scheduled_backup_config"
         && entry.payload?.input?.enabled === true
         && entry.payload?.input?.target?.kind === "webdav"
@@ -1608,7 +1608,7 @@ export async function runSettingsScenarios(context: BrowserSmokeContext) {
       await evaluate(client!, sessionId, `
         document.querySelector('.settings-scheduled-backup-directory-value > span')?.textContent
       `),
-      "C:\\Smoke\\Patina\\backups",
+      "C:\\Smoke\\TimekeepGUI\\backups",
       "The local scheduling dialog lost the authoritative first-install backup directory",
     );
     await evaluate(client!, sessionId, `
@@ -2058,7 +2058,7 @@ export async function runSettingsScenarios(context: BrowserSmokeContext) {
         ?.click();
     `);
     await waitForExpression(client!, sessionId, `
-      globalThis.__PATINA_INVOKED_COMMANDS.some((entry) =>
+      globalThis.__TIMEKEEPGUI_INVOKED_COMMANDS.some((entry) =>
         entry.command === 'cmd_save_scheduled_export_config'
         && entry.payload.input.enabled === true
         && entry.payload.input.cadence === 'weekly'
@@ -2153,7 +2153,7 @@ export async function runSettingsScenarios(context: BrowserSmokeContext) {
     await evaluate(client!, sessionId, `Array.from(document.querySelectorAll('.qp-dialog-actions button')).find((node) => node.textContent?.trim() === "导入")?.click()`);
     await waitForExpression(client!, sessionId, `document.querySelector('.settings-import-action-list') !== null && Boolean(document.querySelector('[aria-label="删除外部导入数据"]'))`);
     assert.equal(
-      await evaluate(client!, sessionId, `globalThis.__PATINA_LAST_IMPORT_PAYLOAD?.classificationMutations?.length > 0`),
+      await evaluate(client!, sessionId, `globalThis.__TIMEKEEPGUI_LAST_IMPORT_PAYLOAD?.classificationMutations?.length > 0`),
       true,
     );
     await evaluate(client!, sessionId, `document.querySelector('[aria-label="删除外部导入数据"]')?.click()`);

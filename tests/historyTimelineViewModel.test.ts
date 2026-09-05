@@ -99,9 +99,9 @@ runTest("day distribution mode persists locally", () => {
 
     rememberHistoryDayDistributionMode("category");
     assert.equal(readHistoryDayDistributionMode(), "category");
-    assert.equal(window.localStorage.getItem("patina:history-day-distribution-mode"), "category");
+    assert.equal(window.localStorage.getItem("timekeepgui:history-day-distribution-mode"), "category");
 
-    window.localStorage.setItem("patina:history-day-distribution-mode", "timeline");
+    window.localStorage.setItem("timekeepgui:history-day-distribution-mode", "timeline");
     assert.equal(readHistoryDayDistributionMode(), "app");
   });
 });
@@ -120,13 +120,13 @@ runTest("timeline display mode persists locally", () => {
 
     rememberHistoryTimelineMode("category");
     assert.equal(readHistoryTimelineMode(), "category");
-    assert.equal(window.localStorage.getItem("patina:history-timeline-mode"), "category");
+    assert.equal(window.localStorage.getItem("timekeepgui:history-timeline-mode"), "category");
 
     rememberHistoryTimelineMode("web");
     assert.equal(readHistoryTimelineMode(), "web");
-    assert.equal(window.localStorage.getItem("patina:history-timeline-mode"), "web");
+    assert.equal(window.localStorage.getItem("timekeepgui:history-timeline-mode"), "web");
 
-    window.localStorage.setItem("patina:history-timeline-mode", "timeline");
+    window.localStorage.setItem("timekeepgui:history-timeline-mode", "timeline");
     assert.equal(readHistoryTimelineMode(), "app");
   });
 });
@@ -155,17 +155,17 @@ runTest("timeline window hours persist continuous zoom values with a four-hour d
 
     rememberHistoryTimelineZoomHours(4);
     assert.equal(readHistoryTimelineZoomHours(), 4);
-    assert.equal(window.localStorage.getItem("patina:history-timeline-zoom-hours"), "4");
+    assert.equal(window.localStorage.getItem("timekeepgui:history-timeline-zoom-hours"), "4");
 
     rememberHistoryTimelineZoomHours(6.375);
     assert.equal(readHistoryTimelineZoomHours(), 6.375);
-    assert.equal(window.localStorage.getItem("patina:history-timeline-zoom-hours"), "6.375");
+    assert.equal(window.localStorage.getItem("timekeepgui:history-timeline-zoom-hours"), "6.375");
 
-    window.localStorage.setItem("patina:history-timeline-zoom-hours", "category");
+    window.localStorage.setItem("timekeepgui:history-timeline-zoom-hours", "category");
     assert.equal(readHistoryTimelineZoomHours(), 4);
 
     for (const invalidValue of ["", "0.99", "24.01", "NaN", "Infinity"]) {
-      window.localStorage.setItem("patina:history-timeline-zoom-hours", invalidValue);
+      window.localStorage.setItem("timekeepgui:history-timeline-zoom-hours", invalidValue);
       assert.equal(readHistoryTimelineZoomHours(), 4);
     }
   });

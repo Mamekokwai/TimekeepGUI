@@ -2,7 +2,7 @@
   <!--
     Canonical tray geometry. Runtime variants must only replace the two role colors:
     ring (#536174) and focus (#2F3B4C). Paths, transforms, stroke widths, and
-    padding are intentionally identical to the Patina brand mark.
+    padding are intentionally identical to the TimekeepGUI brand mark.
   -->
   <g transform="translate(128 128) scale(1.18) translate(-128 -128)">
     <path d="M 218.21 95.17 A 96 96 0 0 1 189.70 201.54" fill="none" stroke="#536174" stroke-width="16" stroke-linecap="round" />

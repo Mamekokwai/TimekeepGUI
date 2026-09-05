@@ -17,7 +17,8 @@ use tokio::sync::Mutex;
 
 const INDEX_FILE_NAME: &str = "backup-index.json";
 const INDEX_VERSION: u32 = 1;
-const INDEX_PRODUCT: &str = "Patina";
+const INDEX_PRODUCT: &str = "TimekeepGUI";
+const LEGACY_INDEX_PRODUCT: &str = "Patina";
 const MAX_BACKUP_LIST_ITEMS: usize = 50;
 const MAX_INDEX_BACKUP_ITEMS: usize = 5_000;
 const MAX_INDEX_WRITE_ATTEMPTS: usize = 3;
@@ -117,7 +118,7 @@ fn remote_backup_id() -> String {
 }
 
 fn remote_backup_file_name(id: &str) -> String {
-    format!("Patina-backup-{id}.zip")
+    format!("TimekeepGUI-backup-{id}.zip")
 }
 
 fn remote_backup_name_candidates(base_id: &str) -> Vec<(String, String)> {
@@ -151,7 +152,7 @@ fn parse_index(raw: &str) -> Result<RemoteBackupIndex, String> {
             index.version
         ));
     }
-    if index.product != INDEX_PRODUCT {
+    if index.product != INDEX_PRODUCT && index.product != LEGACY_INDEX_PRODUCT {
         return Err("WebDAV backup index belongs to another product".to_string());
     }
     if index.backups.len() > MAX_INDEX_BACKUP_ITEMS {
@@ -631,7 +632,7 @@ pub(crate) fn scheduled_remote_backup_paths(
             };
             remote_path(
                 &target.config.remote_dir,
-                &format!("Patina-scheduled-backup-{timestamp}{suffix}.zip"),
+                &format!("TimekeepGUI-scheduled-backup-{timestamp}{suffix}.zip"),
             )
         })
         .collect()
@@ -653,8 +654,8 @@ pub(crate) fn scheduled_temp_paths(
     run: &ScheduledBackupRun,
 ) -> Result<(PathBuf, PathBuf), String> {
     let id = scheduled_remote_backup_id(run);
-    let staging = temp_backup_path(app, &format!("Patina-{id}.zip"))?;
-    let verification = temp_backup_path(app, &format!("Patina-{id}-verify.zip"))?;
+    let staging = temp_backup_path(app, &format!("TimekeepGUI-{id}.zip"))?;
+    let verification = temp_backup_path(app, &format!("TimekeepGUI-{id}-verify.zip"))?;
     Ok((staging, verification))
 }
 
@@ -1007,7 +1008,7 @@ mod tests {
         let config = WebDavConfig {
             url,
             username: "alice".to_string(),
-            remote_dir: "/Patina".to_string(),
+            remote_dir: "/TimekeepGUI".to_string(),
         };
         let client = WebDavClient::new(&config, "secret".to_string()).unwrap();
         ScheduledWebDavTarget { config, client }
@@ -1017,7 +1018,7 @@ mod tests {
     fn remote_file_name_uses_zip_format() {
         assert_eq!(
             remote_backup_file_name("20260603-213000"),
-            "Patina-backup-20260603-213000.zip"
+            "TimekeepGUI-backup-20260603-213000.zip"
         );
     }
 
@@ -1028,14 +1029,14 @@ mod tests {
             candidates[0],
             (
                 "20260603-213000".to_string(),
-                "Patina-backup-20260603-213000.zip".to_string()
+                "TimekeepGUI-backup-20260603-213000.zip".to_string()
             )
         );
         assert_eq!(
             candidates[1],
             (
                 "20260603-213000-02".to_string(),
-                "Patina-backup-20260603-213000-02.zip".to_string()
+                "TimekeepGUI-backup-20260603-213000-02.zip".to_string()
             )
         );
     }
@@ -1043,12 +1044,12 @@ mod tests {
     #[test]
     fn temp_cleanup_removes_file_and_empty_directory() {
         let root = std::env::temp_dir().join(format!(
-            "patina-remote-backup-cleanup-empty-{}",
+            "timekeepgui-remote-backup-cleanup-empty-{}",
             std::process::id()
         ));
         let _ = fs::remove_dir_all(&root);
         fs::create_dir_all(&root).unwrap();
-        let backup_path = root.join("Patina-backup-test.zip");
+        let backup_path = root.join("TimekeepGUI-backup-test.zip");
         fs::write(&backup_path, b"backup").unwrap();
 
         remove_temp_backup_file(&backup_path, &root).unwrap();
@@ -1060,13 +1061,13 @@ mod tests {
     #[test]
     fn temp_cleanup_keeps_directory_with_another_transfer() {
         let root = std::env::temp_dir().join(format!(
-            "patina-remote-backup-cleanup-nonempty-{}",
+            "timekeepgui-remote-backup-cleanup-nonempty-{}",
             std::process::id()
         ));
         let _ = fs::remove_dir_all(&root);
         fs::create_dir_all(&root).unwrap();
-        let backup_path = root.join("Patina-backup-test.zip");
-        let sibling_path = root.join("Patina-backup-other.zip");
+        let backup_path = root.join("TimekeepGUI-backup-test.zip");
+        let sibling_path = root.join("TimekeepGUI-backup-other.zip");
         fs::write(&backup_path, b"backup").unwrap();
         fs::write(&sibling_path, b"other").unwrap();
 
@@ -1081,8 +1082,8 @@ mod tests {
     #[test]
     fn remote_path_joins_normalized_dir_and_file() {
         assert_eq!(
-            remote_path("/Patina/backups", "backup.zip"),
-            "/Patina/backups/backup.zip"
+            remote_path("/TimekeepGUI/backups", "backup.zip"),
+            "/TimekeepGUI/backups/backup.zip"
         );
     }
 
@@ -1102,12 +1103,12 @@ mod tests {
     fn parse_old_index_defaults_external_counts_to_zero() {
         let raw = r#"{
             "version": 1,
-            "product": "Patina",
+            "product": "TimekeepGUI",
             "updatedAtMs": 1,
             "backups": [{
                 "id": "old",
-                "fileName": "Patina-backup-old.zip",
-                "remotePath": "/Patina/Patina-backup-old.zip",
+                "fileName": "TimekeepGUI-backup-old.zip",
+                "remotePath": "/TimekeepGUI/TimekeepGUI-backup-old.zip",
                 "createdAtMs": 1,
                 "sizeBytes": 2,
                 "appVersion": "1.8.3",
@@ -1145,7 +1146,7 @@ mod tests {
             target_kind: "webdav".to_string(),
             logical_date: "2026-08-09".to_string(),
             logical_time_minutes: 120,
-            target_path: "/Patina/owned.zip".to_string(),
+            target_path: "/TimekeepGUI/owned.zip".to_string(),
             staging_path: None,
             phase: "succeeded".to_string(),
             remote_etag: Some("\"object-v1\"".to_string()),
@@ -1195,11 +1196,11 @@ mod tests {
         let candidates = scheduled_remote_backup_paths(&target, &scheduled_run());
         assert_eq!(
             candidates[0],
-            "/Patina/Patina-scheduled-backup-20260809-020000.zip"
+            "/TimekeepGUI/TimekeepGUI-scheduled-backup-20260809-020000.zip"
         );
         assert_eq!(
             candidates[1],
-            "/Patina/Patina-scheduled-backup-20260809-020000-02.zip"
+            "/TimekeepGUI/TimekeepGUI-scheduled-backup-20260809-020000-02.zip"
         );
         assert!(!candidates[0].contains("-a1"));
         assert!(!candidates[0].contains(&scheduled_run().target_generation));
@@ -1215,14 +1216,14 @@ mod tests {
         ])
         .await;
         let path = std::env::temp_dir().join(format!(
-            "patina-scheduled-upload-{}.zip",
+            "timekeepgui-scheduled-upload-{}.zip",
             uuid::Uuid::new_v4().simple()
         ));
         fs::write(&path, vec![0_u8; 42]).unwrap();
         let error = upload_scheduled_snapshot(
             &scheduled_target(url),
             &path,
-            "/Patina/owned.zip",
+            "/TimekeepGUI/owned.zip",
             42,
             false,
         )
@@ -1247,14 +1248,19 @@ mod tests {
         ])
         .await;
         let path = std::env::temp_dir().join(format!(
-            "patina-scheduled-resume-{}.zip",
+            "timekeepgui-scheduled-resume-{}.zip",
             uuid::Uuid::new_v4().simple()
         ));
         fs::write(&path, vec![0_u8; 42]).unwrap();
-        let outcome =
-            upload_scheduled_snapshot(&scheduled_target(url), &path, "/Patina/owned.zip", 42, true)
-                .await
-                .unwrap();
+        let outcome = upload_scheduled_snapshot(
+            &scheduled_target(url),
+            &path,
+            "/TimekeepGUI/owned.zip",
+            42,
+            true,
+        )
+        .await
+        .unwrap();
         let _ = fs::remove_file(path);
 
         assert!(!outcome.created_new);
@@ -1284,7 +1290,7 @@ mod tests {
         assert!(!scheduled_entry_matches_run(&other_run, &run));
 
         let mut wrong_path = entry.clone();
-        wrong_path.remote_path = "/Patina/lookalike.zip".to_string();
+        wrong_path.remote_path = "/TimekeepGUI/lookalike.zip".to_string();
         assert!(!scheduled_entry_matches_run(&wrong_path, &run));
 
         let mut wrong_hash = entry.clone();
@@ -1310,7 +1316,7 @@ mod tests {
         let mut manual = owned.clone();
         manual.id = "manual-backup".to_string();
         manual.file_name = "manual.zip".to_string();
-        manual.remote_path = "/Patina/manual.zip".to_string();
+        manual.remote_path = "/TimekeepGUI/manual.zip".to_string();
         manual.origin = "manual".to_string();
         manual.target_generation = None;
         manual.run_key = None;
@@ -1353,7 +1359,7 @@ mod tests {
         assert!(!published_index.contains("scheduled-owned"));
         assert!(published_index.contains("manual-backup"));
         let delete = requests[5].to_ascii_lowercase();
-        assert!(delete.starts_with("delete /dav/patina/owned.zip "));
+        assert!(delete.starts_with("delete /dav/timekeepgui/owned.zip "));
         assert!(delete.contains("\r\nif-match: \"object-v1\"\r\n"));
     }
 
@@ -1439,7 +1445,7 @@ mod tests {
         let mut manual = scheduled.clone();
         manual.id = "manual-preserved".to_string();
         manual.file_name = "manual.zip".to_string();
-        manual.remote_path = "/Patina/manual.zip".to_string();
+        manual.remote_path = "/TimekeepGUI/manual.zip".to_string();
         manual.origin = "manual".to_string();
         manual.target_generation = None;
         manual.run_key = None;

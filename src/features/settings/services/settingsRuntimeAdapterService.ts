@@ -85,7 +85,6 @@ const RELEASE_NOTES_URL = "https://github.com/Mamekokwai/TimekeepGUI/releases";
 const REPOSITORY_URL = "https://github.com/Mamekokwai/TimekeepGUI";
 const FEEDBACK_URL = "https://github.com/Mamekokwai/TimekeepGUI/issues/new/choose";
 const BLOG_URL = "https://blog.nywerya.com";
-const KOFI_SUPPORT_URL = "https://ko-fi.com/ceceliaee";
 
 export function buildBackupPreviewSummary(preview: BackupPreview, uiText: UiText, locale: Locale): string {
   const UI_TEXT = uiText;
@@ -233,10 +232,6 @@ export class SettingsRuntimeAdapterService {
 
   static async openFeedback(): Promise<void> {
     await openExternalUrl(FEEDBACK_URL);
-  }
-
-  static async openKofiSupport(): Promise<void> {
-    await openExternalUrl(KOFI_SUPPORT_URL);
   }
 
   static async openWebActivityHelpLink(url: string): Promise<void> {

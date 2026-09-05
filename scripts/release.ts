@@ -20,7 +20,7 @@ const VERSION_PATTERN =
   /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9A-Za-z-][0-9A-Za-z-]*)(?:\.(?:0|[1-9A-Za-z-][0-9A-Za-z-]*))*))?$/;
 const VERSION_POLICY_CURRENT_CODE_VERSION_PATTERN = /(- 代码版本为 `)([^`]+)(`)/;
 const GITHUB_UPDATER_ENDPOINT =
-  "https://github.com/Ceceliaee/patina/releases/latest/download/latest.json";
+  "https://github.com/Mamekokwai/TimekeepGUI";
 const SHA256_SUMS_FILE_NAME = "SHA256SUMS.txt";
 const SHA256_PATTERN = /^[0-9a-f]{64}$/;
 const MAX_RELEASE_NOTE_LENGTH = 100;
@@ -55,7 +55,7 @@ export function buildReleaseInstallerName(version) {
     throw new Error(`invalid SemVer version "${version ?? ""}"`);
   }
 
-  return `Patina_${version}_x64-setup.exe`;
+  return `TimekeepGUI_${version}_x64-setup.exe`;
 }
 
 function assertSafeFileName(fileName) {
@@ -258,7 +258,7 @@ export function readCargoTomlPackageVersionText(content) {
   return match?.[1] ?? null;
 }
 
-export function readCargoLockPackageVersionText(content, packageName = "patina") {
+export function readCargoLockPackageVersionText(content, packageName = "timekeepgui") {
   const blocks = content.split(/\r?\n(?=\[\[package\]\])/);
   for (const block of blocks) {
     const name = /^name\s*=\s*"([^"]+)"/m.exec(block)?.[1];
@@ -352,8 +352,8 @@ export function validateReleaseVersionFilesText(files, version) {
       "[package].version",
     ),
     versionFileError(
-      "src-tauri/Cargo.lock package patina",
-      readCargoLockPackageVersionText(files.cargoLock ?? "", "patina"),
+      "src-tauri/Cargo.lock package timekeepgui",
+      readCargoLockPackageVersionText(files.cargoLock ?? "", "timekeepgui"),
       version,
     ),
     versionPolicyError,
@@ -605,7 +605,7 @@ export function renderReleaseNotes(parsed) {
   const visibleSections = releaseNoteVisibleSections(parsed);
   const releaseInstallerName = parsed.version
     ? buildReleaseInstallerName(parsed.version)
-    : "Patina_<version>_x64-setup.exe";
+    : "TimekeepGUI_<version>_x64-setup.exe";
   const lines = [parsed.release, ""];
 
   for (const section of visibleSections) {
@@ -617,7 +617,7 @@ export function renderReleaseNotes(parsed) {
     "",
     "- Windows 安装包：请下载本页面附件中的 `.exe` 安装包。",
     `- SHA-256：下载 \`${SHA256_SUMS_FILE_NAME}\` 后，可在 PowerShell 中运行 \`Get-FileHash .\\${releaseInstallerName} -Algorithm SHA256\` 并比对摘要。`,
-    `- 构建来源：安装 GitHub CLI 后，可运行 \`gh attestation verify .\\${releaseInstallerName} --repo Ceceliaee/patina\`。`,
+    `- 构建来源：安装 GitHub CLI 后，可运行 \`gh attestation verify .\\${releaseInstallerName} --repo Mamekokwai/TimekeepGUI\`。`,
     "",
   );
 

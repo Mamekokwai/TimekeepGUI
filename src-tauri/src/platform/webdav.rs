@@ -74,7 +74,7 @@ pub fn normalize_base_url(raw: &str) -> Result<String, String> {
 pub fn normalize_remote_dir(raw: &str) -> Result<String, String> {
     let trimmed = raw.trim();
     let candidate = if trimmed.is_empty() {
-        "/Patina"
+        "/TimekeepGUI"
     } else {
         trimmed
     };
@@ -531,7 +531,7 @@ mod tests {
             &WebDavConfig {
                 url,
                 username: "alice".to_string(),
-                remote_dir: "/Patina".to_string(),
+                remote_dir: "/TimekeepGUI".to_string(),
             },
             "secret".to_string(),
         )
@@ -540,7 +540,7 @@ mod tests {
 
     fn temp_file(contents: &[u8]) -> PathBuf {
         let path = std::env::temp_dir().join(format!(
-            "patina-webdav-test-{}.zip",
+            "timekeepgui-webdav-test-{}.zip",
             Uuid::new_v4().simple()
         ));
         std::fs::write(&path, contents).unwrap();
@@ -549,18 +549,18 @@ mod tests {
 
     #[test]
     fn normalize_remote_dir_applies_default_and_slashes() {
-        assert_eq!(normalize_remote_dir("").unwrap(), "/Patina");
+        assert_eq!(normalize_remote_dir("").unwrap(), "/TimekeepGUI");
         assert_eq!(
-            normalize_remote_dir("Patina/backups/").unwrap(),
-            "/Patina/backups"
+            normalize_remote_dir("TimekeepGUI/backups/").unwrap(),
+            "/TimekeepGUI/backups"
         );
     }
 
     #[test]
     fn normalize_remote_dir_rejects_unsafe_segments() {
         assert!(normalize_remote_dir("../zotero").is_err());
-        assert!(normalize_remote_dir("Patina\\backups").is_err());
-        assert!(normalize_remote_dir("Patina/\n/backups").is_err());
+        assert!(normalize_remote_dir("TimekeepGUI\\backups").is_err());
+        assert!(normalize_remote_dir("TimekeepGUI/\n/backups").is_err());
     }
 
     #[test]
@@ -582,10 +582,10 @@ mod tests {
     #[test]
     fn remote_url_rejects_untrusted_path_segments_at_the_http_boundary() {
         let client = client("https://example.com/dav".to_string());
-        assert!(client.remote_url("/Patina/../outside.zip").is_err());
-        assert!(client.remote_url("/Patina\\outside.zip").is_err());
-        assert!(client.remote_url("/Patina/unsafe\n.zip").is_err());
-        assert!(client.remote_url("Patina/missing-root.zip").is_err());
+        assert!(client.remote_url("/TimekeepGUI/../outside.zip").is_err());
+        assert!(client.remote_url("/TimekeepGUI\\outside.zip").is_err());
+        assert!(client.remote_url("/TimekeepGUI/unsafe\n.zip").is_err());
+        assert!(client.remote_url("TimekeepGUI/missing-root.zip").is_err());
     }
 
     #[tokio::test]
@@ -597,7 +597,7 @@ mod tests {
         .await;
         let file = temp_file(b"complete backup");
         let error = client(url)
-            .upload_file_create_new(&file, "/Patina/automatic.zip")
+            .upload_file_create_new(&file, "/TimekeepGUI/automatic.zip")
             .await
             .unwrap_err();
         let requests = captured.await.unwrap();
@@ -605,7 +605,7 @@ mod tests {
 
         assert_eq!(error, "remote_name_conflict");
         let request = requests[0].to_ascii_lowercase();
-        assert!(request.starts_with("put /dav/patina/automatic.zip "));
+        assert!(request.starts_with("put /dav/timekeepgui/automatic.zip "));
         assert!(request.contains("\r\nif-none-match: *\r\n"));
     }
 
@@ -617,7 +617,7 @@ mod tests {
         .await;
         client(url)
             .write_text_conditionally(
-                "/Patina/backup-index.json",
+                "/TimekeepGUI/backup-index.json",
                 "{\"version\":1}",
                 Some("\"index-v2\""),
                 false,
@@ -637,7 +637,7 @@ mod tests {
         )])
         .await;
         let error = client(url)
-            .read_text_snapshot("/Patina/backup-index.json")
+            .read_text_snapshot("/TimekeepGUI/backup-index.json")
             .await
             .unwrap_err();
         assert_eq!(error, "WebDAV text response exceeds the safe size limit");
@@ -655,23 +655,23 @@ mod tests {
         .await;
         let client = client(url);
         let metadata = client
-            .object_metadata("/Patina/owned.zip")
+            .object_metadata("/TimekeepGUI/owned.zip")
             .await
             .unwrap()
             .unwrap();
         assert_eq!(metadata.size_bytes, Some(42));
         assert_eq!(metadata.etag.as_deref(), Some("\"object-v1\""));
         assert!(client
-            .delete_file("/Patina/owned.zip", metadata.etag.as_deref())
+            .delete_file("/TimekeepGUI/owned.zip", metadata.etag.as_deref())
             .await
             .unwrap());
 
         let requests = captured.await.unwrap();
         assert!(requests[0]
             .to_ascii_lowercase()
-            .starts_with("head /dav/patina/owned.zip "));
+            .starts_with("head /dav/timekeepgui/owned.zip "));
         let delete = requests[1].to_ascii_lowercase();
-        assert!(delete.starts_with("delete /dav/patina/owned.zip "));
+        assert!(delete.starts_with("delete /dav/timekeepgui/owned.zip "));
         assert!(delete.contains("\r\nif-match: \"object-v1\"\r\n"));
     }
 
@@ -685,7 +685,7 @@ mod tests {
         ])
         .await;
         let metadata = client(url)
-            .object_metadata("/Patina/owned.zip")
+            .object_metadata("/TimekeepGUI/owned.zip")
             .await
             .unwrap()
             .unwrap();
@@ -695,9 +695,9 @@ mod tests {
         let requests = captured.await.unwrap();
         assert!(requests[0]
             .to_ascii_lowercase()
-            .starts_with("head /dav/patina/owned.zip "));
+            .starts_with("head /dav/timekeepgui/owned.zip "));
         let fallback = requests[1].to_ascii_lowercase();
-        assert!(fallback.starts_with("get /dav/patina/owned.zip "));
+        assert!(fallback.starts_with("get /dav/timekeepgui/owned.zip "));
         assert!(fallback.contains("\r\nrange: bytes=0-0\r\n"));
     }
 
@@ -709,7 +709,7 @@ mod tests {
         ])
         .await;
         let error = client(url)
-            .write_text_conditionally("/Patina/backup-index.json", "{}", None, true)
+            .write_text_conditionally("/TimekeepGUI/backup-index.json", "{}", None, true)
             .await
             .unwrap_err();
         assert!(error.contains("HTTP 302"));

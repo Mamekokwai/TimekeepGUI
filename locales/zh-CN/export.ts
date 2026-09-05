@@ -137,10 +137,10 @@ export const MESSAGES = {
   "export.restoreFormatDefaults": "恢复当前格式默认字段",
   "export.selectGroupFields": "全选",
   "export.scheduledErrors": {
-    "databaseUnavailable": "活动数据暂时不可用，Patina 将自动重试",
+    "databaseUnavailable": "活动数据暂时不可用，TimekeepGUI 将自动重试",
     "diskFull": "保存位置空间不足",
     "generic": "定时导出未能完成",
-    "interrupted": "导出被中断，Patina 将自动重试",
+    "interrupted": "导出被中断，TimekeepGUI 将自动重试",
     "permissionDenied": "没有写入保存位置的权限",
     "publishFailed": "导出已通过校验，但未能保存到目标位置",
     "targetConflict": "该周期的文件名已被其他文件占用",

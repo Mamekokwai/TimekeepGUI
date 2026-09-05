@@ -134,16 +134,16 @@ const UNTRACKED_WINDOW: TrackingWindowSnapshot = {
 
 const WIDGET_WINDOW: TrackingWindowSnapshot = {
   ...ACTIVE_WINDOW,
-  title: "Patina Widget",
-  exeName: "patina.exe",
-  processPath: "C:/Program Files/Patina/patina.exe",
+  title: "TimekeepGUI Widget",
+  exeName: "timekeepgui.exe",
+  processPath: "C:/Program Files/TimekeepGUI/timekeepgui.exe",
 };
 
-const PATINA_MAIN_WINDOW: TrackingWindowSnapshot = {
+const TIMEKEEPGUI_MAIN_WINDOW: TrackingWindowSnapshot = {
   ...ACTIVE_WINDOW,
-  title: "Patina",
-  exeName: "patina.exe",
-  processPath: "C:/Program Files/Patina/patina.exe",
+  title: "TimekeepGUI",
+  exeName: "timekeepgui.exe",
+  processPath: "C:/Program Files/TimekeepGUI/timekeepgui.exe",
 };
 
 let passed = 0;
@@ -293,10 +293,10 @@ await runTest("buildWidgetViewModel maps hard degraded probe to existing error l
   assert.equal(viewModel.statusLabel, "\u5f02\u5e38");
 });
 
-await runTest("isWidgetSelfWindow detects Patina chrome without matching similarly titled apps", () => {
+await runTest("isWidgetSelfWindow detects TimekeepGUI chrome without matching similarly titled apps", () => {
   assert.equal(isWidgetSelfWindow(WIDGET_WINDOW), true);
-  assert.equal(isWidgetSelfWindow(PATINA_MAIN_WINDOW), true);
-  assert.equal(isWidgetSelfWindow({ ...WIDGET_WINDOW, title: "工具 - Patina" }), true);
+  assert.equal(isWidgetSelfWindow(TIMEKEEPGUI_MAIN_WINDOW), true);
+  assert.equal(isWidgetSelfWindow({ ...WIDGET_WINDOW, title: "工具 - TimekeepGUI" }), true);
   assert.equal(isWidgetSelfWindow({ ...WIDGET_WINDOW, title: "" }), true);
   assert.equal(isWidgetSelfWindow({ ...WIDGET_WINDOW, exeName: "chrome.exe" }), false);
   assert.equal(isWidgetSelfWindow(ACTIVE_WINDOW), false);

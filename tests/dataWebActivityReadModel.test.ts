@@ -119,19 +119,19 @@ await runTest("opening destination details commits the target without disturbing
   };
 
   assert.deepEqual(
-    commitDataDestinationDetailSelection(snapshot, "app", "patina.exe"),
+    commitDataDestinationDetailSelection(snapshot, "app", "timekeepgui.exe"),
     {
-      appKeys: ["patina.exe"],
+      appKeys: ["timekeepgui.exe"],
       webKeys: ["docs.example"],
       mode: "app",
       listScrollTop: 40,
     },
   );
   assert.deepEqual(
-    commitDataDestinationDetailSelection(snapshot, "web", "patina.example"),
+    commitDataDestinationDetailSelection(snapshot, "web", "timekeepgui.example"),
     {
       appKeys: ["chatgpt.exe"],
-      webKeys: ["patina.example"],
+      webKeys: ["timekeepgui.example"],
       mode: "web",
       listScrollTop: 40,
     },
@@ -152,11 +152,11 @@ await runTest("destination detail theme sources include selected and unselected 
   });
 
   assert.deepEqual(buildDataDestinationIconSources(
-    [createOption("chatgpt.exe", "icon-chatgpt"), createOption("patina.exe", "icon-patina")],
+    [createOption("chatgpt.exe", "icon-chatgpt"), createOption("timekeepgui.exe", "icon-timekeepgui")],
     [createOption("docs.example", "icon-docs"), createOption("empty.example", null)],
   ), {
     "app:chatgpt.exe": "icon-chatgpt",
-    "app:patina.exe": "icon-patina",
+    "app:timekeepgui.exe": "icon-timekeepgui",
     "web:docs.example": "icon-docs",
   });
 });
@@ -763,12 +763,12 @@ await runTest("all-time web trend follows the selected domains' widest activity 
       durationMs: 60 * 60_000,
     },
     {
-      normalizedDomain: "patina.example",
+      normalizedDomain: "timekeepgui.example",
       bucketStartMs: new Date(2026, 5, 1).getTime(),
       durationMs: 60 * 60_000,
     },
     {
-      normalizedDomain: "patina.example",
+      normalizedDomain: "timekeepgui.example",
       bucketStartMs: new Date(2026, 6, 1).getTime(),
       durationMs: 2 * 60 * 60_000,
     },
@@ -786,27 +786,27 @@ await runTest("all-time web trend follows the selected domains' widest activity 
     favicons: {},
   };
 
-  const patina = buildDataWebTrendViewModel({
+  const timekeepgui = buildDataWebTrendViewModel({
     ...baseInput,
-    selectedDomains: ["patina.example"],
+    selectedDomains: ["timekeepgui.example"],
   });
   assert.deepEqual(
-    [patina.range.startDateKey, patina.range.endDateKey],
+    [timekeepgui.range.startDateKey, timekeepgui.range.endDateKey],
     ["2026-06-01", "2026-07-31"],
   );
   assert.deepEqual(
-    patina.chartRows.map((row) => row.date),
+    timekeepgui.chartRows.map((row) => row.date),
     ["2026-06-01", "2026-07-01"],
   );
-  assert.equal(patina.summary.totalDuration, 3 * 60 * 60_000);
+  assert.equal(timekeepgui.summary.totalDuration, 3 * 60 * 60_000);
   assert.equal(
-    patina.domainOptions.find((domain) => domain.normalizedDomain === "archive.example")?.totalDuration,
+    timekeepgui.domainOptions.find((domain) => domain.normalizedDomain === "archive.example")?.totalDuration,
     4 * 60 * 60_000,
   );
 
   const comparison = buildDataWebTrendViewModel({
     ...baseInput,
-    selectedDomains: ["patina.example", "chrome.example"],
+    selectedDomains: ["timekeepgui.example", "chrome.example"],
   });
   assert.deepEqual(
     [comparison.range.startDateKey, comparison.range.endDateKey],

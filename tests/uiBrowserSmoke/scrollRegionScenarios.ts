@@ -12,7 +12,7 @@ async function captureFixtureScreenshot(
   fileName: string,
   theme: "light" | "dark",
 ) {
-  const captureDir = process.env.PATINA_SCROLL_REGION_SCREENSHOT_DIR?.trim();
+  const captureDir = process.env.TIMEKEEPGUI_SCROLL_REGION_SCREENSHOT_DIR?.trim();
   if (!captureDir) return;
   const previousTheme = await evaluate(
     context.client,
@@ -118,7 +118,7 @@ async function fixtureMetrics(context: BrowserSmokeContext) {
         try {
           collectScrollbarRules(sheet.cssRules);
         } catch {
-          // Cross-origin stylesheets are irrelevant to Patina's local Quiet Pro contract.
+          // Cross-origin stylesheets are irrelevant to TimekeepGUI's local Quiet Pro contract.
         }
       }
       const ruleFor = (selector) => scrollbarRules.find(

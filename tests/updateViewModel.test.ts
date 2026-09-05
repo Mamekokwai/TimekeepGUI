@@ -38,7 +38,7 @@ function makeSnapshot(overrides: Partial<UpdateSnapshot> = {}): UpdateSnapshot {
     errorStage: null,
     downloadedBytes: null,
     totalBytes: null,
-    releasePageUrl: "https://github.com/Ceceliaee/patina/releases",
+    releasePageUrl: "https://github.com/Mamekokwai/TimekeepGUI",
     assetDownloadUrl: null,
     ...overrides,
   };
@@ -95,7 +95,7 @@ runTest("check error falls back to release page", () => {
   const panel = buildUpdateStatusPanelModel(makeSnapshot({
     status: "error",
     errorStage: "check",
-    errorMessage: "failed to check updates: error sending request for url (https://github.com/Ceceliaee/patina/releases/latest/download/latest.json)",
+    errorMessage: "failed to check updates: error sending request for url (https://github.com/Mamekokwai/TimekeepGUI)",
   }), false, false);
 
   assert.equal(panel.statusTitle, "无法检查更新");
@@ -246,14 +246,14 @@ runTest("update relaunch view storage persists current keys", () => {
 
     markPendingUpdateRelaunchViewRestore();
     assert.equal(consumePendingUpdateRelaunchView(), "settings");
-    assert.equal(window.localStorage.getItem("patina:last-active-view"), "settings");
-    assert.equal(window.localStorage.getItem("patina:pending-update-relaunch-view"), null);
+    assert.equal(window.localStorage.getItem("timekeepgui:last-active-view"), "settings");
+    assert.equal(window.localStorage.getItem("timekeepgui:pending-update-relaunch-view"), null);
 
     markPendingUpdateRelaunchViewRestore();
-    assert.equal(window.localStorage.getItem("patina:pending-update-relaunch-view"), "1");
+    assert.equal(window.localStorage.getItem("timekeepgui:pending-update-relaunch-view"), "1");
 
     clearPendingUpdateRelaunchViewRestore();
-    assert.equal(window.localStorage.getItem("patina:pending-update-relaunch-view"), null);
+    assert.equal(window.localStorage.getItem("timekeepgui:pending-update-relaunch-view"), null);
   });
 });
 

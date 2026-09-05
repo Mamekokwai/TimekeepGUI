@@ -638,9 +638,9 @@ export async function runDataScenarios(
   await runTest("data web trends keep their geometry and content through slow refreshes", async () => {
     await evaluate(client!, sessionId, `
       (() => {
-        globalThis.__PATINA_INVOKED_COMMANDS = [];
-        globalThis.__PATINA_WEB_ACTIVITY_QUERY_DELAY_MS = 800;
-        globalThis.__PATINA_WEB_ACTIVITY_QUERY_FAILURE = false;
+        globalThis.__TIMEKEEPGUI_INVOKED_COMMANDS = [];
+        globalThis.__TIMEKEEPGUI_WEB_ACTIVITY_QUERY_DELAY_MS = 800;
+        globalThis.__TIMEKEEPGUI_WEB_ACTIVITY_QUERY_FAILURE = false;
         document.querySelector(".data-app-panel .data-trend-range-reset")?.click();
       })()
     `);
@@ -715,11 +715,11 @@ export async function runDataScenarios(
     const webCommandsBeforeRuntimeRefresh = Number(await evaluate(
       client!,
       sessionId,
-      `globalThis.__PATINA_INVOKED_COMMANDS
+      `globalThis.__TIMEKEEPGUI_INVOKED_COMMANDS
         .filter((entry) => entry.command === "cmd_get_web_activity_aggregate_range").length`,
     ));
     await evaluate(client!, sessionId, `
-      globalThis.__PATINA_EMIT_TAURI_EVENT?.("tracking-data-changed", {
+      globalThis.__TIMEKEEPGUI_EMIT_TAURI_EVENT?.("tracking-data-changed", {
         reason: "session-transition",
         changed_at_ms: Date.now(),
       })
@@ -727,7 +727,7 @@ export async function runDataScenarios(
     await waitForExpression(
       client!,
       sessionId,
-      `globalThis.__PATINA_INVOKED_COMMANDS
+      `globalThis.__TIMEKEEPGUI_INVOKED_COMMANDS
         .filter((entry) => entry.command === "cmd_get_web_activity_aggregate_range").length
         > ${webCommandsBeforeRuntimeRefresh}`,
       45_000,
@@ -848,7 +848,7 @@ export async function runDataScenarios(
 
     await evaluate(client!, sessionId, `
       (() => {
-        globalThis.__PATINA_WEB_ACTIVITY_QUERY_DELAY_MS = 800;
+        globalThis.__TIMEKEEPGUI_WEB_ACTIVITY_QUERY_DELAY_MS = 800;
         document.querySelector(
           ".data-app-panel .data-trend-range-control .qp-range-control-arrow:last-child",
         )?.click();
@@ -900,7 +900,7 @@ export async function runDataScenarios(
         let lastCount = -1;
         let stableSince = performance.now();
         const sample = () => {
-          const count = globalThis.__PATINA_INVOKED_COMMANDS
+          const count = globalThis.__TIMEKEEPGUI_INVOKED_COMMANDS
             .filter((entry) => entry.command === "cmd_get_web_activity_aggregate_range").length;
           if (count !== lastCount) {
             lastCount = count;
@@ -938,7 +938,7 @@ export async function runDataScenarios(
     const webCommandCount = Number(await evaluate(
       client!,
       sessionId,
-      `globalThis.__PATINA_INVOKED_COMMANDS
+      `globalThis.__TIMEKEEPGUI_INVOKED_COMMANDS
         .filter((entry) => entry.command === "cmd_get_web_activity_aggregate_range").length`,
     ));
     await evaluate(client!, sessionId, `
@@ -970,7 +970,7 @@ export async function runDataScenarios(
         JSON.stringify({
           hasContent: Boolean(document.querySelector('[aria-label="网页列表"]')),
           hasInvisibleBody: Boolean(document.querySelector(".data-app-panel .invisible")),
-          webCommandCount: globalThis.__PATINA_INVOKED_COMMANDS
+          webCommandCount: globalThis.__TIMEKEEPGUI_INVOKED_COMMANDS
             .filter((entry) => entry.command === "cmd_get_web_activity_aggregate_range").length,
         })
       `))),
@@ -991,7 +991,7 @@ export async function runDataScenarios(
           busy: document.querySelector(".data-app-grid")?.getAttribute("aria-busy"),
           hasUpdatingStatus: document.querySelector(".data-app-panel")
             ?.textContent?.includes("更新中") ?? false,
-          webCommandCount: globalThis.__PATINA_INVOKED_COMMANDS
+          webCommandCount: globalThis.__TIMEKEEPGUI_INVOKED_COMMANDS
             .filter((entry) => entry.command === "cmd_get_web_activity_aggregate_range").length,
         })
       `))),
@@ -1004,8 +1004,8 @@ export async function runDataScenarios(
     );
     await evaluate(client!, sessionId, `
       (() => {
-        globalThis.__PATINA_WEB_ACTIVITY_QUERY_DELAY_MS = 0;
-        globalThis.__PATINA_WEB_ACTIVITY_QUERY_FAILURE = false;
+        globalThis.__TIMEKEEPGUI_WEB_ACTIVITY_QUERY_DELAY_MS = 0;
+        globalThis.__TIMEKEEPGUI_WEB_ACTIVITY_QUERY_FAILURE = false;
         const group = document.querySelector('[aria-label="选择时间去向类型"]');
         Array.from(group?.querySelectorAll("button") ?? [])
           .find((node) => node.textContent?.trim() === "应用")?.click();
@@ -1150,9 +1150,9 @@ export async function runDataScenarios(
   });
 
   await runTest("data reuses the destination panel for web trends and its compact annual heatmap", async () => {
-    await evaluate(client!, sessionId, `globalThis.__PATINA_INVOKED_COMMANDS = []`);
+    await evaluate(client!, sessionId, `globalThis.__TIMEKEEPGUI_INVOKED_COMMANDS = []`);
     assert.equal(
-      await evaluate(client!, sessionId, `globalThis.__PATINA_INVOKED_COMMANDS.some((entry) => entry.command === "cmd_get_web_activity_aggregate_range")`),
+      await evaluate(client!, sessionId, `globalThis.__TIMEKEEPGUI_INVOKED_COMMANDS.some((entry) => entry.command === "cmd_get_web_activity_aggregate_range")`),
       false,
       "the default app view must not issue a web aggregate query",
     );
@@ -1431,7 +1431,7 @@ export async function runDataScenarios(
     `));
     await evaluate(client!, sessionId, `
       (() => {
-        globalThis.__PATINA_WEB_ACTIVITY_QUERY_DELAY_MS = 1_000;
+        globalThis.__TIMEKEEPGUI_WEB_ACTIVITY_QUERY_DELAY_MS = 1_000;
         document.querySelectorAll('[aria-label="网页列表"] button')[1]
           ?.dispatchEvent(new MouseEvent("click", { bubbles: true, ctrlKey: true }));
       })()
@@ -1477,7 +1477,7 @@ export async function runDataScenarios(
       client!,
       sessionId,
       `new Promise((resolve) => setTimeout(resolve, 1_050))
-        .then(() => { globalThis.__PATINA_WEB_ACTIVITY_QUERY_DELAY_MS = 0; })`,
+        .then(() => { globalThis.__TIMEKEEPGUI_WEB_ACTIVITY_QUERY_DELAY_MS = 0; })`,
     );
 
     await evaluate(client!, sessionId, `
@@ -1877,7 +1877,7 @@ export async function runDataScenarios(
     await evaluate(
       client!,
       sessionId,
-      `localStorage.removeItem("patina:destination-detail-timeline-zoom-hours:v1"); localStorage.removeItem("patina:data-destination-detail-timeline-zoom-hours:v1")`,
+      `localStorage.removeItem("timekeepgui:destination-detail-timeline-zoom-hours:v1"); localStorage.removeItem("timekeepgui:data-destination-detail-timeline-zoom-hours:v1")`,
     );
     await waitForExpression(
       client!,
@@ -2649,7 +2649,7 @@ export async function runDataScenarios(
       await evaluate(
         client!,
         sessionId,
-        `localStorage.getItem("patina:destination-detail-timeline-zoom-hours:v1")`,
+        `localStorage.getItem("timekeepgui:destination-detail-timeline-zoom-hours:v1")`,
       ),
       "3",
     );
@@ -2675,7 +2675,7 @@ export async function runDataScenarios(
       await evaluate(
         client!,
         sessionId,
-        `localStorage.getItem("patina:destination-detail-timeline-zoom-hours:v1")`,
+        `localStorage.getItem("timekeepgui:destination-detail-timeline-zoom-hours:v1")`,
       ),
       "2",
     );
@@ -3329,7 +3329,7 @@ export async function runDataScenarios(
     await evaluate(
       client!,
       sessionId,
-      `localStorage.removeItem("patina:destination-detail-timeline-zoom-hours:v1"); localStorage.removeItem("patina:data-destination-detail-timeline-zoom-hours:v1")`,
+      `localStorage.removeItem("timekeepgui:destination-detail-timeline-zoom-hours:v1"); localStorage.removeItem("timekeepgui:data-destination-detail-timeline-zoom-hours:v1")`,
     );
 
     await evaluate(
@@ -3655,9 +3655,9 @@ export async function runDataScenarios(
     );
     await evaluate(client!, sessionId, `
       (() => {
-        globalThis.__PATINA_WEB_ACTIVITY_QUERY_DELAY_MS = 0;
-        globalThis.__PATINA_WEB_ACTIVITY_QUERY_FAILURE = true;
-        globalThis.__PATINA_INVOKED_COMMANDS = [];
+        globalThis.__TIMEKEEPGUI_WEB_ACTIVITY_QUERY_DELAY_MS = 0;
+        globalThis.__TIMEKEEPGUI_WEB_ACTIVITY_QUERY_FAILURE = true;
+        globalThis.__TIMEKEEPGUI_INVOKED_COMMANDS = [];
         document.querySelector('[aria-label="数据"]')?.click();
       })()
     `);
@@ -3686,7 +3686,7 @@ export async function runDataScenarios(
     );
     await evaluate(client!, sessionId, `
       (() => {
-        globalThis.__PATINA_WEB_ACTIVITY_QUERY_FAILURE = false;
+        globalThis.__TIMEKEEPGUI_WEB_ACTIVITY_QUERY_FAILURE = false;
         document.querySelector(".data-web-error button")?.click();
       })()
     `);
@@ -3700,8 +3700,8 @@ export async function runDataScenarios(
       );
     } catch (error) {
       const retryState = await evaluate(client!, sessionId, `JSON.stringify({
-        failure: globalThis.__PATINA_WEB_ACTIVITY_QUERY_FAILURE,
-        commands: globalThis.__PATINA_INVOKED_COMMANDS,
+        failure: globalThis.__TIMEKEEPGUI_WEB_ACTIVITY_QUERY_FAILURE,
+        commands: globalThis.__TIMEKEEPGUI_INVOKED_COMMANDS,
         panelText: document.querySelector(".data-app-panel")?.textContent ?? null,
       })`);
       throw new Error(`Web trend retry state: ${String(retryState)}`, { cause: error });
@@ -3719,7 +3719,7 @@ export async function runDataScenarios(
 
     await evaluate(client!, sessionId, `
       (() => {
-        globalThis.__PATINA_WEB_ACTIVITY_QUERY_FAILURE = true;
+        globalThis.__TIMEKEEPGUI_WEB_ACTIVITY_QUERY_FAILURE = true;
         const next = document.querySelector(
           ".data-app-panel .data-trend-range-control .qp-range-control-arrow:last-child",
         );
@@ -3752,12 +3752,12 @@ export async function runDataScenarios(
     const webCommandsBeforeRefreshRetry = Number(await evaluate(
       client!,
       sessionId,
-      `globalThis.__PATINA_INVOKED_COMMANDS
+      `globalThis.__TIMEKEEPGUI_INVOKED_COMMANDS
         .filter((entry) => entry.command === "cmd_get_web_activity_aggregate_range").length`,
     ));
     assert.equal(await evaluate(client!, sessionId, `
       (() => {
-        globalThis.__PATINA_WEB_ACTIVITY_QUERY_FAILURE = false;
+        globalThis.__TIMEKEEPGUI_WEB_ACTIVITY_QUERY_FAILURE = false;
         const retry = Array.from(document.querySelectorAll(".data-app-refresh-status button"))
           .find((node) => node.textContent?.trim() === "重试");
         if (!(retry instanceof HTMLButtonElement)) return false;
@@ -3768,7 +3768,7 @@ export async function runDataScenarios(
     await waitForExpression(
       client!,
       sessionId,
-      `globalThis.__PATINA_INVOKED_COMMANDS
+      `globalThis.__TIMEKEEPGUI_INVOKED_COMMANDS
         .filter((entry) => entry.command === "cmd_get_web_activity_aggregate_range").length
         > ${webCommandsBeforeRefreshRetry}`,
       45_000,
@@ -3784,8 +3784,8 @@ export async function runDataScenarios(
     );
     await evaluate(client!, sessionId, `
       (() => {
-        globalThis.__PATINA_WEB_ACTIVITY_QUERY_DELAY_MS = 0;
-        globalThis.__PATINA_WEB_ACTIVITY_QUERY_FAILURE = false;
+        globalThis.__TIMEKEEPGUI_WEB_ACTIVITY_QUERY_DELAY_MS = 0;
+        globalThis.__TIMEKEEPGUI_WEB_ACTIVITY_QUERY_FAILURE = false;
         const group = document.querySelector('[aria-label="选择时间去向类型"]');
         Array.from(group?.querySelectorAll("button") ?? [])
           .find((node) => node.textContent?.trim() === "应用")?.click();
@@ -3805,15 +3805,15 @@ export async function runDataScenarios(
         const settings = JSON.parse(localStorage.getItem(key) ?? "{}");
         settings.web_activity_enabled = "0";
         localStorage.setItem(key, JSON.stringify(settings));
-        globalThis.__PATINA_INVOKED_COMMANDS = [];
-        globalThis.__PATINA_RELOAD_MARKER = true;
+        globalThis.__TIMEKEEPGUI_INVOKED_COMMANDS = [];
+        globalThis.__TIMEKEEPGUI_RELOAD_MARKER = true;
       })()
     `);
     await client!.command("Page.navigate", { url: appUrl }, sessionId);
     await waitForExpression(
       client!,
       sessionId,
-      `!globalThis.__PATINA_RELOAD_MARKER && Boolean(document.querySelector('[aria-label="数据"]'))`,
+      `!globalThis.__TIMEKEEPGUI_RELOAD_MARKER && Boolean(document.querySelector('[aria-label="数据"]'))`,
       45_000,
     );
     await evaluate(client!, sessionId, `document.querySelector('[aria-label="数据"]')?.click()`);
@@ -3835,7 +3835,7 @@ export async function runDataScenarios(
                   ? "status"
                   : "unknown"
           )),
-          webCommandCount: globalThis.__PATINA_INVOKED_COMMANDS
+          webCommandCount: globalThis.__TIMEKEEPGUI_INVOKED_COMMANDS
             .filter((entry) => entry.command === "cmd_get_web_activity_aggregate_range").length,
         })
       `))) as {
@@ -3866,14 +3866,14 @@ export async function runDataScenarios(
         const settings = JSON.parse(localStorage.getItem(key) ?? "{}");
         settings.web_activity_enabled = "1";
         localStorage.setItem(key, JSON.stringify(settings));
-        globalThis.__PATINA_RELOAD_MARKER = true;
+        globalThis.__TIMEKEEPGUI_RELOAD_MARKER = true;
       })()
     `);
     await client!.command("Page.navigate", { url: appUrl }, sessionId);
     await waitForExpression(
       client!,
       sessionId,
-      `!globalThis.__PATINA_RELOAD_MARKER && Boolean(document.querySelector('[aria-label="数据"]'))`,
+      `!globalThis.__TIMEKEEPGUI_RELOAD_MARKER && Boolean(document.querySelector('[aria-label="数据"]'))`,
       45_000,
     );
   });
@@ -4103,14 +4103,14 @@ export async function runDataScenarios(
         settings.theme_mode = "dark";
         settings.web_activity_enabled = "1";
         localStorage.setItem(key, JSON.stringify(settings));
-        globalThis.__PATINA_RELOAD_MARKER = true;
+        globalThis.__TIMEKEEPGUI_RELOAD_MARKER = true;
       })()
     `);
     await client!.command("Page.navigate", { url: appUrl }, sessionId);
     await waitForExpression(
       client!,
       sessionId,
-      `!globalThis.__PATINA_RELOAD_MARKER && Boolean(document.querySelector('[aria-label="Data"]'))`,
+      `!globalThis.__TIMEKEEPGUI_RELOAD_MARKER && Boolean(document.querySelector('[aria-label="Data"]'))`,
       45_000,
     );
     await client!.command("Emulation.setDeviceMetricsOverride", {
@@ -4225,7 +4225,7 @@ export async function runDataScenarios(
         settings.language = "zh-CN";
         settings.theme_mode = "light";
         localStorage.setItem(key, JSON.stringify(settings));
-        globalThis.__PATINA_RELOAD_MARKER = true;
+        globalThis.__TIMEKEEPGUI_RELOAD_MARKER = true;
       })()
     `);
     await client!.command("Emulation.setDeviceMetricsOverride", {
@@ -4238,7 +4238,7 @@ export async function runDataScenarios(
     await waitForExpression(
       client!,
       sessionId,
-      `!globalThis.__PATINA_RELOAD_MARKER && Boolean(document.querySelector('[aria-label="数据"]'))`,
+      `!globalThis.__TIMEKEEPGUI_RELOAD_MARKER && Boolean(document.querySelector('[aria-label="数据"]'))`,
       45_000,
     );
   });

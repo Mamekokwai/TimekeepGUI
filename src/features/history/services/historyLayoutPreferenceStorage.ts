@@ -4,9 +4,9 @@ import {
 } from "./historyTimelineViewModel.ts";
 import { getBrowserLocalStorage } from "../../../platform/browser/browserStorageGateway.ts";
 
-const HISTORY_TIMELINE_MODE_KEY = "patina:history-timeline-mode";
-const HISTORY_DAY_DISTRIBUTION_MODE_KEY = "patina:history-day-distribution-mode";
-const HISTORY_TIMELINE_ZOOM_HOURS_KEY = "patina:history-timeline-zoom-hours";
+const HISTORY_TIMELINE_MODE_KEY = "timekeepgui:history-timeline-mode";
+const HISTORY_DAY_DISTRIBUTION_MODE_KEY = "timekeepgui:history-day-distribution-mode";
+const HISTORY_TIMELINE_ZOOM_HOURS_KEY = "timekeepgui:history-timeline-zoom-hours";
 
 export type DayDistributionMode = "app" | "category" | "web";
 

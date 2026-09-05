@@ -5,8 +5,8 @@ import {
   writeBrowserStorage,
 } from "../../platform/browser/browserStorageGateway.ts";
 
-const LAST_ACTIVE_VIEW_KEY = "patina:last-active-view";
-const PENDING_UPDATE_RELAUNCH_VIEW_KEY = "patina:pending-update-relaunch-view";
+const LAST_ACTIVE_VIEW_KEY = "timekeepgui:last-active-view";
+const PENDING_UPDATE_RELAUNCH_VIEW_KEY = "timekeepgui:pending-update-relaunch-view";
 
 function isView(value: string | null): value is View {
   return value === "dashboard"

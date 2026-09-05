@@ -281,8 +281,10 @@ mod tests {
 
     #[test]
     fn output_path_guard_recognizes_the_same_existing_file() {
-        let path =
-            std::env::temp_dir().join(format!("patina-export-source-{}.db", std::process::id()));
+        let path = std::env::temp_dir().join(format!(
+            "timekeepgui-export-source-{}.db",
+            std::process::id()
+        ));
         std::fs::write(&path, b"source").unwrap();
         assert!(paths_refer_to_same_file(&path, &path));
         let _ = std::fs::remove_file(path);

@@ -96,8 +96,11 @@ pub(super) fn is_lifecycle_utility_window(window: WindowTrackingCandidate<'_>) -
     has_lifecycle_metadata_signal(window.title)
 }
 
-pub(super) fn is_patina_widget_window(window: WindowTrackingCandidate<'_>) -> bool {
-    window.exe_name.trim().eq_ignore_ascii_case("patina.exe")
+pub(super) fn is_timekeepgui_widget_window(window: WindowTrackingCandidate<'_>) -> bool {
+    window
+        .exe_name
+        .trim()
+        .eq_ignore_ascii_case("timekeepgui.exe")
         && window.title.trim() == WIDGET_WINDOW_TITLE
 }
 

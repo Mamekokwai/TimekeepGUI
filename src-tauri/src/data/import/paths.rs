@@ -1,7 +1,7 @@
 use rfd::FileDialog;
 
 pub fn pick_canonical_csv_file(initial_path: Option<String>) -> Option<String> {
-    let mut dialog = FileDialog::new().add_filter("Patina CSV", &["csv"]);
+    let mut dialog = FileDialog::new().add_filter("TimekeepGUI CSV", &["csv"]);
     if let Some(directory) = resolve_dialog_directory(initial_path) {
         dialog = dialog.set_directory(directory);
     }

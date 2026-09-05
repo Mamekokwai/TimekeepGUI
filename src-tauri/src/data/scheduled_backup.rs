@@ -541,7 +541,7 @@ pub fn normalize_target_directory(path: &str) -> Result<PathBuf, String> {
 }
 
 pub fn candidate_paths(target_dir: &Path, slot: LogicalBackupSlot) -> Vec<PathBuf> {
-    let stem = format!("Patina-scheduled-backup-{}", slot.compact_timestamp());
+    let stem = format!("TimekeepGUI-scheduled-backup-{}", slot.compact_timestamp());
     (1..=MAX_NAME_CANDIDATES)
         .map(|index| {
             if index == 1 {
@@ -1185,10 +1185,10 @@ mod tests {
         let paths = candidate_paths(Path::new("C:\\Backups"), slot);
         assert!(paths[0]
             .to_string_lossy()
-            .ends_with("Patina-scheduled-backup-20260809-020500.zip"));
+            .ends_with("TimekeepGUI-scheduled-backup-20260809-020500.zip"));
         assert!(paths[1]
             .to_string_lossy()
-            .ends_with("Patina-scheduled-backup-20260809-020500-02.zip"));
+            .ends_with("TimekeepGUI-scheduled-backup-20260809-020500-02.zip"));
         assert_eq!(paths.len(), 99);
     }
 

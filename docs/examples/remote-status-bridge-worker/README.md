@@ -1,12 +1,12 @@
-# Patina 远程推送 Worker
+# TimekeepGUI 远程推送 Worker
 
-这是 Patina 远程推送的最小 Cloudflare Worker 示例。
+这是 TimekeepGUI 远程推送的最小 Cloudflare Worker 示例。
 
-它通过 `WebSocket` 接收 Patina 的 `snapshot` 消息，并用内存保存每台机器的最新状态。
+它通过 `WebSocket` 接收 TimekeepGUI 的 `snapshot` 消息，并用内存保存每台机器的最新状态。
 
 ## 路由
 
-- `/ws`：Patina 使用的 `WebSocket` 接收端。
+- `/ws`：TimekeepGUI 使用的 `WebSocket` 接收端。
 - `/state`：读取最新状态的 JSON 接口。
 
 ## 部署
@@ -14,8 +14,8 @@
 1. 点击文档里的 `Deploy to Cloudflare`。
 2. 在部署页填写 `REMOTE_STATUS_BRIDGE_TOKEN`。
 3. 部署完成后，记下 Worker 域名。
-4. 在 Patina 里把接收地址设成 `wss://<your-worker-host>/ws`。
-5. 把 Patina 的 `Token` 设成和 `REMOTE_STATUS_BRIDGE_TOKEN` 相同的值。
+4. 在 TimekeepGUI 里把接收地址设成 `wss://<your-worker-host>/ws`。
+5. 把 TimekeepGUI 的 `Token` 设成和 `REMOTE_STATUS_BRIDGE_TOKEN` 相同的值。
 
 也可以手动部署：
 

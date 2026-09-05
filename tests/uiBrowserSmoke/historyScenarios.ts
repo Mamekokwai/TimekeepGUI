@@ -14,7 +14,7 @@ import { DATE_TEXT, HISTORY_TITLE_DETAIL_COUNT } from "./constants.ts";
 export async function runHistoryScenarios(context: BrowserSmokeContext) {
   const { appUrl, client, sessionId, runTest } = context;
   const captureHistoryScreenshot = async (fileName: string, theme?: "light" | "dark") => {
-    const captureDir = process.env.PATINA_HISTORY_SCREENSHOT_DIR?.trim();
+    const captureDir = process.env.TIMEKEEPGUI_HISTORY_SCREENSHOT_DIR?.trim();
     if (!captureDir) return;
 
     const previousTheme = theme
@@ -1391,7 +1391,7 @@ export async function runHistoryScenarios(context: BrowserSmokeContext) {
       ".history-timeline-lane-track .history-horizontal-timeline"
     )?.getAttribute("data-history-timeline-window-start")`));
     const persistedZoomHours = Number(await evaluate(client!, sessionId, `localStorage.getItem(
-      "patina:history-timeline-zoom-hours"
+      "timekeepgui:history-timeline-zoom-hours"
     )`));
     assert.ok(Math.abs(persistedZoomHours - continuousZoomState.zoomHours) < 0.001);
     assert.equal(
@@ -1794,7 +1794,7 @@ export async function runHistoryScenarios(context: BrowserSmokeContext) {
         const settings = JSON.parse(localStorage.getItem("__time_tracker_smoke_settings") ?? "{}");
         settings.web_activity_enabled = "1";
         localStorage.setItem("__time_tracker_smoke_settings", JSON.stringify(settings));
-        localStorage.setItem("patina:history-day-distribution-mode", "web");
+        localStorage.setItem("timekeepgui:history-day-distribution-mode", "web");
         window.location.reload();
       })()
     `);
@@ -2037,7 +2037,7 @@ export async function runHistoryScenarios(context: BrowserSmokeContext) {
 
     await evaluate(client!, sessionId, `
       (() => {
-        localStorage.setItem("patina:history-day-distribution-mode", "app");
+        localStorage.setItem("timekeepgui:history-day-distribution-mode", "app");
         delete globalThis.__TIME_TRACKER_ENABLE_WEB_FIXTURE;
         delete globalThis.__TIME_TRACKER_WEB_FAVICON_QUERY_DELAY_MS;
       })()
@@ -2071,8 +2071,8 @@ export async function runHistoryScenarios(context: BrowserSmokeContext) {
         settings.web_activity_enabled = "1";
         settings[${jsonString(webOverrideKey)}] = JSON.stringify({ enabled: false, updatedAt: Date.now() });
         localStorage.setItem("__time_tracker_smoke_settings", JSON.stringify(settings));
-        localStorage.setItem("patina:history-day-distribution-mode", "web");
-        localStorage.setItem("patina:history-timeline-mode", "web");
+        localStorage.setItem("timekeepgui:history-day-distribution-mode", "web");
+        localStorage.setItem("timekeepgui:history-timeline-mode", "web");
         location.reload();
       })()
     `);
@@ -2169,7 +2169,7 @@ export async function runHistoryScenarios(context: BrowserSmokeContext) {
         const settings = JSON.parse(localStorage.getItem("__time_tracker_smoke_settings") ?? "{}");
         delete settings[${jsonString(webOverrideKey)}];
         localStorage.setItem("__time_tracker_smoke_settings", JSON.stringify(settings));
-        localStorage.setItem("patina:history-day-distribution-mode", "app");
+        localStorage.setItem("timekeepgui:history-day-distribution-mode", "app");
         delete globalThis.__TIME_TRACKER_ENABLE_WEB_FIXTURE;
         delete globalThis.__TIME_TRACKER_WEB_FAVICON_QUERY_DOMAINS;
       })()
@@ -2207,7 +2207,7 @@ export async function runHistoryScenarios(context: BrowserSmokeContext) {
     await evaluate(client!, sessionId, `
       (() => {
         globalThis.__TIME_TRACKER_ENABLE_WEB_FIXTURE = true;
-        localStorage.setItem("patina:history-timeline-mode", "app");
+        localStorage.setItem("timekeepgui:history-timeline-mode", "app");
       })()
     `);
     await navigateTo("历史");
@@ -2308,7 +2308,7 @@ export async function runHistoryScenarios(context: BrowserSmokeContext) {
       await evaluate(
         client!,
         sessionId,
-        `localStorage.getItem("patina:history-timeline-mode")`,
+        `localStorage.getItem("timekeepgui:history-timeline-mode")`,
       ),
       "web",
     );
@@ -2710,7 +2710,7 @@ export async function runHistoryScenarios(context: BrowserSmokeContext) {
         const settings = JSON.parse(localStorage.getItem("__time_tracker_smoke_settings") ?? "{}");
         settings.web_activity_enabled = "0";
         localStorage.setItem("__time_tracker_smoke_settings", JSON.stringify(settings));
-        localStorage.setItem("patina:history-timeline-mode", "web");
+        localStorage.setItem("timekeepgui:history-timeline-mode", "web");
         location.reload();
       })()
     `);
@@ -2730,7 +2730,7 @@ export async function runHistoryScenarios(context: BrowserSmokeContext) {
     await waitForExpression(
       client!,
       sessionId,
-      `localStorage.getItem("patina:history-timeline-mode") === "app"`,
+      `localStorage.getItem("timekeepgui:history-timeline-mode") === "app"`,
     );
     await waitForExpression(
       client!,
@@ -2777,7 +2777,7 @@ export async function runHistoryScenarios(context: BrowserSmokeContext) {
         const settings = JSON.parse(localStorage.getItem("__time_tracker_smoke_settings") ?? "{}");
         settings.web_activity_enabled = "1";
         localStorage.setItem("__time_tracker_smoke_settings", JSON.stringify(settings));
-        localStorage.setItem("patina:history-timeline-mode", "app");
+        localStorage.setItem("timekeepgui:history-timeline-mode", "app");
         location.reload();
       })()
     `);
@@ -2793,7 +2793,7 @@ export async function runHistoryScenarios(context: BrowserSmokeContext) {
     await evaluate(client!, sessionId, `
       (() => {
         delete globalThis.__TIME_TRACKER_ENABLE_WEB_FIXTURE;
-        localStorage.setItem("patina:history-timeline-mode", "web");
+        localStorage.setItem("timekeepgui:history-timeline-mode", "web");
         location.reload();
       })()
     `);

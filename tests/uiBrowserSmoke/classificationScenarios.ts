@@ -77,7 +77,7 @@ export async function runClassificationScenarios(context: BrowserSmokeContext) {
     assert.equal(
       await evaluate(client!, sessionId, `
         (() => {
-          localStorage.setItem("patina:last-active-view", "dashboard");
+          localStorage.setItem("timekeepgui:last-active-view", "dashboard");
           localStorage.setItem("__time_tracker_classification_query_delay_ms", "900");
           location.reload();
           return true;
@@ -429,7 +429,7 @@ export async function runClassificationScenarios(context: BrowserSmokeContext) {
   await runTest("classification presentation stays atomic across cold load and every remount", async () => {
     assert.equal(await evaluate(client!, sessionId, `
       (() => {
-        localStorage.setItem("patina:last-active-view", "dashboard");
+        localStorage.setItem("timekeepgui:last-active-view", "dashboard");
         localStorage.setItem("__time_tracker_enable_classification_icon_fixture", "1");
         localStorage.setItem("__time_tracker_app_icon_query_delay_ms", "700");
         location.reload();
@@ -520,7 +520,7 @@ export async function runClassificationScenarios(context: BrowserSmokeContext) {
     await evaluate(client!, sessionId, `
       (() => {
         localStorage.removeItem("__time_tracker_enable_classification_icon_fixture");
-        localStorage.setItem("patina:last-active-view", "dashboard");
+        localStorage.setItem("timekeepgui:last-active-view", "dashboard");
         location.reload();
         return true;
       })()

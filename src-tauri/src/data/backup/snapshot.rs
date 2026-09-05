@@ -20,10 +20,12 @@ mod restore;
 
 pub(super) use restore::restore_snapshot_backup;
 
-pub(super) const SNAPSHOT_FORMAT: &str = "PatinaSQLiteSnapshot-1";
+pub(super) const SNAPSHOT_FORMAT: &str = "TimekeepGUISQLiteSnapshot-1";
+const LEGACY_SNAPSHOT_FORMAT: &str = "PatinaSQLiteSnapshot-1";
 const MANIFEST_ENTRY: &str = "manifest.json";
 const CHECKSUMS_ENTRY: &str = "checksums.json";
-const DATABASE_ENTRY: &str = "database/patina.db";
+const DATABASE_ENTRY: &str = "database/timekeepgui.db";
+const LEGACY_DATABASE_ENTRY: &str = "database/patina.db";
 const MAX_METADATA_BYTES: u64 = 256 * 1024;
 pub(crate) const MAX_DATABASE_BYTES: u64 = 512 * 1024 * 1024;
 static UNIQUE_COUNTER: AtomicU64 = AtomicU64::new(0);
@@ -603,7 +605,7 @@ async fn write_snapshot_archive_internal(
         let database_sha256 = sha256_file(&db_path)?;
         let manifest = SnapshotManifest {
             format: SNAPSHOT_FORMAT.to_string(),
-            product: "Patina".to_string(),
+            product: "TimekeepGUI".to_string(),
             created_at_ms: now_ms(),
             app_version: app_version.to_string(),
             database: SnapshotDatabaseManifest {
@@ -716,7 +718,10 @@ pub(super) fn is_snapshot_archive(path: &Path) -> Result<bool, String> {
     };
     let value: serde_json::Value = serde_json::from_slice(&manifest_bytes)
         .map_err(|error| format!("failed to parse backup manifest: {error}"))?;
-    Ok(value.get("format").and_then(|value| value.as_str()) == Some(SNAPSHOT_FORMAT))
+    Ok(matches!(
+        value.get("format").and_then(|value| value.as_str()),
+        Some(SNAPSHOT_FORMAT | LEGACY_SNAPSHOT_FORMAT)
+    ))
 }
 
 pub(super) async fn extract_snapshot_archive(
@@ -752,10 +757,17 @@ pub(super) async fn extract_snapshot_archive(
                 return Err("snapshot archive contains an unsafe or duplicate path".to_string());
             }
         }
+        let database_entry = if names.contains(DATABASE_ENTRY) {
+            DATABASE_ENTRY
+        } else if names.contains(LEGACY_DATABASE_ENTRY) {
+            LEGACY_DATABASE_ENTRY
+        } else {
+            return Err("snapshot archive is missing its database entry".to_string());
+        };
         let expected = BTreeSet::from([
             MANIFEST_ENTRY.to_string(),
             CHECKSUMS_ENTRY.to_string(),
-            DATABASE_ENTRY.to_string(),
+            database_entry.to_string(),
         ]);
         if names != expected {
             return Err("snapshot archive has an unexpected file set".to_string());
@@ -766,9 +778,11 @@ pub(super) async fn extract_snapshot_archive(
             .map_err(|error| format!("failed to parse snapshot manifest: {error}"))?;
         let checksums: SnapshotChecksums = serde_json::from_slice(&checksum_bytes)
             .map_err(|error| format!("failed to parse snapshot checksums: {error}"))?;
-        if manifest.format != SNAPSHOT_FORMAT
-            || manifest.product != "Patina"
-            || manifest.database.path != DATABASE_ENTRY
+        if !matches!(
+            manifest.format.as_str(),
+            SNAPSHOT_FORMAT | LEGACY_SNAPSHOT_FORMAT
+        ) || !matches!(manifest.product.as_str(), "TimekeepGUI" | "Patina")
+            || manifest.database.path != database_entry
             || checksums.algorithm != "sha256"
             || manifest.restore.strategies != vec!["replace".to_string(), "merge".to_string()]
         {
@@ -776,7 +790,7 @@ pub(super) async fn extract_snapshot_archive(
         }
         let checksum_names = checksums.files.keys().cloned().collect::<BTreeSet<_>>();
         let expected_checksum_names =
-            BTreeSet::from([MANIFEST_ENTRY.to_string(), DATABASE_ENTRY.to_string()]);
+            BTreeSet::from([MANIFEST_ENTRY.to_string(), database_entry.to_string()]);
         if checksum_names != expected_checksum_names {
             return Err("snapshot checksum file set is invalid".to_string());
         }
@@ -788,7 +802,7 @@ pub(super) async fn extract_snapshot_archive(
             return Err("snapshot manifest checksum mismatch".to_string());
         }
         let db_entry = archive
-            .by_name(DATABASE_ENTRY)
+            .by_name(database_entry)
             .map_err(|error| format!("snapshot database is missing: {error}"))?;
         if db_entry.size() == 0
             || db_entry.size() > MAX_DATABASE_BYTES
@@ -809,7 +823,7 @@ pub(super) async fn extract_snapshot_archive(
         let digest = sha256_file(&db_path)?;
         let checksum_digest = checksums
             .files
-            .get(DATABASE_ENTRY)
+            .get(database_entry)
             .ok_or_else(|| "snapshot database checksum is missing".to_string())?;
         if digest != manifest.database.sha256 || &digest != checksum_digest {
             return Err("snapshot database checksum mismatch".to_string());
@@ -836,8 +850,8 @@ mod tests {
 
     #[test]
     fn snapshot_format_is_explicit_and_not_the_legacy_format() {
-        assert_eq!(SNAPSHOT_FORMAT, "PatinaSQLiteSnapshot-1");
-        assert_ne!(SNAPSHOT_FORMAT, "PatinaBackup");
+        assert_eq!(SNAPSHOT_FORMAT, "TimekeepGUISQLiteSnapshot-1");
+        assert_ne!(SNAPSHOT_FORMAT, "TimekeepGUIBackup");
     }
 
     #[test]
@@ -967,7 +981,7 @@ mod tests {
 
         let manifest = SnapshotManifest {
             format: SNAPSHOT_FORMAT.to_string(),
-            product: "Patina".to_string(),
+            product: "TimekeepGUI".to_string(),
             created_at_ms: now_ms(),
             app_version: "old".to_string(),
             database: SnapshotDatabaseManifest {

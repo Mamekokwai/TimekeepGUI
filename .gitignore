@@ -72,6 +72,15 @@ skills-lock.json
 timetracker.db
 timetracker.db-shm
 timetracker.db-wal
+timekeep.db
+timekeep.db-shm
+timekeep.db-wal
+timekeepgui.db
+timekeepgui.db-shm
+timekeepgui.db-wal
+patina.db
+patina.db-shm
+patina.db-wal
 
 # Reference projects are kept outside the parent repository
 sample/

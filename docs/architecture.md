@@ -2,7 +2,7 @@
 
 ## 1. 文档定位
 
-本文件定义 `Patina` 当前阶段的长期架构基线。
+本文件定义 `TimekeepGUI` 当前阶段的长期架构基线。
 
 它不是迁移记录、执行清单或某一轮重构计划，而是以后新增代码、调整边界、评估结构风险时都应默认遵循的母规则。
 
@@ -25,7 +25,7 @@
 
 ## 2. 系统现实
 
-`Patina` 不是普通 Web 应用，而是一个：
+`TimekeepGUI` 不是普通 Web 应用，而是一个：
 
 - `Tauri v2` 桌面应用
 - `Rust + React + TypeScript` 双栈工程
@@ -180,15 +180,15 @@ Tauri application command 采用显式、默认拒绝的窗口授权模型：
 
 ### 4.4 浏览器扩展伴生边界
 
-`Patina Web Sync` 浏览器扩展是 `Patina` 的外部 companion，不属于主仓库内的前端 feature、Rust runtime 或发布产物。
+`Patina Web Sync` 浏览器扩展是 `TimekeepGUI` 的外部 companion，不属于主仓库内的前端 feature、Rust runtime 或发布产物。
 
 边界规则如下：
 
-- `Patina` 拥有本机 HTTP 接收端、token 校验、网页活动写入、备份恢复、清理历史、History / Classification 读模型和 Settings 配置说明
+- `TimekeepGUI` 拥有本机 HTTP 接收端、token 校验、网页活动写入、备份恢复、清理历史、History / Classification 读模型和 Settings 配置说明
 - `Patina Web Sync` 独立仓库拥有 Chromium / Firefox 扩展源码、manifest 版本、商店素材、三店提交、AMO 公开 listed XPI 和扩展 release asset
 - 两者通过 [`web-activity-protocol.md`](./web-activity-protocol.md) 定义的本机协议协作
-- 不把浏览器扩展源码、构建脚本或商店发布流程重新放回 `Patina` 主仓库
-- 不为了扩展分发把 `Patina` 主应用发布流程重新绑定到扩展版本号
+- 不把浏览器扩展源码、构建脚本或商店发布流程重新放回 `TimekeepGUI` 主仓库
+- 不为了扩展分发把 `TimekeepGUI` 主应用发布流程重新绑定到扩展版本号
 
 ### 4.5 命名与跨层协议
 
@@ -539,8 +539,8 @@ Rust 侧允许为了稳定演进保留少量入口协调或兼容封装，但规
 
 安装版、日常开发版和隔离验证版可以同时运行，但必须是不同的运行身份，而不是共享同一身份后再靠调用纪律避让：
 
-- 正式安装版使用 `com.ceceliaee.patina` 与 `Patina` 数据目录。
-- `npm run tauri dev` 必须自动合并 `src-tauri/tauri.dev.conf.json`，使用 `com.ceceliaee.patina.dev`、`Patina Dev` 数据目录和独立单实例作用域。
+- 正式安装版使用 `com.mamekokwai.timekeepgui` 与 `TimekeepGUI` 数据目录。
+- `npm run tauri dev` 必须自动合并 `src-tauri/tauri.dev.conf.json`，使用 `com.mamekokwai.timekeepgui.dev`、`TimekeepGUI Dev` 数据目录和独立单实例作用域。
 - 本地 release 验证需要独立身份时使用 `src-tauri/tauri.local.conf.json`，不得把普通 debug 构建指向正式版数据。
 - `platform/app_paths.rs` 是运行身份到数据、缓存路径映射的唯一 owner；调用方不得自行拼接正式版、开发版目录。
 - debug 构建若仍携带正式版身份，必须在接触数据 anchor、SQLite、备份或 WebView 持久化之前失败关闭；只有显式提供绝对隔离根目录的自动化测试可例外。

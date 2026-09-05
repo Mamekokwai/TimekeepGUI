@@ -2,10 +2,10 @@ import type { TimerMode } from "../../../shared/types/tools.ts";
 import type { ReminderFormMode, ReminderMode, ToolsSection } from "../types.ts";
 import { getBrowserLocalStorage } from "../../../platform/browser/browserStorageGateway.ts";
 
-const TOOLS_SECTION_KEY = "patina:tools-section";
-const TOOLS_TIMER_MODE_KEY = "patina:tools-timer-mode";
-const TOOLS_REMINDER_MODE_KEY = "patina:tools-reminder-mode";
-const TOOLS_REMINDER_FORM_MODE_KEY = "patina:tools-reminder-form-mode";
+const TOOLS_SECTION_KEY = "timekeepgui:tools-section";
+const TOOLS_TIMER_MODE_KEY = "timekeepgui:tools-timer-mode";
+const TOOLS_REMINDER_MODE_KEY = "timekeepgui:tools-reminder-mode";
+const TOOLS_REMINDER_FORM_MODE_KEY = "timekeepgui:tools-reminder-form-mode";
 
 function readStoredValue<T extends string>(
   key: string,

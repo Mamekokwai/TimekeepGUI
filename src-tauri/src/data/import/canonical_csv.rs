@@ -30,8 +30,8 @@ struct CanonicalCsvRow {
 }
 
 pub fn parse_canonical_csv(bytes: &[u8]) -> Result<ParsedCanonicalCsv, String> {
-    let text =
-        std::str::from_utf8(bytes).map_err(|_| "Patina CSV must be UTF-8 encoded".to_string())?;
+    let text = std::str::from_utf8(bytes)
+        .map_err(|_| "TimekeepGUI CSV must be UTF-8 encoded".to_string())?;
     let text = text.strip_prefix('\u{feff}').unwrap_or(text);
     let mut reader = csv::ReaderBuilder::new()
         .has_headers(true)
@@ -39,7 +39,7 @@ pub fn parse_canonical_csv(bytes: &[u8]) -> Result<ParsedCanonicalCsv, String> {
         .from_reader(text.as_bytes());
     let headers = reader
         .headers()
-        .map_err(|error| format!("failed to read Patina CSV header: {error}"))?
+        .map_err(|error| format!("failed to read TimekeepGUI CSV header: {error}"))?
         .clone();
     validate_headers(&headers)?;
 
@@ -48,7 +48,7 @@ pub fn parse_canonical_csv(bytes: &[u8]) -> Result<ParsedCanonicalCsv, String> {
         let line = index + 2;
         if parsed.records.len() + parsed.errors.len() >= MAX_IMPORT_RECORDS {
             return Err(format!(
-                "Patina CSV exceeds the {MAX_IMPORT_RECORDS} record safety limit"
+                "TimekeepGUI CSV exceeds the {MAX_IMPORT_RECORDS} record safety limit"
             ));
         }
         match result {
@@ -72,11 +72,11 @@ pub fn encode_canonical_csv(records: &[CanonicalImportRecord]) -> Result<Vec<u8>
     for record in records {
         writer
             .serialize(to_csv_row(record)?)
-            .map_err(|error| format!("failed to encode Patina CSV row: {error}"))?;
+            .map_err(|error| format!("failed to encode TimekeepGUI CSV row: {error}"))?;
     }
     let csv_bytes = writer
         .into_inner()
-        .map_err(|error| format!("failed to finish Patina CSV: {error}"))?;
+        .map_err(|error| format!("failed to finish TimekeepGUI CSV: {error}"))?;
     let mut bytes = Vec::with_capacity(UTF8_BOM.len() + csv_bytes.len());
     bytes.extend_from_slice(UTF8_BOM);
     bytes.extend_from_slice(&csv_bytes);
@@ -121,7 +121,7 @@ pub fn write_canonical_csv_atomic(
             .map_err(|error| format!("failed to flush temporary output: {error}"))?;
         drop(file);
         std::fs::rename(&temp_path, &output_path)
-            .map_err(|error| format!("failed to publish Patina CSV: {error}"))?;
+            .map_err(|error| format!("failed to publish TimekeepGUI CSV: {error}"))?;
         Ok(())
     })();
 
@@ -137,7 +137,7 @@ fn validate_headers(headers: &csv::StringRecord) -> Result<(), String> {
         return Ok(());
     }
     Err(format!(
-        "invalid Patina CSV columns; expected {}",
+        "invalid TimekeepGUI CSV columns; expected {}",
         REQUIRED_HEADERS.join(",")
     ))
 }
@@ -322,7 +322,7 @@ fn sibling_output_path(source_path: &Path) -> Result<std::path::PathBuf, String>
         .file_stem()
         .and_then(|value| value.to_str())
         .ok_or_else(|| "source file name is not valid UTF-8".to_string())?;
-    Ok(parent.join(format!("{stem}.patina.csv")))
+    Ok(parent.join(format!("{stem}.timekeepgui.csv")))
 }
 
 #[cfg(test)]
@@ -390,7 +390,7 @@ mod tests {
     fn rejects_the_removed_per_row_version_column() {
         let text = "patina_version,record_type,start_time,end_time,duration_ms,exe_name,app_name,title,category\n1,hour_bucket,2026-01-01T00:00:00Z,,60000,code.exe,,,";
         let error = parse_canonical_csv(text.as_bytes()).unwrap_err();
-        assert!(error.contains("invalid Patina CSV columns"));
+        assert!(error.contains("invalid TimekeepGUI CSV columns"));
         assert!(!error.contains("patina_version"));
     }
 
@@ -398,7 +398,7 @@ mod tests {
     fn rejects_the_removed_path_and_source_columns() {
         let text = "record_type,start_time,end_time,duration_ms,exe_name,app_name,title,path,category,source\nhour_bucket,2026-01-01T00:00:00Z,,60000,code.exe,,,,,";
         let error = parse_canonical_csv(text.as_bytes()).unwrap_err();
-        assert!(error.contains("invalid Patina CSV columns"));
+        assert!(error.contains("invalid TimekeepGUI CSV columns"));
         assert!(error.contains("title,category"));
     }
 

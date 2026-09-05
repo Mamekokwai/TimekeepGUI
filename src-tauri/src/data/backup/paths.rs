@@ -19,7 +19,7 @@ fn backup_file_name() -> String {
 }
 
 pub(super) fn backup_file_name_for_timestamp(timestamp: &str) -> String {
-    format!("Patina-backup-{timestamp}.{BACKUP_FILE_EXT}")
+    format!("TimekeepGUI-backup-{timestamp}.{BACKUP_FILE_EXT}")
 }
 
 pub(super) fn resolve_backup_path<R: Runtime>(
@@ -73,7 +73,7 @@ fn resolve_dialog_directory(initial_path: Option<String>) -> Option<PathBuf> {
 }
 
 pub fn pick_backup_save_file(initial_path: Option<String>) -> Option<String> {
-    let mut dialog = rfd::FileDialog::new().add_filter("Patina backup", &["zip"]);
+    let mut dialog = rfd::FileDialog::new().add_filter("TimekeepGUI backup", &["zip"]);
     if let Some(dir) = resolve_dialog_directory(initial_path) {
         dialog = dialog.set_directory(dir);
     }
@@ -85,7 +85,7 @@ pub fn pick_backup_save_file(initial_path: Option<String>) -> Option<String> {
 }
 
 pub fn pick_backup_file(initial_path: Option<String>) -> Option<String> {
-    let mut dialog = rfd::FileDialog::new().add_filter("Patina backup", &["zip"]);
+    let mut dialog = rfd::FileDialog::new().add_filter("TimekeepGUI backup", &["zip"]);
     if let Some(dir) = resolve_dialog_directory(initial_path) {
         dialog = dialog.set_directory(dir);
     }

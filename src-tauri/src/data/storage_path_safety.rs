@@ -33,7 +33,7 @@ pub(super) fn probe_directory_writable(directory: &Path, label: &str) -> Result<
     for _ in 0..16 {
         let sequence = WRITE_PROBE_SEQUENCE.fetch_add(1, Ordering::Relaxed);
         let probe = directory.join(format!(
-            ".patina-write-probe-{}-{sequence}",
+            ".timekeepgui-write-probe-{}-{sequence}",
             std::process::id()
         ));
         let mut file = match OpenOptions::new().write(true).create_new(true).open(&probe) {

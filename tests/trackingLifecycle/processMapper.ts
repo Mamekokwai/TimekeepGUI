@@ -105,13 +105,13 @@ export function runProcessMapperTests() {
     }
   });
 
-  runTest("Patina itself remains trackable and uses the Patina display name", () => {
+  runTest("TimekeepGUI itself remains trackable and uses the TimekeepGUI display name", () => {
     ProcessMapper.clearUserOverrides();
 
     for (
       const exeName of [
-        "patina.exe",
-        "patina",
+        "timekeepgui.exe",
+        "timekeepgui",
         "time_tracker.exe",
         "time_tracker",
         "time-tracker.exe",
@@ -124,7 +124,7 @@ export function runProcessMapperTests() {
     ) {
       assert.equal(shouldTrackProcess(exeName), true);
       assert.equal(ProcessMapper.shouldTrack(exeName), true);
-      assert.equal(ProcessMapper.map(exeName, { appName: "Patina" }).name, "Patina");
+      assert.equal(ProcessMapper.map(exeName, { appName: "TimekeepGUI" }).name, "TimekeepGUI");
       assert.equal(ProcessMapper.map(exeName).category, "other");
     }
   });
@@ -522,7 +522,7 @@ export function runProcessMapperTests() {
       appName: "Game Launcher",
     }), true);
     assert.equal(shouldTrackProcess("Antigravity.exe"), true);
-    assert.equal(shouldTrackProcess("patina.exe"), true);
+    assert.equal(shouldTrackProcess("timekeepgui.exe"), true);
     assert.equal(shouldTrackProcess("time_tracker.exe"), true);
     assert.equal(shouldTrackProcess("time-tracker.exe"), true);
   });

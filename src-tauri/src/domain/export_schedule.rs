@@ -200,10 +200,10 @@ impl LogicalExportPeriod {
     pub fn compact_file_stem(self) -> String {
         let start = self.start_date.format("%Y%m%d");
         if self.end_date_exclusive == self.start_date.succ_opt().expect("valid next date") {
-            format!("Patina-scheduled-export-{start}")
+            format!("TimekeepGUI-scheduled-export-{start}")
         } else {
             format!(
-                "Patina-scheduled-export-{start}-{}",
+                "TimekeepGUI-scheduled-export-{start}-{}",
                 self.end_inclusive().format("%Y%m%d")
             )
         }
@@ -389,7 +389,7 @@ mod tests {
         assert_eq!(period.end_key(), "2026-08-08");
         assert_eq!(
             period.compact_file_stem(),
-            "Patina-scheduled-export-20260808"
+            "TimekeepGUI-scheduled-export-20260808"
         );
     }
 
@@ -404,7 +404,7 @@ mod tests {
         assert_eq!(period.end_key(), "2026-08-02");
         assert_eq!(
             period.compact_file_stem(),
-            "Patina-scheduled-export-20260727-20260802"
+            "TimekeepGUI-scheduled-export-20260727-20260802"
         );
     }
 

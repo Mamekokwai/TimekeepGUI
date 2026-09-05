@@ -2,7 +2,7 @@
 
 ## 1. 文档定位
 
-本文是 `Patina` 的长期工程质量母文档。
+本文是 `TimekeepGUI` 的长期工程质量母文档。
 
 它回答的是长期稳定规则，而不是某一轮专项执行计划：
 
@@ -65,7 +65,7 @@
 2. 代码质量
 3. 性能
 
-原因很简单：`Patina` 是本地优先、以“可信记录”为核心价值的桌面时间追踪工具。只要记录不可信、恢复不可信、发布后不可信，其他优化都会失去意义。
+原因很简单：`TimekeepGUI` 是本地优先、以“可信记录”为核心价值的桌面时间追踪工具。只要记录不可信、恢复不可信、发布后不可信，其他优化都会失去意义。
 
 默认取舍规则：
 
@@ -201,7 +201,7 @@ Draft PR 暂不运行准入 job；标记为 ready for review 后，必须满足�
 - `npm run check:rust`
 - `npm run check:dependencies`
 
-Rust 默认门槛包含边界检查器自测、`npm run check:rust-boundaries`、`cargo check --locked`、Rust 测试与 `cargo clippy --locked -- -D warnings`，其中 clippy 通过 `npm run check:rust:clippy` 单独暴露，便于局部复查。依赖门禁同时运行 `npm audit` 与固定版本的 `cargo-audit`；CI 必须显式安装仓库要求的 `cargo-audit` 版本，允许项只能是经 Windows target 依赖树证明不可达的精确 advisory，不得用宽泛忽略掩盖当前目标可达漏洞。受控无网络环境可以显式设置 `PATINA_DEPENDENCY_AUDIT_OFFLINE=1`，此时门禁必须强制 RustSec `--no-fetch` 和 npm `--offline`，仍执行精确例外可达性校验；该模式只证明本地 advisory 数据库快照下的结果，不能替代发布 CI 的联网新鲜度检查。
+Rust 默认门槛包含边界检查器自测、`npm run check:rust-boundaries`、`cargo check --locked`、Rust 测试与 `cargo clippy --locked -- -D warnings`，其中 clippy 通过 `npm run check:rust:clippy` 单独暴露，便于局部复查。依赖门禁同时运行 `npm audit` 与固定版本的 `cargo-audit`；CI 必须显式安装仓库要求的 `cargo-audit` 版本，允许项只能是经 Windows target 依赖树证明不可达的精确 advisory，不得用宽泛忽略掩盖当前目标可达漏洞。受控无网络环境可以显式设置 `TIMEKEEPGUI_DEPENDENCY_AUDIT_OFFLINE=1`，此时门禁必须强制 RustSec `--no-fetch` 和 npm `--offline`，仍执行精确例外可达性校验；该模式只证明本地 advisory 数据库快照下的结果，不能替代发布 CI 的联网新鲜度检查。
 
 工具链版本必须保持单一来源：Node 由仓库根目录 `.node-version` 定义，Rust 由根目录 `rust-toolchain.toml` 定义。CI 应直接读取或安装这两个文件声明的工具链，不得在 workflow 中重复硬编码 Node 或 Rust 版本。`package.json` 的 `engines` 与 `devEngines` 只镜像根配置决定的 Node/npm 事实，其中 `devEngines` 必须对开发 runtime 与 package manager 使用精确版本和 `onFail: error`，让错误工具链在 `npm install`、`npm ci` 与 `npm run` 前失败；`@types/node` 主版本必须与 `.node-version` 的 Node 主版本一致。依赖安装脚本只允许使用精确包版本的 `allowScripts` 条目，不得用包名级宽泛许可。默认测试必须检查这些镜像声明、Node 类型主版本、脚本许可和所有 workflow 的 `.node-version` 引用没有漂移；升级工具链后运行完整门槛验证。
 
@@ -270,7 +270,7 @@ WebDAV 已保存密码的显示是凭据边界的唯一明文返回例外：只�
 兼容清理必须区分两类代码：
 
 - 历史产品身份、旧目录、旧本地存储键、旧远端目录、旧备份格式等“迁移窗口兼容”，可以在承诺窗口结束、发布说明充分提醒且验证通过后退出。
-- 当前 `Patina` 数据库 schema migration、legacy schema repair、基线归一化和已安装数据库直升保护，属于升级可信链路，不应因为名字里带 `legacy` 或 `migration` 就当作可清理兼容代码删除。
+- 当前 `TimekeepGUI` 数据库 schema migration、legacy schema repair、基线归一化和已安装数据库直升保护，属于升级可信链路，不应因为名字里带 `legacy` 或 `migration` 就当作可清理兼容代码删除。
 
 如果要移除第二类代码，必须先证明它不再承担已发布版本数据库升级职责，并以明确执行单、风险说明和自动化测试覆盖，而不是把它混入普通兼容清理。
 

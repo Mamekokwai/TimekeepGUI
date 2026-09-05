@@ -12,7 +12,7 @@ import { EXPECTED_NAV_LABELS } from "./constants.ts";
 export async function runLocaleScenarios(context: BrowserSmokeContext) {
   const { appUrl, client, sessionId, runTest } = context;
 
-  await evaluate(client!, sessionId, `localStorage.removeItem("patina:sidebar-navigation-mode")`);
+  await evaluate(client!, sessionId, `localStorage.removeItem("timekeepgui:sidebar-navigation-mode")`);
   await client!.command("Page.addScriptToEvaluateOnNewDocument", {
     source: "globalThis.__TIME_TRACKER_SMOKE_LANGUAGE = 'en-US';",
   }, sessionId);

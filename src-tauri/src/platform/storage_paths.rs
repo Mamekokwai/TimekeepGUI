@@ -2,7 +2,7 @@ use crate::platform::{app_paths, storage_anchor};
 use std::path::{Path, PathBuf};
 use tauri::{AppHandle, Runtime};
 
-pub const SQLITE_DB_FILE_NAME: &str = "patina.db";
+pub const SQLITE_DB_FILE_NAME: &str = "timekeepgui.db";
 const BACKUP_DIR_NAME: &str = "backups";
 const REMOTE_BACKUP_TEMP_DIR_NAME: &str = "remote-backup-temp";
 
@@ -44,12 +44,14 @@ impl StoragePaths {
 
 pub fn default_storage_paths<R: Runtime>(app: &AppHandle<R>) -> Result<StoragePaths, String> {
     #[cfg(debug_assertions)]
-    if std::env::var("PATINA_E2E").as_deref() == Ok("1") {
-        let root = std::env::var_os("PATINA_E2E_DATA_ROOT")
+    if std::env::var("TIMEKEEPGUI_E2E").as_deref() == Ok("1") {
+        let root = std::env::var_os("TIMEKEEPGUI_E2E_DATA_ROOT")
             .map(PathBuf::from)
-            .ok_or_else(|| "PATINA_E2E_DATA_ROOT is required when PATINA_E2E=1".to_string())?;
+            .ok_or_else(|| {
+                "TIMEKEEPGUI_E2E_DATA_ROOT is required when TIMEKEEPGUI_E2E=1".to_string()
+            })?;
         if !root.is_absolute() {
-            return Err("PATINA_E2E_DATA_ROOT must be absolute".to_string());
+            return Err("TIMEKEEPGUI_E2E_DATA_ROOT must be absolute".to_string());
         }
         return Ok(StoragePaths::from_roots(
             root.join("anchors"),
@@ -193,24 +195,24 @@ mod tests {
     #[test]
     fn custom_webview_root_uses_product_root_as_webview_parent() {
         assert_eq!(
-            derive_custom_webview_root(Path::new("D:\\Patina Data")),
-            PathBuf::from("D:\\Patina Data")
+            derive_custom_webview_root(Path::new("D:\\TimekeepGUI Data")),
+            PathBuf::from("D:\\TimekeepGUI Data")
         );
     }
 
     #[test]
     fn custom_data_root_uses_product_folder_under_selected_root() {
         assert_eq!(
-            derive_custom_data_root(Path::new("D:\\Storage"), "Patina"),
-            PathBuf::from("D:\\Storage\\Patina")
+            derive_custom_data_root(Path::new("D:\\Storage"), "TimekeepGUI"),
+            PathBuf::from("D:\\Storage\\TimekeepGUI")
         );
     }
 
     #[test]
     fn custom_data_root_does_not_duplicate_product_folder() {
         assert_eq!(
-            derive_custom_data_root(Path::new("D:\\Storage\\Patina"), "Patina"),
-            PathBuf::from("D:\\Storage\\Patina")
+            derive_custom_data_root(Path::new("D:\\Storage\\TimekeepGUI"), "TimekeepGUI"),
+            PathBuf::from("D:\\Storage\\TimekeepGUI")
         );
     }
 
@@ -219,17 +221,23 @@ mod tests {
         let paths = StoragePaths::from_roots(
             PathBuf::from("C:\\DataAnchor"),
             PathBuf::from("C:\\CacheAnchor"),
-            PathBuf::from("D:\\Patina Data"),
-            PathBuf::from("D:\\Patina Data\\webview"),
+            PathBuf::from("D:\\TimekeepGUI Data"),
+            PathBuf::from("D:\\TimekeepGUI Data\\webview"),
             true,
             true,
         );
 
-        assert_eq!(paths.db_path, PathBuf::from("D:\\Patina Data\\patina.db"));
-        assert_eq!(paths.backup_dir, PathBuf::from("D:\\Patina Data\\backups"));
+        assert_eq!(
+            paths.db_path,
+            PathBuf::from("D:\\TimekeepGUI Data\\timekeepgui.db")
+        );
+        assert_eq!(
+            paths.backup_dir,
+            PathBuf::from("D:\\TimekeepGUI Data\\backups")
+        );
         assert_eq!(
             paths.remote_backup_temp_dir,
-            PathBuf::from("D:\\Patina Data\\remote-backup-temp")
+            PathBuf::from("D:\\TimekeepGUI Data\\remote-backup-temp")
         );
     }
 }

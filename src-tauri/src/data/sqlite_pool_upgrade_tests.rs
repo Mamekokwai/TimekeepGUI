@@ -97,12 +97,12 @@ fn supported_legacy_upgrade_preserves_classification_settings_across_restarts() 
         }
         let before = load_classification_settings_snapshot(&pool).await;
 
-        prepare_pool_schema(&pool, Path::new("supported-v1.5.2-patina.db"))
+        prepare_pool_schema(&pool, Path::new("supported-v1.5.2-timekeepgui.db"))
             .await
             .unwrap();
         let after_upgrade = load_classification_settings_snapshot(&pool).await;
 
-        prepare_pool_schema(&pool, Path::new("supported-v1.5.2-patina.db"))
+        prepare_pool_schema(&pool, Path::new("supported-v1.5.2-timekeepgui.db"))
             .await
             .unwrap();
         let after_restart = load_classification_settings_snapshot(&pool).await;
@@ -199,7 +199,9 @@ fn version_seven_upgrade_creates_empty_read_models_without_touching_facts() {
             before.get::<i64, _>("bucket_count"),
         );
 
-        if let Err(error) = prepare_pool_schema(&pool, Path::new("supported-v7-patina.db")).await {
+        if let Err(error) =
+            prepare_pool_schema(&pool, Path::new("supported-v7-timekeepgui.db")).await
+        {
             let read_model_objects = sqlx::query(
                 "SELECT type, name FROM sqlite_master
                  WHERE name LIKE '%read_model%' OR name LIKE '%activity_%'
@@ -308,7 +310,7 @@ fn version_eight_draft_triggers_are_reinstalled_without_touching_facts() {
         .unwrap();
         assert!(!has_activity_read_models_schema(&pool).await.unwrap());
 
-        prepare_pool_schema(&pool, Path::new("draft-v8-patina.db"))
+        prepare_pool_schema(&pool, Path::new("draft-v8-timekeepgui.db"))
             .await
             .unwrap();
 
@@ -377,7 +379,7 @@ fn version_twelve_activity_rule_upgrade_preserves_every_legacy_field() {
         .await
         .unwrap();
 
-        prepare_pool_schema(&pool, Path::new("version-12-patina.db"))
+        prepare_pool_schema(&pool, Path::new("version-12-timekeepgui.db"))
             .await
             .unwrap();
 

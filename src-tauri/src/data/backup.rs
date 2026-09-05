@@ -115,7 +115,7 @@ mod tests {
     fn backup_file_name_uses_timestamp_zip_format() {
         assert_eq!(
             backup_file_name_for_timestamp("20260515-213045"),
-            "Patina-backup-20260515-213045.zip"
+            "TimekeepGUI-backup-20260515-213045.zip"
         );
     }
 
@@ -510,7 +510,7 @@ mod tests {
 
         let error = read_backup_payload(&backup_path).unwrap_err();
         let _ = fs::remove_file(&backup_path);
-        assert!(error.contains("not a supported structured Patina backup"));
+        assert!(error.contains("not a supported structured TimekeepGUI backup"));
     }
 
     #[test]
@@ -525,7 +525,7 @@ mod tests {
 
         let error = read_backup_payload(&backup_path).unwrap_err();
         let _ = fs::remove_file(&backup_path);
-        assert!(error.contains("not a supported structured Patina backup"));
+        assert!(error.contains("not a supported structured TimekeepGUI backup"));
     }
 
     async fn setup_test_db() -> SqlitePool {

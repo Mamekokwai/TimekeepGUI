@@ -529,10 +529,10 @@ await runTest("normalizeSettingsRecord accepts current minimize behavior values"
 });
 
 await runTest("remote backup settings normalize WebDAV directory and timestamps", () => {
-  assert.equal(remoteBackupSettingsInternals.normalizeRemoteDir(""), "/Patina");
+  assert.equal(remoteBackupSettingsInternals.normalizeRemoteDir(""), "/TimekeepGUI");
   assert.equal(remoteBackupSettingsInternals.normalizeRemoteDir("/TimeTracker"), "/TimeTracker");
   assert.equal(remoteBackupSettingsInternals.normalizeRemoteDir("TimeTracker"), "/TimeTracker");
-  assert.equal(remoteBackupSettingsInternals.normalizeRemoteDir("Patina/backups/"), "/Patina/backups");
+  assert.equal(remoteBackupSettingsInternals.normalizeRemoteDir("TimekeepGUI/backups/"), "/TimekeepGUI/backups");
   assert.equal(remoteBackupSettingsInternals.normalizeRemoteDir("/Custom/backups"), "/Custom/backups");
   assert.equal(remoteBackupSettingsInternals.parseTimestamp(undefined), null);
   assert.equal(remoteBackupSettingsInternals.parseTimestamp(""), null);
@@ -737,16 +737,16 @@ await runTest("runSettingsCleanupFlow executes confirmed cleanup and reloads", a
 
 await runTest("storage paths hide Windows device prefixes from users", () => {
   assert.equal(
-    toUserVisibleStoragePath("\\\\?\\C:\\Users\\Patina\\backups"),
-    "C:\\Users\\Patina\\backups",
+    toUserVisibleStoragePath("\\\\?\\C:\\Users\\TimekeepGUI\\backups"),
+    "C:\\Users\\TimekeepGUI\\backups",
   );
   assert.equal(
     toUserVisibleStoragePath("\\\\?\\UNC\\server\\share\\backups"),
     "\\\\server\\share\\backups",
   );
   assert.equal(
-    toUserVisibleStoragePath("C:\\Users\\Patina\\backups"),
-    "C:\\Users\\Patina\\backups",
+    toUserVisibleStoragePath("C:\\Users\\TimekeepGUI\\backups"),
+    "C:\\Users\\TimekeepGUI\\backups",
   );
 });
 
@@ -754,20 +754,20 @@ await runTest("scheduled WebDAV target summary preserves the saved server base p
   assert.equal(
     formatRemoteBackupTargetSummary({
       url: "https://dav.jianguoyun.com/dav/",
-      username: "patina",
-      remoteDir: "/Patina",
+      username: "timekeepgui",
+      remoteDir: "/TimekeepGUI",
       lastBackupAtMs: null,
     }),
-    "https://dav.jianguoyun.com/dav/Patina",
+    "https://dav.jianguoyun.com/dav/TimekeepGUI",
   );
   assert.equal(
     formatRemoteBackupTargetSummary({
       url: "https://example.com/webdav/account",
-      username: "patina",
-      remoteDir: "/Patina/backups",
+      username: "timekeepgui",
+      remoteDir: "/TimekeepGUI/backups",
       lastBackupAtMs: null,
     }),
-    "https://example.com/webdav/account/Patina/backups",
+    "https://example.com/webdav/account/TimekeepGUI/backups",
   );
 });
 
@@ -870,12 +870,12 @@ await runTest("scheduled backup gateway accepts the fixed-retention contract", (
       cadence: "daily",
       weekday: null,
       localTimeMinutes: 120,
-      target: { kind: "local", targetDir: "C:/Patina/backups" },
+      target: { kind: "local", targetDir: "C:/TimekeepGUI/backups" },
       targetGeneration: "a".repeat(32),
       scheduleAnchorAtMs: 1,
       updatedAtMs: 1,
     },
-    defaultLocalTargetDir: "C:/Patina/backups",
+    defaultLocalTargetDir: "C:/TimekeepGUI/backups",
     nextExecutionAtMs: 2,
     recentSuccess: null,
     recentFailure: null,
@@ -893,13 +893,13 @@ await runTest("scheduled backup gateway strips the retired retention field", () 
       cadence: "daily",
       weekday: null,
       localTimeMinutes: 120,
-      target: { kind: "local", targetDir: "C:/Patina/backups" },
+      target: { kind: "local", targetDir: "C:/TimekeepGUI/backups" },
       retentionCount: 7,
       targetGeneration: "a".repeat(32),
       scheduleAnchorAtMs: 1,
       updatedAtMs: 1,
     },
-    defaultLocalTargetDir: "C:/Patina/backups",
+    defaultLocalTargetDir: "C:/TimekeepGUI/backups",
     nextExecutionAtMs: null,
     recentSuccess: null,
     recentFailure: null,
@@ -915,12 +915,12 @@ await runTest("scheduled backup gateway rejects an invalid local time", () => {
       cadence: "daily",
       weekday: null,
       localTimeMinutes: 1440,
-      target: { kind: "local", targetDir: "C:/Patina/backups" },
+      target: { kind: "local", targetDir: "C:/TimekeepGUI/backups" },
       targetGeneration: "a".repeat(32),
       scheduleAnchorAtMs: 1,
       updatedAtMs: 1,
     },
-    defaultLocalTargetDir: "C:/Patina/backups",
+    defaultLocalTargetDir: "C:/TimekeepGUI/backups",
     nextExecutionAtMs: null,
     recentSuccess: null,
     recentFailure: null,
@@ -940,14 +940,14 @@ await runTest("scheduled backup gateway accepts a WebDAV target identity", () =>
       scheduleAnchorAtMs: 1,
       updatedAtMs: 1,
     },
-    defaultLocalTargetDir: "C:/Patina/backups",
+    defaultLocalTargetDir: "C:/TimekeepGUI/backups",
     nextExecutionAtMs: 2,
     recentSuccess: null,
     recentFailure: null,
     activeRun: null,
   });
   assert.equal(snapshot.config.target.kind, "webdav");
-  assert.equal(snapshot.defaultLocalTargetDir, "C:/Patina/backups");
+  assert.equal(snapshot.defaultLocalTargetDir, "C:/TimekeepGUI/backups");
 });
 
 await runTest("runBackupExportFlow normalizes the initial path and stores the exported path", async () => {

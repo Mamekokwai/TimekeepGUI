@@ -36,7 +36,7 @@ pub async fn commit_canonical_import<R: Runtime>(
     import_batches::commit_records(
         &pool,
         source_name,
-        "patina-csv",
+        "timekeepgui-csv",
         &actual_fingerprint,
         &parsed.records,
         parsed.errors.len(),

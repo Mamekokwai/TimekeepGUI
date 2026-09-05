@@ -7,7 +7,7 @@ use std::io::Write;
 use std::path::{Path, PathBuf};
 use tauri::{AppHandle, Runtime};
 
-const RESTORE_MARKER_NAME: &str = ".patina-restore-pending";
+const RESTORE_MARKER_NAME: &str = ".timekeepgui-restore-pending";
 
 fn restore_marker_path(db_path: &Path) -> Result<PathBuf, String> {
     db_path
@@ -43,7 +43,7 @@ pub(super) fn recover_interrupted_db_restore(db_path: &Path) -> Result<(), Strin
     let rollback_name = fs::read_to_string(&marker_path)
         .map_err(|error| format!("failed to read restore recovery marker: {error}"))?;
     let rollback_name = rollback_name.trim();
-    if !rollback_name.starts_with(".patina-restore-rollback-")
+    if !rollback_name.starts_with(".timekeepgui-restore-rollback-")
         || rollback_name.contains('/')
         || rollback_name.contains('\\')
     {
@@ -99,8 +99,8 @@ pub(crate) async fn replace_product_db_from_candidate<R: Runtime>(
         .duration_since(std::time::UNIX_EPOCH)
         .map(|duration| duration.as_nanos())
         .unwrap_or_default();
-    let staging_path = parent.join(format!(".patina-restore-staging-{suffix}.db"));
-    let rollback_path = parent.join(format!(".patina-restore-rollback-{suffix}.db"));
+    let staging_path = parent.join(format!(".timekeepgui-restore-staging-{suffix}.db"));
+    let rollback_path = parent.join(format!(".timekeepgui-restore-rollback-{suffix}.db"));
     fs::copy(candidate_path, &staging_path)
         .map_err(|error| format!("failed to stage restored sqlite database: {error}"))?;
     let marker_path = persist_restore_marker(&db_path, &rollback_path)?;
@@ -213,10 +213,10 @@ mod tests {
             .duration_since(std::time::UNIX_EPOCH)
             .unwrap()
             .as_nanos();
-        let dir = std::env::temp_dir().join(format!("patina-restore-recovery-test-{suffix}"));
+        let dir = std::env::temp_dir().join(format!("timekeepgui-restore-recovery-test-{suffix}"));
         fs::create_dir(&dir).unwrap();
-        let db_path = dir.join("patina.db");
-        let rollback_path = dir.join(format!(".patina-restore-rollback-{suffix}.db"));
+        let db_path = dir.join("timekeepgui.db");
+        let rollback_path = dir.join(format!(".timekeepgui-restore-rollback-{suffix}.db"));
         fs::write(&db_path, b"interrupted candidate").unwrap();
         fs::write(format!("{}-wal", db_path.display()), b"candidate wal").unwrap();
         fs::write(format!("{}-shm", db_path.display()), b"candidate shm").unwrap();

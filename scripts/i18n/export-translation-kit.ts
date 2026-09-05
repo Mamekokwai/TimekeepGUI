@@ -35,7 +35,7 @@ export function parseExportOptions(args: string[]): ExportOptions {
   const direction = valueAfter("--direction") ?? "ltr";
   if (direction !== "ltr" && direction !== "rtl") throw new Error("Direction must be ltr or rtl");
   if (!(source in LOCALE_REGISTRY)) throw new Error(`Reference locale is not registered: ${source}`);
-  const output = resolve(valueAfter("--output") ?? join(REPO_ROOT, "artifacts", "i18n", `patina-${target}-from-${source}-translation-kit.xlsx`));
+  const output = resolve(valueAfter("--output") ?? join(REPO_ROOT, "artifacts", "i18n", `timekeepgui-${target}-from-${source}-translation-kit.xlsx`));
   return { direction, label, output, source, target };
 }
 

@@ -12,11 +12,11 @@ import {
 } from "./uiBrowserSmoke/browserHarness.ts";
 
 // Keep cold compilation separate from actual WebView startup so a slow hosted
-// runner cannot consume the runtime readiness budget before Patina launches.
+// runner cannot consume the runtime readiness budget before TimekeepGUI launches.
 const COLD_BUILD_TIMEOUT_MS = 480_000;
 const WEBVIEW_STARTUP_TIMEOUT_MS = 30_000;
 const RUNTIME_TARGET_DIR = join(process.cwd(), "src-tauri", "target", "runtime-smoke");
-const RUNTIME_BINARY_PATH = join(RUNTIME_TARGET_DIR, "debug", "patina.exe");
+const RUNTIME_BINARY_PATH = join(RUNTIME_TARGET_DIR, "debug", "timekeepgui.exe");
 async function reservePort() {
   return new Promise<number>((resolve, reject) => {
     const server = createNetServer();
@@ -133,15 +133,15 @@ function runRuntimeBinaryProcessCommand(command: string) {
     encoding: "utf8",
     env: {
       ...process.env,
-      PATINA_RUNTIME_SMOKE_BINARY: RUNTIME_BINARY_PATH,
+      TIMEKEEPGUI_RUNTIME_SMOKE_BINARY: RUNTIME_BINARY_PATH,
     },
   });
 }
 
 function stopResidualRuntimeBinary() {
   const result = runRuntimeBinaryProcessCommand(`
-    $target = [IO.Path]::GetFullPath($env:PATINA_RUNTIME_SMOKE_BINARY)
-    $processes = @(Get-Process patina -ErrorAction SilentlyContinue)
+    $target = [IO.Path]::GetFullPath($env:TIMEKEEPGUI_RUNTIME_SMOKE_BINARY)
+    $processes = @(Get-Process timekeepgui -ErrorAction SilentlyContinue)
     foreach ($process in $processes) {
       try {
         $path = [IO.Path]::GetFullPath($process.Path)
@@ -161,8 +161,8 @@ function stopResidualRuntimeBinary() {
 
 function isResidualRuntimeBinaryRunning() {
   const result = runRuntimeBinaryProcessCommand(`
-    $target = [IO.Path]::GetFullPath($env:PATINA_RUNTIME_SMOKE_BINARY)
-    $processes = @(Get-Process patina -ErrorAction SilentlyContinue)
+    $target = [IO.Path]::GetFullPath($env:TIMEKEEPGUI_RUNTIME_SMOKE_BINARY)
+    $processes = @(Get-Process timekeepgui -ErrorAction SilentlyContinue)
     foreach ($process in $processes) {
       try {
         if ($process.Path -and [IO.Path]::GetFullPath($process.Path) -ieq $target) {
@@ -183,8 +183,8 @@ function isResidualRuntimeBinaryRunning() {
 
 function measureRuntimeProcessTree() {
   const result = runRuntimeBinaryProcessCommand(`
-    $target = [IO.Path]::GetFullPath($env:PATINA_RUNTIME_SMOKE_BINARY)
-    $rootProcess = @(Get-Process patina -ErrorAction SilentlyContinue) | Where-Object {
+    $target = [IO.Path]::GetFullPath($env:TIMEKEEPGUI_RUNTIME_SMOKE_BINARY)
+    $rootProcess = @(Get-Process timekeepgui -ErrorAction SilentlyContinue) | Where-Object {
       try { $_.Path -and [IO.Path]::GetFullPath($_.Path) -ieq $target } catch { $false }
     } | Select-Object -First 1
     if (-not $rootProcess) { throw 'runtime smoke root process not found' }
@@ -243,7 +243,7 @@ function verifyDatabase(dbPath: string) {
     "integrity = db.execute('PRAGMA integrity_check').fetchone()[0]",
     "value = db.execute(\"SELECT value FROM settings WHERE key='refresh_interval_secs'\").fetchone()",
     "migration = db.execute('SELECT MAX(version) FROM _sqlx_migrations').fetchone()",
-    "widget_sessions = db.execute(\"SELECT COUNT(*) FROM sessions WHERE lower(exe_name) = 'patina.exe' AND window_title = 'Patina Widget'\").fetchone()[0]",
+    "widget_sessions = db.execute(\"SELECT COUNT(*) FROM sessions WHERE lower(exe_name) = 'timekeepgui.exe' AND window_title = 'TimekeepGUI Widget'\").fetchone()[0]",
     "states = dict(db.execute('SELECT model_name, state FROM read_model_state'))",
     "scheduled = db.execute('SELECT enabled, cadence, weekday, local_time_minutes, retention_count FROM scheduled_backup_config WHERE id = 1').fetchone()",
     "scheduled_columns = {row[1] for row in db.execute('PRAGMA table_info(scheduled_backup_config)')}",
@@ -289,8 +289,8 @@ function seedWebActivitySegment(dbPath: string) {
 
 const frontendPort = await reservePort();
 const devtoolsPort = await reservePort();
-const root = mkdtempSync(join(tmpdir(), "patina-tauri-e2e-"));
-assertIsolatedTempPath(root, "patina-tauri-e2e-");
+const root = mkdtempSync(join(tmpdir(), "timekeepgui-tauri-e2e-"));
+assertIsolatedTempPath(root, "timekeepgui-tauri-e2e-");
 const frontendUrl = `http://127.0.0.1:${frontendPort}`;
 const frontendDistDir = join(root, "frontend-dist");
 const logs: string[] = [];
@@ -338,13 +338,13 @@ try {
       return null;
     }
   }, 30_000);
-  console.log("PATINA_FRONTEND_SERVE_REPORT", JSON.stringify({
+  console.log("TIMEKEEPGUI_FRONTEND_SERVE_REPORT", JSON.stringify({
     mode: "production-static-preview",
     output: "isolated",
   }));
 
   const tauriConfigOverride = {
-    identifier: "com.ceceliaee.patina.runtime-smoke",
+    identifier: "com.mamekokwai.timekeepgui.runtime-smoke",
     build: {
       beforeDevCommand: "",
       devUrl: frontendUrl,
@@ -363,12 +363,12 @@ try {
     cwd: process.cwd(),
     env: {
       ...process.env,
-      PATINA_E2E: "1",
-      PATINA_E2E_SINGLE_INSTANCE: "1",
-      PATINA_E2E_DATA_ROOT: root,
-      PATINA_E2E_FRONTEND_URL: frontendUrl,
-      PATINA_E2E_DEVTOOLS_PORT: String(devtoolsPort),
-      PATINA_E2E_WIDGET_SHOW_FAILURES: "3",
+      TIMEKEEPGUI_E2E: "1",
+      TIMEKEEPGUI_E2E_SINGLE_INSTANCE: "1",
+      TIMEKEEPGUI_E2E_DATA_ROOT: root,
+      TIMEKEEPGUI_E2E_FRONTEND_URL: frontendUrl,
+      TIMEKEEPGUI_E2E_DEVTOOLS_PORT: String(devtoolsPort),
+      TIMEKEEPGUI_E2E_WIDGET_SHOW_FAILURES: "3",
       CARGO_TARGET_DIR: RUNTIME_TARGET_DIR,
       TAURI_CONFIG: tauriConfigOverrideJson,
       WEBVIEW2_USER_DATA_FOLDER: join(root, "webview-user-data"),
@@ -379,7 +379,7 @@ try {
     const text = String(chunk);
     logs.push(text);
     appLogTail = `${appLogTail}${text}`.slice(-4_096);
-    if (/Running[\s\S]*patina\.exe/i.test(appLogTail)) {
+    if (/Running[\s\S]*timekeepgui\.exe/i.test(appLogTail)) {
       appLaunchObserved = true;
     }
   };
@@ -391,7 +391,7 @@ try {
     () => {
       if (appLaunchObserved) return true;
       if (appProcess && appProcess.exitCode !== null) {
-        throw new Error(`Tauri dev exited before launching Patina (exit ${appProcess.exitCode})`);
+        throw new Error(`Tauri dev exited before launching TimekeepGUI (exit ${appProcess.exitCode})`);
       }
       return null;
     },
@@ -399,7 +399,7 @@ try {
   );
 
   const target = await waitFor(
-    "Patina main WebView CDP target",
+    "TimekeepGUI main WebView CDP target",
     () => findMainTarget(devtoolsPort),
     WEBVIEW_STARTUP_TIMEOUT_MS,
   );
@@ -532,7 +532,7 @@ try {
             renderTokenError = String(error);
           }
           return {
-            generation: window.__PATINA_MAIN_WINDOW_GENERATION__ ?? null,
+            generation: window.__TIMEKEEPGUI_MAIN_WINDOW_GENERATION__ ?? null,
             windowLabel: window.__TAURI_INTERNALS__?.metadata?.currentWindow?.label ?? null,
             documentWindowLabel: document.documentElement.dataset.windowLabel ?? null,
             frameConnected: Boolean(frame?.isConnected),
@@ -635,11 +635,11 @@ try {
     timeout: 10_000,
     env: {
       ...process.env,
-      PATINA_E2E: "1",
-      PATINA_E2E_SINGLE_INSTANCE: "1",
-      PATINA_E2E_DATA_ROOT: root,
-      PATINA_E2E_FRONTEND_URL: frontendUrl,
-      PATINA_E2E_DEVTOOLS_PORT: String(devtoolsPort),
+      TIMEKEEPGUI_E2E: "1",
+      TIMEKEEPGUI_E2E_SINGLE_INSTANCE: "1",
+      TIMEKEEPGUI_E2E_DATA_ROOT: root,
+      TIMEKEEPGUI_E2E_FRONTEND_URL: frontendUrl,
+      TIMEKEEPGUI_E2E_DEVTOOLS_PORT: String(devtoolsPort),
       CARGO_TARGET_DIR: RUNTIME_TARGET_DIR,
       TAURI_CONFIG: tauriConfigOverrideJson,
       WEBVIEW2_USER_DATA_FOLDER: join(root, "webview-user-data"),
@@ -678,7 +678,7 @@ try {
   );
   mainWindowGeneration = Number(await evaluate(
     client,
-    `window.__PATINA_MAIN_WINDOW_GENERATION__`,
+    `window.__TIMEKEEPGUI_MAIN_WINDOW_GENERATION__`,
   ));
   assert.match(logs.join(""), /reason=single-instance[\s\S]*result=visible/);
 
@@ -742,7 +742,7 @@ try {
 
   await evaluate(
     client,
-    `localStorage.setItem("patina:last-active-view", "data")`,
+    `localStorage.setItem("timekeepgui:last-active-view", "data")`,
   );
   const logsBeforeReload = logs.join("");
   await client.command("Page.reload", { ignoreCache: true });
@@ -949,7 +949,7 @@ try {
   );
   assert.deepEqual(reloadedWidgetPlacement, leftWidgetPlacement);
   const widgetTarget = await waitFor(
-    "Patina widget WebView CDP target",
+    "TimekeepGUI widget WebView CDP target",
     () => findWidgetTarget(devtoolsPort, target.webSocketDebuggerUrl!),
     10_000,
   );
@@ -1244,12 +1244,12 @@ try {
 
   for (const deniedExpression of [
     `window.__TAURI_INTERNALS__.invoke("plugin:sql|select", {
-      db: "sqlite:patina.db",
+      db: "sqlite:timekeepgui.db",
       query: "SELECT key FROM settings",
       values: [],
     })`,
     `window.__TAURI_INTERNALS__.invoke("plugin:sql|load", {
-      db: "sqlite:patina.db",
+      db: "sqlite:timekeepgui.db",
     })`,
     `window.__TAURI_INTERNALS__.invoke("cmd_get_storage_snapshot")`,
     `window.__TAURI_INTERNALS__.invoke("cmd_restore_backup", {
@@ -1271,7 +1271,7 @@ try {
   }
   widgetClient.close();
   widgetClient = null;
-  console.log("PATINA_FIRST_MINIMIZE_RECOVERY_REPORT", JSON.stringify({
+  console.log("TIMEKEEPGUI_FIRST_MINIMIZE_RECOVERY_REPORT", JSON.stringify({
     environment: "isolated real Tauri/WebView2 runtime",
     hardFailurePreservedMain: true,
     transientFailureRetried: true,
@@ -1304,7 +1304,7 @@ try {
     assert.ok(match, `${event} elapsed time is missing`);
     return Number(match[1]);
   };
-  console.log("PATINA_MAIN_WINDOW_READINESS_REPORT", JSON.stringify({
+  console.log("TIMEKEEPGUI_MAIN_WINDOW_READINESS_REPORT", JSON.stringify({
     sampleCount: 1,
     environment: "isolated real Tauri/WebView2 runtime",
     generation: mainWindowGeneration,
@@ -1432,7 +1432,7 @@ try {
   assert.equal(aggregateRange.factRowCount, 0);
   assert.equal(aggregateRange.hasActiveSession, false);
 
-  const runtimeDatabasePath = join(root, "data", "patina.db");
+  const runtimeDatabasePath = join(root, "data", "timekeepgui.db");
   seedWebActivitySegment(runtimeDatabasePath);
   const webAggregateRange = await evaluate(
     client,
@@ -1525,7 +1525,7 @@ try {
     };
   };
   assert.equal(typeof resourceDiagnostics.process_resources, "object");
-  console.log("PATINA_RUNTIME_MEMORY_REPORT", JSON.stringify({
+  console.log("TIMEKEEPGUI_RUNTIME_MEMORY_REPORT", JSON.stringify({
     scope: "isolated real Tauri main process after read-model initialization",
     workingSetBytes: resourceDiagnostics.process_resources?.working_set_bytes ?? null,
     privateUsageBytes: resourceDiagnostics.process_resources?.private_usage_bytes ?? null,
@@ -1535,7 +1535,7 @@ try {
   assert.ok(processTreeMemory.processCount >= 1);
   assert.ok(processTreeMemory.workingSetBytes > 0);
   assert.ok(processTreeMemory.privateUsageBytes > 0);
-  console.log("PATINA_RUNTIME_PROCESS_TREE_MEMORY_REPORT", JSON.stringify({
+  console.log("TIMEKEEPGUI_RUNTIME_PROCESS_TREE_MEMORY_REPORT", JSON.stringify({
     scope: processTreeMemory.coverage === "root_and_descendants"
       ? "isolated real Tauri root process and descendant WebView2 process tree"
       : "isolated real Tauri root process; Windows CIM descendant enumeration unavailable",
@@ -1545,9 +1545,9 @@ try {
 
   await evaluate(client, `
     (async () => {
-      window.__patinaE2eEvents = [];
+      window.__timekeepguiE2eEvents = [];
       const handler = window.__TAURI_INTERNALS__.transformCallback(
-        (event) => window.__patinaE2eEvents.push(event.event),
+        (event) => window.__timekeepguiE2eEvents.push(event.event),
       );
       await window.__TAURI_INTERNALS__.invoke("plugin:event|listen", {
         event: "app-settings-changed",
@@ -1562,12 +1562,12 @@ try {
   })`);
   await waitFor(
     "Rust to frontend settings event",
-    async () => evaluate(client!, "window.__patinaE2eEvents?.includes('app-settings-changed')"),
+    async () => evaluate(client!, "window.__timekeepguiE2eEvents?.includes('app-settings-changed')"),
     10_000,
   );
 
   const rows = await evaluate(client, `window.__TAURI_INTERNALS__.invoke("plugin:sql|select", {
-    db: "sqlite:patina.db",
+    db: "sqlite:timekeepgui.db",
     query: "SELECT value FROM settings WHERE key = ?",
     values: ["refresh_interval_secs"],
   })`);
@@ -1582,7 +1582,7 @@ try {
     ],
   })`);
   const englishTraySettingRows = await evaluate(client, `window.__TAURI_INTERNALS__.invoke("plugin:sql|select", {
-    db: "sqlite:patina.db",
+    db: "sqlite:timekeepgui.db",
     query: "SELECT key, value FROM settings WHERE key IN (?, ?, ?) ORDER BY key",
     values: ["language", "tracking_paused", "title_recording_enabled"],
   })`);
@@ -1599,7 +1599,7 @@ try {
     ],
   })`);
   const restoredTraySettingRows = await evaluate(client, `window.__TAURI_INTERNALS__.invoke("plugin:sql|select", {
-    db: "sqlite:patina.db",
+    db: "sqlite:timekeepgui.db",
     query: "SELECT key, value FROM settings WHERE key IN (?, ?, ?) ORDER BY key",
     values: ["language", "tracking_paused", "title_recording_enabled"],
   })`);
@@ -1609,7 +1609,7 @@ try {
     { key: "tracking_paused", value: "0" },
   ]);
   const widgetPlacementRows = await evaluate(client, `window.__TAURI_INTERNALS__.invoke("plugin:sql|select", {
-    db: "sqlite:patina.db",
+    db: "sqlite:timekeepgui.db",
     query: "SELECT key, value FROM settings WHERE key IN (?, ?, ?) ORDER BY key",
     values: ["widget_placement", "widget_side", "widget_anchor_y"],
   })`) as Array<{ key?: string; value?: string }>;
@@ -1625,14 +1625,14 @@ try {
     payload: ${JSON.stringify(historyBootstrapPayload)},
   })`);
   const historyBootstrapRows = await evaluate(client, `window.__TAURI_INTERNALS__.invoke("plugin:sql|select", {
-    db: "sqlite:patina.db",
+    db: "sqlite:timekeepgui.db",
     query: "SELECT value FROM settings WHERE key = ?",
     values: ["history.bootstrap_snapshot.v1"],
   })`);
   assert.deepEqual(historyBootstrapRows, [{ value: historyBootstrapPayload }]);
   await evaluate(client, `window.__TAURI_INTERNALS__.invoke("cmd_clear_history_bootstrap_snapshot_payload")`);
   const clearedHistoryBootstrapRows = await evaluate(client, `window.__TAURI_INTERNALS__.invoke("plugin:sql|select", {
-    db: "sqlite:patina.db",
+    db: "sqlite:timekeepgui.db",
     query: "SELECT value FROM settings WHERE key = ?",
     values: ["history.bootstrap_snapshot.v1"],
   })`);
@@ -1641,7 +1641,7 @@ try {
 
   const deniedWrite = await evaluate(client, `
     window.__TAURI_INTERNALS__.invoke("plugin:sql|execute", {
-      db: "sqlite:patina.db",
+      db: "sqlite:timekeepgui.db",
       query: "DELETE FROM settings",
       values: [],
     }).then(() => null, (error) => String(error))
@@ -1699,7 +1699,7 @@ try {
   if (process.platform === "win32") {
     try {
       await waitFor(
-        "runtime-smoke Patina binary exit",
+        "runtime-smoke TimekeepGUI binary exit",
         () => {
           stopResidualRuntimeBinary();
           return isResidualRuntimeBinaryRunning() ? null : true;
@@ -1724,7 +1724,7 @@ try {
   } catch (error) {
     cleanupErrors.push(error);
   }
-  const dbPath = join(root, "data", "patina.db");
+  const dbPath = join(root, "data", "timekeepgui.db");
   try {
     if (databaseMutationCompleted && existsSync(dbPath)) verifyDatabase(dbPath);
   } catch (error) {
@@ -1733,7 +1733,7 @@ try {
   try {
     await waitFor("isolated runtime directory cleanup", () => {
       try {
-        assertIsolatedTempPath(root, "patina-tauri-e2e-");
+        assertIsolatedTempPath(root, "timekeepgui-tauri-e2e-");
         rmSync(root, { recursive: true, force: true, maxRetries: 4, retryDelay: 250 });
         return !existsSync(root);
       } catch (error) {

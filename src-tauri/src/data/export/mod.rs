@@ -23,7 +23,7 @@ pub async fn export_data(app: &AppHandle, request: ExportDataRequest) -> Result<
     let database_path = crate::data::sqlite_pool::resolve_product_db_path(app)?;
     if common::paths_refer_to_same_file(std::path::Path::new(&request.output_path), &database_path)
     {
-        return Err("export path cannot overwrite the Patina database".to_string());
+        return Err("export path cannot overwrite the TimekeepGUI database".to_string());
     }
     let pool = wait_for_sqlite_pool(app).await?;
     let selected_fields = request.selected_fields.as_deref();
@@ -215,7 +215,7 @@ mod tests {
             .expect("system time should be after epoch")
             .as_nanos();
         std::env::temp_dir().join(format!(
-            "patina-export-test-{}-{suffix}.{extension}",
+            "timekeepgui-export-test-{}-{suffix}.{extension}",
             std::process::id()
         ))
     }
@@ -435,7 +435,7 @@ mod tests {
         .unwrap();
         let markdown = std::fs::read_to_string(&path).unwrap();
         assert_eq!(count, 2);
-        assert!(markdown.starts_with("# Patina 活动记录"));
+        assert!(markdown.starts_with("# TimekeepGUI 活动记录"));
         assert!(markdown.contains("| 开始时间 | 来源名称 | 窗口标题 | 页面标题 |"));
         assert!(markdown.contains("Plan \\| review\\\\notes next"));
         assert!(markdown.contains("—"));
@@ -540,7 +540,7 @@ mod tests {
         .await
         .unwrap();
         let markdown = std::fs::read_to_string(&path).unwrap();
-        assert!(markdown.starts_with("# Patina Activity Records"));
+        assert!(markdown.starts_with("# TimekeepGUI Activity Records"));
         assert!(markdown.contains("| Start Time | Duration (ms) |"));
         let _ = std::fs::remove_file(path);
     }

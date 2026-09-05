@@ -2,14 +2,14 @@
 
 本仓库提供一键部署到 Cloudflare Worker 的示例模板，用来快速搭一个**无需服务器**的远程状态接收服务。
 
-[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/Ceceliaee/patina/tree/main/docs/examples/remote-status-bridge-worker)
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/Mamekokwai/TimekeepGUI)
 
 快速部署：
 
 1. 点击 `Deploy to Cloudflare`。
 2. 在部署页填写 `REMOTE_STATUS_BRIDGE_TOKEN`。
 3. 部署完成后记下 Worker 域名。
-4. 打开 Patina `设置 -> 服务 -> 远程推送`。
+4. 打开 TimekeepGUI `设置 -> 服务 -> 远程推送`。
 5. 填写接收地址：`wss://<your-worker-host>/ws`。
 6. 填写和 Worker 相同的 `Token`。
 7. 打开远程推送开关并保存。
@@ -25,7 +25,7 @@
 它不会替代现有能力：
 
 - 网页记录仍通过本机 HTTP 浏览器桥接链路处理。
-- 本地 SQLite 仍是 Patina 历史记录、设置、备份和恢复的主数据源。
+- 本地 SQLite 仍是 TimekeepGUI 历史记录、设置、备份和恢复的主数据源。
 
 ## 2. 适用场景
 
@@ -48,30 +48,30 @@
 需要填写：
 
 - `接收地址`：Worker `WebSocket` 地址，格式通常是 `wss://<your-worker-host>/ws`。
-- `Token`：Patina 连接 Worker 时发送的鉴权值。
-- `本机标识`：Patina 自动生成并持久化，用来区分不同机器。
+- `Token`：TimekeepGUI 连接 Worker 时发送的鉴权值。
+- `本机标识`：TimekeepGUI 自动生成并持久化，用来区分不同机器。
 
 启用规则：
 
 - 开关默认关闭。
 - `接收地址` 为空时不会连接。
 - `Token` 为空时不会连接。
-- 保存设置后，Patina 会关闭旧连接并按新配置重连。
+- 保存设置后，TimekeepGUI 会关闭旧连接并按新配置重连。
 - `本机标识` 由 Rust 启动时生成并保存，设置页只读展示。
 
 ## 4. Worker 侧最低要求
 
 Worker 必须提供一个可升级为 `WebSocket` 的地址。这个地址可以是 Cloudflare Worker，也可以是用户自己的源站。
 
-使用仓库内置示例时，把 Patina 的 `接收地址` 设置为：
+使用仓库内置示例时，把 TimekeepGUI 的 `接收地址` 设置为：
 
 ```text
 wss://<your-worker-host>/ws
 ```
 
-再把 Worker 的 `REMOTE_STATUS_BRIDGE_TOKEN` secret 设置成和 Patina `Token` 相同的值。
+再把 Worker 的 `REMOTE_STATUS_BRIDGE_TOKEN` secret 设置成和 TimekeepGUI `Token` 相同的值。
 
-连接建立后，Patina 会先发送鉴权消息：
+连接建立后，TimekeepGUI 会先发送鉴权消息：
 
 ```json
 {
@@ -96,7 +96,7 @@ Worker 应返回：
 }
 ```
 
-Patina 在收到 `auth-ok` 前不会发送业务快照。鉴权等待期间如果本机状态变化，Patina 只保留最后一份待发送快照。收到 `auth-ok` 后，立即发送这份最新快照。
+TimekeepGUI 在收到 `auth-ok` 前不会发送业务快照。鉴权等待期间如果本机状态变化，TimekeepGUI 只保留最后一份待发送快照。收到 `auth-ok` 后，立即发送这份最新快照。
 
 Worker 可发送：
 
@@ -106,7 +106,7 @@ Worker 可发送：
 }
 ```
 
-Patina 会回复：
+TimekeepGUI 会回复：
 
 ```json
 {
@@ -114,7 +114,7 @@ Patina 会回复：
 }
 ```
 
-Patina 不要求 Worker 使用任何特定存储。Worker 可以只用内存维护当前状态，也可以自行写入 `D1`、`KV` 或其他存储。这个选择不属于 Patina 的实现边界。
+TimekeepGUI 不要求 Worker 使用任何特定存储。Worker 可以只用内存维护当前状态，也可以自行写入 `D1`、`KV` 或其他存储。这个选择不属于 TimekeepGUI 的实现边界。
 
 ## 5. 快照消息
 
@@ -146,13 +146,13 @@ Patina 不要求 Worker 使用任何特定存储。Worker 可以只用内存维�
 
 `presence` 规则：
 
-- `active`：Patina 当前认为追踪状态活跃。
-- `afk`：Patina 当前认为用户无操作或不处于活跃追踪状态。
-- `offline` 不由 Patina 发送，应由 Worker 根据超时自行判定。
+- `active`：TimekeepGUI 当前认为追踪状态活跃。
+- `afk`：TimekeepGUI 当前认为用户无操作或不处于活跃追踪状态。
+- `offline` 不由 TimekeepGUI 发送，应由 Worker 根据超时自行判定。
 
 ## 6. 图标发送规则
 
-Patina 沿用现有 PNG data URL 图标，不新增 WebP 编码链路。
+TimekeepGUI 沿用现有 PNG data URL 图标，不新增 WebP 编码链路。
 
 发送规则：
 
@@ -161,11 +161,11 @@ Patina 沿用现有 PNG data URL 图标，不新增 WebP 编码链路。
 - 同一个连接内，如果 `iconHash` 变化，下一条快照会再次带 `iconData`。
 - 普通心跳默认不带 `iconData`，除非心跳时发现图标已经变化。
 
-这样 Worker 不需要假设自己保留了上一次连接的图标缓存。即使 Worker 冷启动、路由到新实例，Patina 重连后的首帧也会重新带图标。
+这样 Worker 不需要假设自己保留了上一次连接的图标缓存。即使 Worker 冷启动、路由到新实例，TimekeepGUI 重连后的首帧也会重新带图标。
 
 ## 7. 发送时机
 
-Patina 会在这些时机发送 `snapshot`：
+TimekeepGUI 会在这些时机发送 `snapshot`：
 
 - 连接鉴权成功后，立即发送一条全量快照。
 - `presence`、`appName` 或 `iconHash` 任一变化时，发送变化快照。
@@ -175,7 +175,7 @@ Patina 会在这些时机发送 `snapshot`：
 
 ## 8. Worker 离线判定
 
-Patina 不发送 `offline`。
+TimekeepGUI 不发送 `offline`。
 
 Worker 推荐按每个 `machineId` 维护最近收到消息的时间。超过 150 到 180 秒没有收到该机器消息时，把它标记为 `offline`。
 
@@ -183,7 +183,7 @@ Worker 推荐按每个 `machineId` 维护最近收到消息的时间。超过 15
 
 ## 9. 重连行为
 
-连接失败、鉴权失败、Worker 主动关闭或网络断开后，Patina 会进入重连。
+连接失败、鉴权失败、Worker 主动关闭或网络断开后，TimekeepGUI 会进入重连。
 
 退避序列：
 
@@ -215,7 +215,7 @@ Worker 是否把当前状态持久化，取决于展示链路需求。只读实�
 
 ## 11. 安全边界
 
-`Token` 由用户自行设置。Patina 只负责把它放进 `auth` 消息。
+`Token` 由用户自行设置。TimekeepGUI 只负责把它放进 `auth` 消息。
 
 建议：
 
@@ -225,7 +225,7 @@ Worker 是否把当前状态持久化，取决于展示链路需求。只读实�
 - Worker 对不合法消息直接关闭连接或忽略。
 - Worker 不把 `iconData` 当作可信 HTML 渲染。
 
-Patina 发送的数据只代表当前状态，但仍可能暴露正在使用的软件名称。公网展示前应确认屏幕内容符合使用者预期。
+TimekeepGUI 发送的数据只代表当前状态，但仍可能暴露正在使用的软件名称。公网展示前应确认屏幕内容符合使用者预期。
 
 ## 12. 示例 Worker 接口
 
@@ -236,7 +236,7 @@ Patina 发送的数据只代表当前状态，但仍可能暴露正在使用的�
 | 路由 | 方法 | 用途 | 请求头 | 请求体 | 响应 |
 | --- | --- | --- | --- | --- | --- |
 | `/state` | `GET` | 读取当前机器状态快照 | 无特殊要求 | 无 | `application/json` |
-| `/ws` | `GET` + `WebSocket` upgrade | Patina 推送状态 | `Upgrade: websocket` 等 `WebSocket` 握手头 | HTTP 请求体为空；业务数据走 `WebSocket` 消息 | `101 Switching Protocols` |
+| `/ws` | `GET` + `WebSocket` upgrade | TimekeepGUI 推送状态 | `Upgrade: websocket` 等 `WebSocket` 握手头 | HTTP 请求体为空；业务数据走 `WebSocket` 消息 | `101 Switching Protocols` |
 
 ### 12.2 HTTP 路由示例
 
@@ -269,7 +269,7 @@ curl -s https://<your-worker-host>/state
 
 ### 12.3 WebSocket 握手示例
 
-`/ws` 不是普通 HTTP JSON 接口。Patina 连接时会先发起 `WebSocket` upgrade。下面的 `curl` 只能用于检查 Worker 是否接受 upgrade，不能完整模拟后续 `auth` 和 `snapshot` 消息。
+`/ws` 不是普通 HTTP JSON 接口。TimekeepGUI 连接时会先发起 `WebSocket` upgrade。下面的 `curl` 只能用于检查 Worker 是否接受 upgrade，不能完整模拟后续 `auth` 和 `snapshot` 消息。
 
 ```bash
 curl -i --http1.1 \
@@ -286,12 +286,12 @@ curl -i --http1.1 \
 
 | 阶段 | 方向 | 消息体 | 说明 |
 | --- | --- | --- | --- |
-| 鉴权 | Patina -> Worker | `{"type":"auth","token":"Token"}` | 连接建立后第一条消息 |
-| 鉴权成功 | Worker -> Patina | `{"type":"auth-ok"}` | Patina 收到后才会发送快照 |
-| 鉴权失败 | Worker -> Patina | `{"type":"auth-failed"}` | Patina 会断开并进入重连 |
-| 状态快照 | Patina -> Worker | 见下方 `snapshot` 示例 | 当前前台应用状态 |
-| 心跳探测 | Worker -> Patina | `{"type":"ping"}` | 可选 |
-| 心跳响应 | Patina -> Worker | `{"type":"pong"}` | 收到 `ping` 后回复 |
+| 鉴权 | TimekeepGUI -> Worker | `{"type":"auth","token":"Token"}` | 连接建立后第一条消息 |
+| 鉴权成功 | Worker -> TimekeepGUI | `{"type":"auth-ok"}` | TimekeepGUI 收到后才会发送快照 |
+| 鉴权失败 | Worker -> TimekeepGUI | `{"type":"auth-failed"}` | TimekeepGUI 会断开并进入重连 |
+| 状态快照 | TimekeepGUI -> Worker | 见下方 `snapshot` 示例 | 当前前台应用状态 |
+| 心跳探测 | Worker -> TimekeepGUI | `{"type":"ping"}` | 可选 |
+| 心跳响应 | TimekeepGUI -> Worker | `{"type":"pong"}` | 收到 `ping` 后回复 |
 
 `snapshot` 消息体示例：
 
@@ -335,10 +335,10 @@ Worker 只看到机器离线：
 
 - 确认 Worker 保存了首帧中的 `iconData`。
 - 确认 Worker 在收到新 `iconHash` 且带 `iconData` 的快照时更新缓存。
-- 确认 Worker 冷启动或实例切换后，等待 Patina 重连首帧刷新图标。
+- 确认 Worker 冷启动或实例切换后，等待 TimekeepGUI 重连首帧刷新图标。
 
 修改配置后仍走旧连接：
 
 - 保存设置后旧连接会关闭。
-- 如果新配置完整，Patina 会按新配置重连。
+- 如果新配置完整，TimekeepGUI 会按新配置重连。
 - Worker 侧可通过 `Token` 或日志确认新连接是否生效。

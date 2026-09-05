@@ -232,7 +232,7 @@ mod tests {
             extension_version: Some("0.1.0".into()),
             tab_id: Some(1),
             window_id: Some(2),
-            url: Some("https://GitHub.com/Ceceliaee/patina/issues/6".into()),
+            url: Some("https://GitHub.com/Mamekokwai/TimekeepGUI/issues/6".into()),
             title: Some("Issue #6".into()),
             fav_icon_url: Some("https://github.com/favicon.ico".into()),
             incognito: Some(false),
@@ -246,7 +246,7 @@ mod tests {
         assert_eq!(sanitized.browser_kind, "chrome");
         assert_eq!(
             sanitized.url.as_deref(),
-            Some("https://GitHub.com/Ceceliaee/patina/issues/6")
+            Some("https://GitHub.com/Mamekokwai/TimekeepGUI/issues/6")
         );
         assert_eq!(sanitized.title.as_deref(), Some("Issue #6"));
     }

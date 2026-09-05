@@ -7,7 +7,7 @@ import {
 } from "../src/features/tools/services/activityReminderTargetOptions.ts";
 import { ProcessMapper } from "../src/shared/classification/processMapper.ts";
 
-const apps = [{ appName: "Patina", exeName: "Patina.exe", lastSeenAt: 3 }];
+const apps = [{ appName: "TimekeepGUI", exeName: "TimekeepGUI.exe", lastSeenAt: 3 }];
 const categories = [{ categoryId: "development", label: "开发", color: "#2563eb" }];
 const webDomains = [{
   normalizedDomain: "github.com",
@@ -32,16 +32,16 @@ test("activity reminder target options keep readable labels and stable values", 
     apps,
     categories,
     webDomains,
-    { "patina.exe": "data:image/png;base64,icon" },
+    { "timekeepgui.exe": "data:image/png;base64,icon" },
   );
   const categoryOptions = buildActivityReminderTargetOptions("category", apps, categories, webDomains, {});
   const webOptions = buildActivityReminderTargetOptions("web", apps, categories, webDomains, {});
 
   assert.deepEqual(appOptions[0], {
-    key: "app:Patina.exe",
-    value: "Patina.exe",
-    label: "Patina",
-    meta: "Patina.exe",
+    key: "app:TimekeepGUI.exe",
+    value: "TimekeepGUI.exe",
+    label: "TimekeepGUI",
+    meta: "TimekeepGUI.exe",
     iconUrl: "data:image/png;base64,icon",
     accentColor: null,
   });
@@ -60,8 +60,8 @@ test("all activity reminder target modes are searchable by label or stable ident
     ...buildActivityReminderTargetOptions("web", apps, categories, webDomains, {}),
   ];
 
-  assert.deepEqual(filterActivityReminderTargetOptions("patina.exe", allOptions).map((item) => item.key), [
-    "app:Patina.exe",
+  assert.deepEqual(filterActivityReminderTargetOptions("timekeepgui.exe", allOptions).map((item) => item.key), [
+    "app:TimekeepGUI.exe",
   ]);
   assert.deepEqual(filterActivityReminderTargetOptions("开发", allOptions).map((item) => item.key), [
     "category:development",
@@ -69,5 +69,5 @@ test("all activity reminder target modes are searchable by label or stable ident
   assert.deepEqual(filterActivityReminderTargetOptions("github.com", allOptions).map((item) => item.key), [
     "web:github.com",
   ]);
-  assert.equal(findActivityReminderTargetOption(" PATINA.EXE ", allOptions)?.label, "Patina");
+  assert.equal(findActivityReminderTargetOption(" TIMEKEEPGUI.EXE ", allOptions)?.label, "TimekeepGUI");
 });

@@ -209,7 +209,7 @@ pub fn is_trackable_window(window: Option<WindowTrackingCandidate<'_>>) -> bool 
 }
 
 pub fn is_tracking_control_surface_window(window: WindowTrackingCandidate<'_>) -> bool {
-    super::process_filters::is_patina_widget_window(window)
+    super::process_filters::is_timekeepgui_widget_window(window)
 }
 
 #[cfg(test)]

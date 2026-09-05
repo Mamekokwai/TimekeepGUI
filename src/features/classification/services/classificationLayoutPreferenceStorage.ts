@@ -2,7 +2,7 @@ import { getBrowserLocalStorage } from "../../../platform/browser/browserStorage
 
 export type MappingObjectMode = "app" | "web";
 
-const CLASSIFICATION_OBJECT_MODE_KEY = "patina:classification-object-mode";
+const CLASSIFICATION_OBJECT_MODE_KEY = "timekeepgui:classification-object-mode";
 
 function isMappingObjectMode(value: string | null): value is MappingObjectMode {
   return value === "app" || value === "web";

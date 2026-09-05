@@ -5,7 +5,7 @@ import {
 
 export type SidebarNavigationMode = "icons" | "labeled";
 
-const SIDEBAR_NAVIGATION_MODE_KEY = "patina:sidebar-navigation-mode";
+const SIDEBAR_NAVIGATION_MODE_KEY = "timekeepgui:sidebar-navigation-mode";
 
 function isSidebarNavigationMode(value: string | null): value is SidebarNavigationMode {
   return value === "icons" || value === "labeled";

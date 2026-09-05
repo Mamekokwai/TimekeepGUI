@@ -132,7 +132,7 @@ if (process.argv.includes("--self-test")) {
   try { parseNewLocaleOptions(["ru-RU", "Русский", "--unknown"], "zh-CN"); throw new Error("unknown option accepted"); } catch (error) {
     if (error instanceof Error && error.message === "unknown option accepted") throw error;
   }
-  const fixtureRoot = mkdtempSync(join(tmpdir(), "patina-i18n-new-locale-"));
+  const fixtureRoot = mkdtempSync(join(tmpdir(), "timekeepgui-i18n-new-locale-"));
   try {
     const sourceRoot = join(fixtureRoot, "source");
     const targetRoot = join(fixtureRoot, "target");

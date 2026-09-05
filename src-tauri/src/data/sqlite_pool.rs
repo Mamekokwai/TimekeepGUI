@@ -14,7 +14,7 @@ use tauri::{AppHandle, Manager, Runtime};
 use tauri_plugin_sql::{DbInstances, DbPool, MigrationKind};
 use tokio::time::{sleep, Duration};
 
-pub const SQLITE_DB_NAME: &str = "sqlite:patina.db";
+pub const SQLITE_DB_NAME: &str = "sqlite:timekeepgui.db";
 const VALIDATED_SCHEMA_MIGRATION_HEAD: i64 = schema::USER_ACTIVITY_MIGRATION_VERSION;
 mod activity_read_model_schema;
 pub(super) mod import_schema;

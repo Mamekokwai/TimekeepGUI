@@ -73,7 +73,7 @@ export const MESSAGES = {
     "body": {
       "$op": "concat",
       "parts": [
-        "Patina-native activity: ",
+        "TimekeepGUI-native activity: ",
         {
           "$op": "arg",
           "name": "sessionCount"

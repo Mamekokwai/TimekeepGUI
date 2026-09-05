@@ -4,8 +4,8 @@
 
 参考项目
 https://github.com/jms-guy/timekeep
-https://github.com/Ceceliaee/patina
-将patina的GUI和timekeep的功能结合
+https://github.com/Mamekokwai/TimekeepGUI
+将timekeepgui的GUI和timekeep的功能结合
 
 面向 Windows 桌面的本地优先时间管理工具。
 
@@ -25,7 +25,7 @@ TimekeepGUI 将 Timekeep 的程序存在时间追踪与安静、可信的桌面�
 
 ## 项目定位
 
-TimekeepGUI 是一个 Windows 桌面端时间管理项目，使用 Patina 的 Tauri/React 图形界面承载 Timekeep 的程序追踪、活动会话、历史记录和统计能力。
+TimekeepGUI 是一个 Windows 桌面端时间管理项目，使用 TimekeepGUI 的 Tauri/React 图形界面承载 Timekeep 的程序追踪、活动会话、历史记录和统计能力。
 
 当前仓库的父级目录 `E:\Github\TimekeepGUI` 是实际 GUI 项目根目录。`sample/` 仅用于保存参考项目，不参与前端、Rust 或 Release 构建。
 
@@ -56,7 +56,7 @@ TimekeepGUI/
 ├─ tests/               前端、集成和 UI 测试
 ├─ scripts/             检查、生成和 Release 脚本
 ├─ .vscode/             推荐插件、任务和调试配置
-└─ sample/              Patina/Timekeep 参考代码，不参与本项目构建
+└─ sample/              TimekeepGUI/Timekeep 参考代码，不参与本项目构建
 ```
 
 <p align="center">
@@ -167,9 +167,9 @@ src-tauri/target/release/bundle/nsis/
 
 TimekeepGUI 当前版本需要从源码构建，独立 Release 页面将在项目正式发布后补充。构建方法见下方“从源码构建”章节。
 
-Patina 的公开版本和素材仅作为本项目的参考来源，不代表 TimekeepGUI 的发行包。
+TimekeepGUI 的公开版本和素材仅作为本项目的参考来源，不代表 TimekeepGUI 的发行包。
 
-[Patina Web Sync](https://github.com/Ceceliaee/patina-web-sync) 可以为浏览器活动补充具体网页信息，可按需安装：
+[Patina Web Sync](https://github.com/Mamekokwai/patina-web-sync) 可以为浏览器活动补充具体网页信息，可按需安装：
 
 <p align="center">
   <a href="https://chromewebstore.google.com/detail/patina-web-sync/gimdckblhckibmeklhemgccabmbnoemd"><img src=".github/assets/store-badges/chrome-web-store.png" height="36" alt="从 Chrome 应用商店安装 Patina Web Sync"></a>
@@ -277,7 +277,7 @@ TimekeepGUI 当前专注于个人本地时间记录：
 需要持续跟进的缺陷和建议请使用 GitHub Issues；日常交流可以扫描二维码加入 QQ 频道：
 
 <div align="center">
-  <a href="https://github.com/Ceceliaee/patina/issues/new/choose">
+  <a href="https://github.com/Mamekokwai/TimekeepGUI">
     <picture>
       <source media="(prefers-color-scheme: dark)" srcset=".github/assets/feedback/github-issues-button-dark.svg">
       <img src=".github/assets/feedback/github-issues-button-light.svg" height="36" alt="GitHub Issues">
@@ -286,7 +286,7 @@ TimekeepGUI 当前专注于个人本地时间记录：
   <br><br>
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset=".github/assets/feedback/qq-channel-dark.jpg">
-      <img src=".github/assets/feedback/qq-channel-light.jpg" width="200" alt="Patina QQ 频道二维码">
+      <img src=".github/assets/feedback/qq-channel-light.jpg" width="200" alt="TimekeepGUI QQ 频道二维码">
   </picture>
 </div>
 
@@ -295,7 +295,6 @@ TimekeepGUI 当前专注于个人本地时间记录：
 TimekeepGUI 是一个个人维护的本地优先开源项目。如果它对你的日常生活或工作有所帮助，欢迎通过方便的方式支持项目持续维护：
 
 <div align="center">
-  <a href="https://ko-fi.com/ceceliaee"><img src="https://storage.ko-fi.com/cdn/kofi2.png?v=3" height="36" alt="请作者喝咖啡"></a>
   <br><br>
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset=".github/assets/support/wechat-reward-dark.png">
@@ -307,11 +306,11 @@ TimekeepGUI 是一个个人维护的本地优先开源项目。如果它对你�
 
 ## Star 历史
 
-<a href="https://www.star-history.com/?repos=Ceceliaee%2Fpatina">
+<a href="https://www.star-history.com/?repos=Mamekokwai%2Ftimekeepgui">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=Ceceliaee/patina&type=date&theme=dark&legend=top-left&sealed_token=TkOqzStKb8XlqP6BGjPQemnL7ZceKzqtuxfJf7xf_DrzNfgZeW2TjJDSbHigf23UNcY-30x56ZaebW5RV1tbcW2Q_5UczdmmdB2ndfELHsoLcpYL5hIHvw" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=Ceceliaee/patina&type=date&legend=top-left&sealed_token=TkOqzStKb8XlqP6BGjPQemnL7ZceKzqtuxfJf7xf_DrzNfgZeW2TjJDSbHigf23UNcY-30x56ZaebW5RV1tbcW2Q_5UczdmmdB2ndfELHsoLcpYL5hIHvw" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=Ceceliaee/patina&type=date&legend=top-left&sealed_token=TkOqzStKb8XlqP6BGjPQemnL7ZceKzqtuxfJf7xf_DrzNfgZeW2TjJDSbHigf23UNcY-30x56ZaebW5RV1tbcW2Q_5UczdmmdB2ndfELHsoLcpYL5hIHvw" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=Mamekokwai/TimekeepGUI&type=date&theme=dark&legend=top-left&sealed_token=TkOqzStKb8XlqP6BGjPQemnL7ZceKzqtuxfJf7xf_DrzNfgZeW2TjJDSbHigf23UNcY-30x56ZaebW5RV1tbcW2Q_5UczdmmdB2ndfELHsoLcpYL5hIHvw" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=Mamekokwai/TimekeepGUI&type=date&legend=top-left&sealed_token=TkOqzStKb8XlqP6BGjPQemnL7ZceKzqtuxfJf7xf_DrzNfgZeW2TjJDSbHigf23UNcY-30x56ZaebW5RV1tbcW2Q_5UczdmmdB2ndfELHsoLcpYL5hIHvw" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=Mamekokwai/TimekeepGUI&type=date&legend=top-left&sealed_token=TkOqzStKb8XlqP6BGjPQemnL7ZceKzqtuxfJf7xf_DrzNfgZeW2TjJDSbHigf23UNcY-30x56ZaebW5RV1tbcW2Q_5UczdmmdB2ndfELHsoLcpYL5hIHvw" />
  </picture>
 </a>
 

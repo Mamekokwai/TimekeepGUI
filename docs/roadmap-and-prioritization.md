@@ -2,7 +2,7 @@
 
 ## 1. 文档定位
 
-本文定义 `Patina` 当前阶段的长期路线主题与默认优先级判断规则。
+本文定义 `TimekeepGUI` 当前阶段的长期路线主题与默认优先级判断规则。
 
 它不是一次性开发计划，也不是细粒度 backlog，而是以后面对多个方向竞争时，用来回答这些问题的长期基线：
 
@@ -47,7 +47,7 @@
 
 当前阶段的北极星不是“功能数量最多”，而是：
 
-**把 `Patina` 打磨成一个可信、可读、可控、可长期使用的个人桌面时间追踪工具。**
+**把 `TimekeepGUI` 打磨成一个可信、可读、可控、可长期使用的个人桌面时间追踪工具。**
 
 所有优先级判断，默认都应回到这句话。
 
@@ -289,7 +289,7 @@
 
 ## 13. 维护者开发队列与长期协作方式
 
-`Patina` 使用 GitHub Project 维护经过筛选的实际开发队列。该队列是维护者工作台，不作为外部贡献者必须可见的公开入口。
+`TimekeepGUI` 使用 GitHub Project 维护经过筛选的实际开发队列。该队列是维护者工作台，不作为外部贡献者必须可见的公开入口。
 
 这个 Project 是本文优先级规则的执行层：本文解释为什么这样排序，Project 展示维护者当前实际准备先做什么、后做什么。
 
@@ -306,7 +306,7 @@ Project 默认遵守以下边界：
 - 只收录维护者已经筛选并确认想做的工作。
 - 不自动收集所有公开反馈。
 - 不记录反馈渠道、评论者身份、点赞数或反馈次数。
-- 原始文字、截图和一般外部链接只用于帮助理解问题，不进入最终工作项；如果工作项直接对应一个或多个仓库 GitHub Issue，则保留精简的 `Related: Ceceliaee/patina#N` 关联。
+- 原始文字、截图和一般外部链接只用于帮助理解问题，不进入最终工作项；如果工作项直接对应一个或多个仓库 GitHub Issue，则保留精简的 `Related: Mamekokwai/TimekeepGUI#N` 关联。
 - Project 状态独立于 GitHub Issue 状态；整理、排序、完成或删除 Project item 时，不修改对应 Issue 的开关状态。
 - 无论反馈来自 GitHub Issue 还是其他渠道，进入 Project 时都整理为独立的 draft item；GitHub Issue 关联只用于追溯相关上下文，不代替完整工作项，也不修改原 GitHub Issue 状态。没有直接对应 Issue 的事项不创建空关联或牵强关联。
 
@@ -373,7 +373,7 @@ Project 从上到下的手动顺序就是当前真实开发顺序，不额外维
 每个工作项默认整理为以下内容：
 
 - `Problem`
-- 可选的 `Related: Ceceliaee/patina#N`；存在多个直接相关 Issue 时在同一行列出，放在 `Problem` 说明之后
+- 可选的 `Related: Mamekokwai/TimekeepGUI#N`；存在多个直接相关 Issue 时在同一行列出，放在 `Problem` 说明之后
 - `Expected outcome`
 - `Scope`
 - `Non-goals`
